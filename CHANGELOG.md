@@ -1,5 +1,6 @@
 # v6.1.4-beta3
 
+- Fix: Add missing import of `GuidHelper` in `FieldXML.php` to avoid fatal error when compiling subforms. #1277
 - Refactor the File Upload Manager to achieve improved maintainability, greater customization flexibility, and easier extensibility.
 
 # v6.1.4-beta
