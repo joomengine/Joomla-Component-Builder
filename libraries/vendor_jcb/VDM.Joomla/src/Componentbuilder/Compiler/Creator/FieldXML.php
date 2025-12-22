@@ -28,6 +28,7 @@ use VDM\Joomla\Utilities\StringHelper;
 use VDM\Joomla\Utilities\String\FieldHelper;
 use VDM\Joomla\Utilities\ArrayHelper;
 use VDM\Joomla\Utilities\ObjectHelper;
+use VDM\Joomla\Utilities\GuidHelper;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Creator\Fieldtypeinterface;
 
