@@ -73,7 +73,7 @@ class JsonapiView extends BaseApiView
 			}
 		}
 
-		$this->fieldsToRenderList = array_keys($fields);
+		$this->fieldsToRenderList = array_keys($fields) ?: ['id'];
 
 		return parent::displayList($items);
 	}

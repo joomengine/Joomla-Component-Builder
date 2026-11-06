@@ -990,6 +990,31 @@ class Custom_codeModel extends AdminModel
 	}
 
 	/**
+	 * Database column settings used when generating unique values.
+	 *
+	 * @return  array  Column types, character limits and nullability.
+	 * @since   6.2.1
+	 */
+	protected function getUniqueFieldSettings()
+	{
+		return [
+			'system_name' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'path' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'target' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'type' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => true],
+			'comment_type' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'joomla_version' => ['type' => 'INT', 'length' => 11, 'nullable' => false],
+			'function_name' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'code' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'hashendtarget' => ['type' => 'VARCHAR', 'length' => 64, 'nullable' => true],
+			'to_line' => ['type' => 'VARCHAR', 'length' => 100, 'nullable' => true],
+			'from_line' => ['type' => 'VARCHAR', 'length' => 100, 'nullable' => true],
+			'hashtarget' => ['type' => 'VARCHAR', 'length' => 64, 'nullable' => true],
+			'component' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+		];
+	}
+
+	/**
 	 * Method to delete one or more records.
 	 *
 	 * @param   array  &$pks  An array of record primary keys.
@@ -1187,7 +1212,16 @@ class Custom_codeModel extends AdminModel
 			{
 				foreach ($uniqueFields as $uniqueField)
 				{
-					$data[$uniqueField] = $this->generateUnique($uniqueField,$data[$uniqueField]);
+					if (!array_key_exists($uniqueField, $data))
+					{
+						continue;
+					}
+					$uniqueValue = $this->generateUnique($uniqueField, $data[$uniqueField]);
+					if ($uniqueValue === false)
+					{
+						return false;
+					}
+					$data[$uniqueField] = $uniqueValue;
 				}
 			}
 		}
@@ -1200,25 +1234,106 @@ class Custom_codeModel extends AdminModel
 	}
 
 	/**
-	 * Method to generate a unique value.
+	 * Generate a storable unique copy value without changing numeric identifiers.
 	 *
-	 * @param   string  $field name.
-	 * @param   string  $value data.
+	 * @param   string  $field  The database column name.
+	 * @param   mixed   $value  The requested copy value.
 	 *
-	 * @return  string  New value.
+	 * @return  mixed  An available value, or false after setting a model error.
 	 * @since   3.0
 	 */
 	protected function generateUnique($field, $value)
 	{
-		// set field value unique
-		$table = $this->getTable();
+		$settings = $this->getUniqueFieldSettings();
+		$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
 
-		while ($table->load([$field => $value]))
+		if (!isset($settings[$field]) || (!is_scalar($value) && $value !== null) || $value === false)
 		{
-			$value = StringHelper::increment($value);
+			$this->setError(Text::sprintf($error, $field));
+			return false;
 		}
 
-		return $value;
+		$column = $settings[$field];
+
+		// Table::load compares NULL as a quoted value, not with SQL IS NULL.
+		if ($value === null)
+		{
+			if ($column['nullable'])
+			{
+				return null;
+			}
+
+			$this->setError(Text::sprintf($error, $field));
+			return false;
+		}
+
+		$isText = in_array($column['type'], ['CHAR', 'VARCHAR'], true);
+		$matched = [];
+
+		try
+		{
+			$table = $this->getTable();
+
+			// At most 100 collision queries, including the original requested value.
+			for ($attempt = 0; $attempt < 100; $attempt++)
+			{
+				if ($isText && $column['length'] !== null
+					&& StringHelper::strlen((string) $value) > $column['length'])
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LENGTH';
+					break;
+				}
+
+				$loaded = $table->load([$field => $value]);
+
+				// A failed query/bind is never evidence that a value is available.
+				if ($table->getError())
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+					break;
+				}
+
+				if (!$loaded)
+				{
+					return $value;
+				}
+
+				$key = $table->getKeyName();
+				$primaryKey = (string) $table->$key;
+
+				// Detect coercion/collation matches that suffixing cannot escape.
+				if (isset($matched[$primaryKey]))
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$matched[$primaryKey] = true;
+
+				if ($field === 'guid')
+				{
+					$value = $this->generateUniqueGuid();
+				}
+				elseif ($isText && $column['length'] !== null)
+				{
+					$value = StringHelper::increment((string) $value);
+				}
+				else
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LIMIT';
+			}
+		}
+		catch (\Throwable $exception)
+		{
+			$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+		}
+
+		$this->setError(Text::sprintf($error, $field));
+		return false;
 	}
 
 	/**

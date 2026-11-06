@@ -7,6 +7,7 @@
  * @note	      This file has been modified by the Joomla! Project (and VDM) and no longer reflects the original work of its author.
  * @depreciation  This was ported for the sake of those who have stuff encrypted with the FOF encryption suite.
  */
+
 namespace VDM\Joomla\FOF\Utils;
 
 

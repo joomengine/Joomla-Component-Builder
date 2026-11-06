@@ -1386,6 +1386,117 @@ class Admin_viewModel extends AdminModel
 	}
 
 	/**
+	 * Database column settings used when generating unique values.
+	 *
+	 * @return  array  Column types, character limits and nullability.
+	 * @since   6.2.1
+	 */
+	protected function getUniqueFieldSettings()
+	{
+		return [
+			'system_name' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'name_single' => ['type' => 'CHAR', 'length' => 64, 'nullable' => true],
+			'short_description' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'php_postsavehook' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_before_save' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_getlistquery' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_getitems' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'ajax_input' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'source' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'icon' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'php_batchmove' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_fadein' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'description' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'icon_category' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'icon_add' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'php_allowedit' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_after_delete' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_after_cancel' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'type' => ['type' => 'INT', 'length' => 11, 'nullable' => false],
+			'php_after_publish' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'mysql_table_charset' => ['type' => 'VARCHAR', 'length' => 64, 'nullable' => false],
+			'name_list' => ['type' => 'CHAR', 'length' => 64, 'nullable' => true],
+			'addpermissions' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'php_getitem' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_getitems_after_all' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'addtabs' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'php_getform' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_save' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_allowadd' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'addlinked_views' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'php_before_cancel' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_batchcopy' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'alias_builder_type' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_before_publish' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_before_delete' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_document' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'alias_builder' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'mysql_table_row_format' => ['type' => 'VARCHAR', 'length' => 64, 'nullable' => false],
+			'sql' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_category_submenu' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_ajaxmethod' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_getitem' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_getitems' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_css_view' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_getitems_after_all' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'css_view' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_getlistquery' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_css_views' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_getform' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'css_views' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_before_save' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_javascript_view_file' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_save' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'javascript_view_file' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_postsavehook' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_javascript_view_footer' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_allowadd' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'javascript_view_footer' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_allowedit' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_javascript_views_file' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_before_cancel' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'javascript_views_file' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_after_cancel' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_javascript_views_footer' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_batchcopy' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'javascript_views_footer' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_batchmove' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_custom_button' => ['type' => 'INT', 'length' => 1, 'nullable' => false],
+			'add_php_before_publish' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'custom_button' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_php_after_publish' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_controller' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_before_delete' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_model' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_after_delete' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_controller_list' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_document' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_model_list' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'mysql_table_engine' => ['type' => 'VARCHAR', 'length' => 64, 'nullable' => false],
+			'add_view_toolbar' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'mysql_table_collate' => ['type' => 'VARCHAR', 'length' => 64, 'nullable' => false],
+			'view_toolbar' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_sql' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_views_toolbar' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'addtables' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'views_toolbar' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'guid' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+			'add_php_ajax' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+		];
+	}
+
+	/**
+	 * Generate a valid GUID candidate for a copied record.
+	 *
+	 * @return  string  A new GUID candidate.
+	 * @since   6.2.1
+	 */
+	protected function generateUniqueGuid()
+	{
+		return (string) GuidHelper::get();
+	}
+
+	/**
 	 * Method to delete one or more records.
 	 *
 	 * @param   array  &$pks  An array of record primary keys.
@@ -2261,7 +2372,16 @@ class Admin_viewModel extends AdminModel
 			{
 				foreach ($uniqueFields as $uniqueField)
 				{
-					$data[$uniqueField] = $this->generateUnique($uniqueField,$data[$uniqueField]);
+					if (!array_key_exists($uniqueField, $data))
+					{
+						continue;
+					}
+					$uniqueValue = $this->generateUnique($uniqueField, $data[$uniqueField]);
+					if ($uniqueValue === false)
+					{
+						return false;
+					}
+					$data[$uniqueField] = $uniqueValue;
 				}
 			}
 		}
@@ -2274,25 +2394,106 @@ class Admin_viewModel extends AdminModel
 	}
 
 	/**
-	 * Method to generate a unique value.
+	 * Generate a storable unique copy value without changing numeric identifiers.
 	 *
-	 * @param   string  $field name.
-	 * @param   string  $value data.
+	 * @param   string  $field  The database column name.
+	 * @param   mixed   $value  The requested copy value.
 	 *
-	 * @return  string  New value.
+	 * @return  mixed  An available value, or false after setting a model error.
 	 * @since   3.0
 	 */
 	protected function generateUnique($field, $value)
 	{
-		// set field value unique
-		$table = $this->getTable();
+		$settings = $this->getUniqueFieldSettings();
+		$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
 
-		while ($table->load([$field => $value]))
+		if (!isset($settings[$field]) || (!is_scalar($value) && $value !== null) || $value === false)
 		{
-			$value = StringHelper::increment($value);
+			$this->setError(Text::sprintf($error, $field));
+			return false;
 		}
 
-		return $value;
+		$column = $settings[$field];
+
+		// Table::load compares NULL as a quoted value, not with SQL IS NULL.
+		if ($value === null)
+		{
+			if ($column['nullable'])
+			{
+				return null;
+			}
+
+			$this->setError(Text::sprintf($error, $field));
+			return false;
+		}
+
+		$isText = in_array($column['type'], ['CHAR', 'VARCHAR'], true);
+		$matched = [];
+
+		try
+		{
+			$table = $this->getTable();
+
+			// At most 100 collision queries, including the original requested value.
+			for ($attempt = 0; $attempt < 100; $attempt++)
+			{
+				if ($isText && $column['length'] !== null
+					&& StringHelper::strlen((string) $value) > $column['length'])
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LENGTH';
+					break;
+				}
+
+				$loaded = $table->load([$field => $value]);
+
+				// A failed query/bind is never evidence that a value is available.
+				if ($table->getError())
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+					break;
+				}
+
+				if (!$loaded)
+				{
+					return $value;
+				}
+
+				$key = $table->getKeyName();
+				$primaryKey = (string) $table->$key;
+
+				// Detect coercion/collation matches that suffixing cannot escape.
+				if (isset($matched[$primaryKey]))
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$matched[$primaryKey] = true;
+
+				if ($field === 'guid')
+				{
+					$value = $this->generateUniqueGuid();
+				}
+				elseif ($isText && $column['length'] !== null)
+				{
+					$value = StringHelper::increment((string) $value);
+				}
+				else
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LIMIT';
+			}
+		}
+		catch (\Throwable $exception)
+		{
+			$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+		}
+
+		$this->setError(Text::sprintf($error, $field));
+		return false;
 	}
 
 	/**

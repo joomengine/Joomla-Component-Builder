@@ -849,6 +849,68 @@ class Joomla_pluginModel extends AdminModel
 	}
 
 	/**
+	 * Database column settings used when generating unique values.
+	 *
+	 * @return  array  Column types, character limits and nullability.
+	 * @since   6.2.1
+	 */
+	protected function getUniqueFieldSettings()
+	{
+		return [
+			'system_name' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'class_extends' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+			'joomla_plugin_group' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+			'add_sql' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_method_uninstall' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_postflight_update' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_php_postflight_install' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'sales_server' => ['type' => 'INT', 'length' => 11, 'nullable' => false],
+			'add_update_server' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'method_selection' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'property_selection' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_head' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_sql_uninstall' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'addreadme' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'head' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'update_server_target' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'main_class_code' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'update_server' => ['type' => 'INT', 'length' => 11, 'nullable' => false],
+			'description' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'php_postflight_install' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'plugin_version' => ['type' => 'CHAR', 'length' => 64, 'nullable' => true],
+			'php_postflight_update' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'fields' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'php_method_uninstall' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_script_construct' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'sql' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'php_script_construct' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'sql_uninstall' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_preflight_install' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'readme' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'php_preflight_install' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'update_server_url' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'add_php_preflight_update' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_preflight_update' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'add_php_preflight_uninstall' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_sales_server' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'php_preflight_uninstall' => ['type' => 'MEDIUMTEXT', 'length' => null, 'nullable' => true],
+			'guid' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+			'name' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+		];
+	}
+
+	/**
+	 * Generate a valid GUID candidate for a copied record.
+	 *
+	 * @return  string  A new GUID candidate.
+	 * @since   6.2.1
+	 */
+	protected function generateUniqueGuid()
+	{
+		return (string) GuidHelper::get();
+	}
+
+	/**
 	 * Method to delete one or more records.
 	 *
 	 * @param   array  &$pks  An array of record primary keys.
@@ -1389,7 +1451,16 @@ class Joomla_pluginModel extends AdminModel
 			{
 				foreach ($uniqueFields as $uniqueField)
 				{
-					$data[$uniqueField] = $this->generateUnique($uniqueField,$data[$uniqueField]);
+					if (!array_key_exists($uniqueField, $data))
+					{
+						continue;
+					}
+					$uniqueValue = $this->generateUnique($uniqueField, $data[$uniqueField]);
+					if ($uniqueValue === false)
+					{
+						return false;
+					}
+					$data[$uniqueField] = $uniqueValue;
 				}
 			}
 		}
@@ -1402,25 +1473,106 @@ class Joomla_pluginModel extends AdminModel
 	}
 
 	/**
-	 * Method to generate a unique value.
+	 * Generate a storable unique copy value without changing numeric identifiers.
 	 *
-	 * @param   string  $field name.
-	 * @param   string  $value data.
+	 * @param   string  $field  The database column name.
+	 * @param   mixed   $value  The requested copy value.
 	 *
-	 * @return  string  New value.
+	 * @return  mixed  An available value, or false after setting a model error.
 	 * @since   3.0
 	 */
 	protected function generateUnique($field, $value)
 	{
-		// set field value unique
-		$table = $this->getTable();
+		$settings = $this->getUniqueFieldSettings();
+		$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
 
-		while ($table->load([$field => $value]))
+		if (!isset($settings[$field]) || (!is_scalar($value) && $value !== null) || $value === false)
 		{
-			$value = StringHelper::increment($value);
+			$this->setError(Text::sprintf($error, $field));
+			return false;
 		}
 
-		return $value;
+		$column = $settings[$field];
+
+		// Table::load compares NULL as a quoted value, not with SQL IS NULL.
+		if ($value === null)
+		{
+			if ($column['nullable'])
+			{
+				return null;
+			}
+
+			$this->setError(Text::sprintf($error, $field));
+			return false;
+		}
+
+		$isText = in_array($column['type'], ['CHAR', 'VARCHAR'], true);
+		$matched = [];
+
+		try
+		{
+			$table = $this->getTable();
+
+			// At most 100 collision queries, including the original requested value.
+			for ($attempt = 0; $attempt < 100; $attempt++)
+			{
+				if ($isText && $column['length'] !== null
+					&& StringHelper::strlen((string) $value) > $column['length'])
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LENGTH';
+					break;
+				}
+
+				$loaded = $table->load([$field => $value]);
+
+				// A failed query/bind is never evidence that a value is available.
+				if ($table->getError())
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+					break;
+				}
+
+				if (!$loaded)
+				{
+					return $value;
+				}
+
+				$key = $table->getKeyName();
+				$primaryKey = (string) $table->$key;
+
+				// Detect coercion/collation matches that suffixing cannot escape.
+				if (isset($matched[$primaryKey]))
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$matched[$primaryKey] = true;
+
+				if ($field === 'guid')
+				{
+					$value = $this->generateUniqueGuid();
+				}
+				elseif ($isText && $column['length'] !== null)
+				{
+					$value = StringHelper::increment((string) $value);
+				}
+				else
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LIMIT';
+			}
+		}
+		catch (\Throwable $exception)
+		{
+			$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+		}
+
+		$this->setError(Text::sprintf($error, $field));
+		return false;
 	}
 
 	/**
