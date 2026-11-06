@@ -77,7 +77,7 @@ class JsonapiView extends BaseApiView
 			}
 		}
 
-		$this->fieldsToRenderList = array_keys($fields);###API_DYNAMIC_VIEWS_JSON_META###
+		$this->fieldsToRenderList = array_keys($fields) ?: ['id'];###API_DYNAMIC_VIEWS_JSON_META###
 
 		return parent::displayList($items);
 	}

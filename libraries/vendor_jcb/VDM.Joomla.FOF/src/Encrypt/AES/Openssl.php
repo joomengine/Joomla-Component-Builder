@@ -13,6 +13,7 @@
  *                  - Use phpseclib/phpseclib version 3 Instead.
  *                  - Checkout the JCB Crypt Suite. <https://git.vdm.dev/joomla/phpseclib>
  */
+
 namespace VDM\Joomla\FOF\Encrypt\AES;
 
 
@@ -27,7 +28,7 @@ use VDM\Joomla\FOF\Encrypt\AES\Abstraction;
  * 
  * @package  FrameworkOnFramework
  * @since    1.0
- * @deprecated Use phpseclib/phpseclib version 3 Instead. 
+ * @deprecated Use phpseclib/phpseclib version 3 Instead.
  */
 class Openssl extends Abstraction implements AesInterface
 {
@@ -123,7 +124,7 @@ class Openssl extends Abstraction implements AesInterface
 		return $plainText;
 	}
 
-	public function isSupported(Phpfunc $phpfunc = null)
+	public function isSupported(?Phpfunc $phpfunc = null)
 	{
 		if (!is_object($phpfunc) || !($phpfunc instanceof $phpfunc))
 		{

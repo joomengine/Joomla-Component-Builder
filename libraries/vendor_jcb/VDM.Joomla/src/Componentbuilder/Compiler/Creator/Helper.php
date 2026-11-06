@@ -197,7 +197,7 @@ class Helper
 			$help[] = Indent::_(2) . "\$user" . Indent::_(1) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
 		}
 
-		$help[] = Indent::_(2) . "\$groups = \$user->get('groups');";
+		$help[] = Indent::_(2) . "\$groups = \$user->groups;";
 
 		// DB resolution
 		if ($this->config->get('joomla_version', 3) == 3)

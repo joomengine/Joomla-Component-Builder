@@ -1075,6 +1075,54 @@ class FieldModel extends AdminModel
 	}
 
 	/**
+	 * Database column settings used when generating unique values.
+	 *
+	 * @return  array  Column types, character limits and nullability.
+	 * @since   6.2.1
+	 */
+	protected function getUniqueFieldSettings()
+	{
+		return [
+			'name' => ['type' => 'VARCHAR', 'length' => 255, 'nullable' => true],
+			'fieldtype' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+			'datatype' => ['type' => 'CHAR', 'length' => 64, 'nullable' => false],
+			'indexes' => ['type' => 'CHAR', 'length' => 64, 'nullable' => false],
+			'null_switch' => ['type' => 'CHAR', 'length' => 64, 'nullable' => true],
+			'store' => ['type' => 'INT', 'length' => 11, 'nullable' => false],
+			'catid' => ['type' => 'INT', 'length' => 11, 'nullable' => false],
+			'on_get_model_field' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'on_save_model_field' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'initiator_on_get_model' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'xml' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'datalenght' => ['type' => 'CHAR', 'length' => 64, 'nullable' => false],
+			'javascript_view_footer' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'css_views' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'css_view' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'datadefault_other' => ['type' => 'CHAR', 'length' => 64, 'nullable' => true],
+			'datadefault' => ['type' => 'CHAR', 'length' => 64, 'nullable' => false],
+			'datalenght_other' => ['type' => 'CHAR', 'length' => 64, 'nullable' => true],
+			'javascript_views_footer' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'add_css_view' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_css_views' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_javascript_view_footer' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'add_javascript_views_footer' => ['type' => 'TINYINT', 'length' => 1, 'nullable' => false],
+			'initiator_on_save_model' => ['type' => 'TEXT', 'length' => null, 'nullable' => true],
+			'guid' => ['type' => 'VARCHAR', 'length' => 36, 'nullable' => true],
+		];
+	}
+
+	/**
+	 * Generate a valid GUID candidate for a copied record.
+	 *
+	 * @return  string  A new GUID candidate.
+	 * @since   6.2.1
+	 */
+	protected function generateUniqueGuid()
+	{
+		return (string) GuidHelper::get();
+	}
+
+	/**
 	 * Method to delete one or more records.
 	 *
 	 * @param   array  &$pks  An array of record primary keys.
@@ -1183,9 +1231,7 @@ class FieldModel extends AdminModel
 
 			if (!$jcbPatchTable->load($jcbPatchId))
 			{
-				$this->setError(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'));
-
-				return false;
+				throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'), 404);
 			}
 
 			foreach ($jcbPatchTable->getFields() as $jcbPatchField)
@@ -1442,7 +1488,16 @@ class FieldModel extends AdminModel
 			{
 				foreach ($uniqueFields as $uniqueField)
 				{
-					$data[$uniqueField] = $this->generateUnique($uniqueField,$data[$uniqueField]);
+					if (!array_key_exists($uniqueField, $data))
+					{
+						continue;
+					}
+					$uniqueValue = $this->generateUnique($uniqueField, $data[$uniqueField]);
+					if ($uniqueValue === false)
+					{
+						return false;
+					}
+					$data[$uniqueField] = $uniqueValue;
 				}
 			}
 		}
@@ -1455,25 +1510,106 @@ class FieldModel extends AdminModel
 	}
 
 	/**
-	 * Method to generate a unique value.
+	 * Generate a storable unique copy value without changing numeric identifiers.
 	 *
-	 * @param   string  $field name.
-	 * @param   string  $value data.
+	 * @param   string  $field  The database column name.
+	 * @param   mixed   $value  The requested copy value.
 	 *
-	 * @return  string  New value.
+	 * @return  mixed  An available value, or false after setting a model error.
 	 * @since   3.0
 	 */
 	protected function generateUnique($field, $value)
 	{
-		// set field value unique
-		$table = $this->getTable();
+		$settings = $this->getUniqueFieldSettings();
+		$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
 
-		while ($table->load([$field => $value]))
+		if (!isset($settings[$field]) || (!is_scalar($value) && $value !== null) || $value === false)
 		{
-			$value = StringHelper::increment($value);
+			$this->setError(Text::sprintf($error, $field));
+			return false;
 		}
 
-		return $value;
+		$column = $settings[$field];
+
+		// Table::load compares NULL as a quoted value, not with SQL IS NULL.
+		if ($value === null)
+		{
+			if ($column['nullable'])
+			{
+				return null;
+			}
+
+			$this->setError(Text::sprintf($error, $field));
+			return false;
+		}
+
+		$isText = in_array($column['type'], ['CHAR', 'VARCHAR'], true);
+		$matched = [];
+
+		try
+		{
+			$table = $this->getTable();
+
+			// At most 100 collision queries, including the original requested value.
+			for ($attempt = 0; $attempt < 100; $attempt++)
+			{
+				if ($isText && $column['length'] !== null
+					&& StringHelper::strlen((string) $value) > $column['length'])
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LENGTH';
+					break;
+				}
+
+				$loaded = $table->load([$field => $value]);
+
+				// A failed query/bind is never evidence that a value is available.
+				if ($table->getError())
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+					break;
+				}
+
+				if (!$loaded)
+				{
+					return $value;
+				}
+
+				$key = $table->getKeyName();
+				$primaryKey = (string) $table->$key;
+
+				// Detect coercion/collation matches that suffixing cannot escape.
+				if (isset($matched[$primaryKey]))
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$matched[$primaryKey] = true;
+
+				if ($field === 'guid')
+				{
+					$value = $this->generateUniqueGuid();
+				}
+				elseif ($isText && $column['length'] !== null)
+				{
+					$value = StringHelper::increment((string) $value);
+				}
+				else
+				{
+					$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_CONFLICT';
+					break;
+				}
+
+				$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_LIMIT';
+			}
+		}
+		catch (\Throwable $exception)
+		{
+			$error = 'COM_COMPONENTBUILDER_UNIQUE_FIELD_ERROR';
+		}
+
+		$this->setError(Text::sprintf($error, $field));
+		return false;
 	}
 
 	/**

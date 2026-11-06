@@ -5774,7 +5774,7 @@ abstract class ComponentbuilderHelper
 	public static function getHelpUrl(string $view)
 	{
 		$user	= Factory::getApplication()->getIdentity();
-		$groups = $user->get('groups');
+		$groups = $user->groups;
 		$db	= Factory::getContainer()->get(DatabaseInterface::class);
 		$query	= $db->createQuery();
 		$query->select(array('a.id','a.groups','a.target','a.type','a.article','a.url'));

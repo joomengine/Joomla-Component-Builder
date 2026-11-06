@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="6.0" method="upgrade">
 	<name>COM_COMPONENTBUILDER</name>
-	<creationDate>27th October, 2026</creationDate>
+	<creationDate>6th November, 2026</creationDate>
 	<author>Llewellyn van der Merwe</author>
 	<authorEmail>joomla@vdm.io</authorEmail>
 	<authorUrl>https://dev.vdm.io</authorUrl>
 	<copyright>Copyright (C) 2015 Vast Development Method. All rights reserved.</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<version>6.2.1-alpha1</version>
+	<version>6.2.1-alpha2</version>
 	<description><![CDATA[
-		<h1>Component Builder (v.6.2.1-alpha1)</h1>
+		<h1>Component Builder (v.6.2.1-alpha2)</h1>
 		<div style="clear: both;"></div>
 		<p>The Component Builder for [Joomla](https://extensions.joomla.org/extension/component-builder/) is highly advanced tool that is truly able to build extremely complex components in a fraction of the time.
 

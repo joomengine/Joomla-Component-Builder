@@ -298,8 +298,17 @@ class AliasTitleFix
 		$fixUnique[] = Indent::_(4)
 			. "foreach (\$uniqueFields as \$uniqueField)";
 		$fixUnique[] = Indent::_(4) . "{";
+		$fixUnique[] = Indent::_(5) . "if (!array_key_exists(\$uniqueField, \$data))";
+		$fixUnique[] = Indent::_(5) . "{";
+		$fixUnique[] = Indent::_(6) . "continue;";
+		$fixUnique[] = Indent::_(5) . "}";
 		$fixUnique[] = Indent::_(5)
-			. "\$data[\$uniqueField] = \$this->generateUnique(\$uniqueField,\$data[\$uniqueField]);";
+			. "\$uniqueValue = \$this->generateUnique(\$uniqueField, \$data[\$uniqueField]);";
+		$fixUnique[] = Indent::_(5) . "if (\$uniqueValue === false)";
+		$fixUnique[] = Indent::_(5) . "{";
+		$fixUnique[] = Indent::_(6) . "return false;";
+		$fixUnique[] = Indent::_(5) . "}";
+		$fixUnique[] = Indent::_(5) . "\$data[\$uniqueField] = \$uniqueValue;";
 		$fixUnique[] = Indent::_(4) . "}";
 		$fixUnique[] = Indent::_(3) . "}";
 		$fixUnique[] = Indent::_(2) . "}";

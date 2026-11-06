@@ -1588,7 +1588,10 @@ class ArchitectureModel implements ServiceProviderInterface
 	{
 		return new ModelUniqueFields(
 			$container->get('Compiler.Builder.Database.Unique.Guid'),
-			$container->get('Compiler.Builder.Database.Unique.Keys')
+			$container->get('Compiler.Builder.Database.Unique.Keys'),
+			$container->get('Compiler.Builder.Database.Tables'),
+			$container->get('Config'),
+			$container->get('Language')
 		);
 	}
 }

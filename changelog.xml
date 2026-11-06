@@ -405,7 +405,7 @@
   <changelog>
     <element>com_componentbuilder</element>
     <type>component</type>
-    <version>6.2.1-alpha1</version>
+    <version>6.2.1-alpha</version>
     <fix>
       <item>Fix Joomla 6 plugin event registration to restore JCB compiler hooks.</item>
       <item>Fix generated frontend form navigation when custom view names are used. #1118</item>
@@ -441,6 +441,36 @@
       <item>Restore stable ID ordering in JCB Search batches to prevent matching records from being skipped.</item>
       <item>Normalize compiler-created translation records to the same empty value used by manual saves. #1309</item>
       <item>Correct the NotAllowed import so denied Site View and Custom Admin View API requests return HTTP 403 instead of HTTP 500. #1326</item>
+    </note>
+  </changelog>
+  <changelog>
+    <element>com_componentbuilder</element>
+    <type>component</type>
+    <version>6.2.1-alpha2</version>
+    <fix>
+      <item>Fix language-translation imports and editing by restoring JSON storage, encoding and decoding for translation subforms.</item>
+      <item>Fix infinite loops in Save as Copy and Batch Copy when unique numeric fields conflict with existing records, and report a clear error. #1328</item>
+      <item>Fix empty Site View and Custom Admin View API lists returning HTTP 500 return HTTP 200. #1330</item>
+      <item>Fix Joomla 7.0 deprecation notices in the Component Builder helper and generated helper methods.</item>
+    </fix>
+    <language>
+      <item>Return decoded translation subform data in language-translation API responses.</item>
+      <item>Restore filter-specific caching in Language Translations so extension, translated and untranslated selections return the correct records and totals.</item>
+    </language>
+    <remove>
+      <item>Declare optional AES parameters explicitly nullable to remove PHP 8.4 and 8.5 deprecation notices.</item>
+    </remove>
+    <note>
+      <item>Generate valid replacement GUIDs when copied records conflict on the GUID field.</item>
+      <item>Respect SQL column types, text-length limits and nullability when generating unique copy values, preserving available values and valid NULL entries.</item>
+      <item>Bound collision checks and detect repeated database matches when generating unique field values.</item>
+      <item>Handle omitted unique fields safely and stop saving copied records when unique-value generation fails, including batch title handling.</item>
+      <item>Return HTTP 404 from generated Joomla 6 API PATCH handlers when the target record cannot be loaded.</item>
+      <item>Apply configured indentation and source comment settings to generated API PATCH code.</item>
+      <item>Preserve plugin provider namespace placeholders during JCB self-compilation so generated Joomla 4, 5 and 6 plugins use the correct namespaces.</item>
+      <item>Replace deprecated global configuration access with the active Joomla application's configuration in JCB services and upload handling.</item>
+      <item>Replace deprecated GUID casts and cURL and MIME cleanup calls for PHP 8.5 compatibility.</item>
+      <item>Report localized SFTP private-key loading errors that distinguish key files from pasted key text.</item>
     </note>
   </changelog>
 </changelogs>
