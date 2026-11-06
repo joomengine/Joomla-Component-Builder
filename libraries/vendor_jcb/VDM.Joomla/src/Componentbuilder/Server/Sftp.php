@@ -200,21 +200,21 @@ class Sftp implements Serverinterface
 		if (in_array($authentication, [2, 3, 4, 5], true))
 		{
 			$privateKey = $this->details->private_key ?? null;
-			$message = 'Loading the Private key file failed';
+			$message = Text::_('COM_COMPONENTBUILDER_LOADING_THE_PRIVATE_KEY_TEXT_FAILED');
 
 			if ($authentication === 2 || $authentication === 3)
 			{
 				$path = $this->details->private ?? '';
 				$privateKey = is_string($path) && is_file($path) && is_readable($path)
 					? FileHelper::getContent($path, null) : null;
-				$message = 'Loading the Private key file failed';
+				$message = Text::_('COM_COMPONENTBUILDER_LOADING_THE_PRIVATE_KEY_FILE_FAILED');
 			}
 
 			try
 			{
 				if (!StringHelper::check($privateKey))
 				{
-					$this->app->enqueueMessage(Text::_($message), 'Error');
+					$this->app->enqueueMessage($message, 'Error');
 
 					return null;
 				}
@@ -223,7 +223,7 @@ class Sftp implements Serverinterface
 			}
 			catch (\Exception $error)
 			{
-				$this->app->enqueueMessage(Text::_($message), 'Error');
+				$this->app->enqueueMessage($message, 'Error');
 
 				return null;
 			}

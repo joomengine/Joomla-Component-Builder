@@ -388,10 +388,13 @@ class BatchCopy implements BatchCopyInterface
 				. ") && !is_numeric(\$this->table->" . implode('', $titles)
 				. "))";
 			$batchcopy[] = Indent::_(3) . "{";
-			$batchcopy[] = Indent::_(4) . "\$this->table->" . implode(
-					'', $titles
-				) . " = \$this->generateUnique('" . implode('', $titles)
-				. "',\$this->table->" . implode('', $titles) . ");";
+			$batchcopy[] = Indent::_(4) . "\$uniqueValue = \$this->generateUnique('"
+				. implode('', $titles) . "', \$this->table->" . implode('', $titles) . ");";
+			$batchcopy[] = Indent::_(4) . "if (\$uniqueValue === false)";
+			$batchcopy[] = Indent::_(4) . "{";
+			$batchcopy[] = Indent::_(5) . "return false;";
+			$batchcopy[] = Indent::_(4) . "}";
+			$batchcopy[] = Indent::_(4) . "\$this->table->" . implode('', $titles) . " = \$uniqueValue;";
 			$batchcopy[] = Indent::_(3) . "}";
 		}
 
@@ -419,7 +422,12 @@ class BatchCopy implements BatchCopyInterface
 			. "foreach (\$uniqueFields as \$uniqueField)";
 		$batchcopy[] = Indent::_(4) . "{";
 		$batchcopy[] = Indent::_(5)
-			. "\$this->table->\$uniqueField = \$this->generateUnique(\$uniqueField,\$this->table->\$uniqueField);";
+			. "\$uniqueValue = \$this->generateUnique(\$uniqueField, \$this->table->\$uniqueField);";
+		$batchcopy[] = Indent::_(5) . "if (\$uniqueValue === false)";
+		$batchcopy[] = Indent::_(5) . "{";
+		$batchcopy[] = Indent::_(6) . "return false;";
+		$batchcopy[] = Indent::_(5) . "}";
+		$batchcopy[] = Indent::_(5) . "\$this->table->\$uniqueField = \$uniqueValue;";
 		$batchcopy[] = Indent::_(4) . "}";
 		$batchcopy[] = Indent::_(3) . "}";
 

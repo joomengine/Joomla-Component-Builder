@@ -43,7 +43,26 @@
 - Fix toolbar generation when descriptions are missing or null.
 - Preserve original source line endings when compiler processing leaves the content unchanged.
 
-# v4.2.1-alpha1
+# v4.2.1-alpha2
+
+- Fix language-translation imports and editing by restoring JSON storage, encoding and decoding for translation subforms.
+- Return decoded translation subform data in language-translation API responses.
+- Restore filter-specific caching in Language Translations so extension, translated and untranslated selections return the correct records and totals.
+- Fix infinite loops in Save as Copy and Batch Copy when unique numeric fields conflict with existing records, and report a clear error. #1328
+- Generate valid replacement GUIDs when copied records conflict on the GUID field.
+- Respect SQL column types, text-length limits and nullability when generating unique copy values, preserving available values and valid NULL entries.
+- Bound collision checks and detect repeated database matches when generating unique field values.
+- Handle omitted unique fields safely and stop saving copied records when unique-value generation fails, including batch title handling.
+- Fix empty Site View and Custom Admin View API lists returning HTTP 500; return HTTP 200. #1330
+- Apply configured indentation and source comment settings to generated API PATCH code.
+- Preserve plugin provider namespace placeholders during JCB self-compilation so generated plugins use the correct namespaces.
+- Use direct user-group property access in the Component Builder helper and generated helper methods.
+- Replace deprecated global configuration access with the active Joomla application's configuration in JCB services and upload handling.
+- Declare optional AES parameters explicitly nullable to remove PHP 8.4 and 8.5 deprecation notices.
+- Replace deprecated GUID casts and cURL and MIME cleanup calls for PHP 8.5 compatibility.
+- Report localized SFTP private-key loading errors that distinguish key files from pasted key text.
+
+# v4.2.1-alpha
 
 - Fix custom frontend view navigation when compiling for Joomla 4 and 5. #1118
 - Fix missing or misplaced Joomla Power imports, including Uri, in generated PHP classes. #1123
