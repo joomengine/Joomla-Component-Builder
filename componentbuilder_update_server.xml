@@ -17,7 +17,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="3.*"/>
-		<sha512>f592b05f2c569d9b403a46c82c8e7a09cd4e2772f471f9a4eba56b2c69a6baf13244f2e4c4da5c4989d2393cfce4074696266820811c4b08b22b26373ac29deb</sha512>
+		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -36,7 +36,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>8e84a31564ffbd15913a22b035054b9a30db77413b944336e623648c5685e12e93a264ed29512102d1f3d9c2bc3e194d99f3786db56a72e01c4734536f7e668a</sha512>
+		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -112,7 +112,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>a1b8aa72353cdd8d6a1eb75c1c7e0de5a1ed13b605cfc31dd577ab18c6c841201e3a62f0d6eb2d1facf3f6b807d32bae5ddf76ed4cc77676acde72599271271b</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -169,7 +169,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>40cae9c936d713875e84f102df379f8dce3bc89a46fe6b8af04234837887984917e3ccfcb53503543c0b461f50aa5ee6eb51a5db530c395d38df62a64bb7c78a</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -207,7 +207,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>20443047ee1f961de4b7f680d28aceb32e10cf5f165a53995534fdda7fdc2fe44d8b0ddbc73d3c828ecbd5f854c04e71c8935f35903ab42701cb156915eb8b27</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -245,7 +245,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>14e1b5a9c9b475750ed59dedb0c69892ca12f105cf7fb8d5c43cfd260bd28b5470cd7535a4052676e3d0de4d6c944153ac2eeadc76c2270ac8da5784bfce3809</sha512>
+		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
