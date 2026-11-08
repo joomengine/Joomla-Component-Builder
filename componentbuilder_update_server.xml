@@ -74,7 +74,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>3fdaac224c16cb3be6a5d702ee2d3d1a8491915ff2520d36bcd15ababd387f48c72ccfa3b0db1c36bcdca75477e018bd3b1db68fd6ea06054e248733c2b97478</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -93,7 +93,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>71827b08ee6b634848373e5470b25251dd2520603ec788d43910bb8172344fb086dfd9e6f1c6b145643fd00b71ce84661bd5f32e89281749e64c02a2eb1f5a0c</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -131,7 +131,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>0c75f70c654deda8c17fdadf5ac4727bb39dc445deddb950ac3cc8e5449cce0061903889c22a678f17644adc00465aa817156d52c6222247223412f3e9271a32</sha512>
+		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -150,7 +150,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>bfc21e2f63efdff8280959d30a20b4b26448aa8cfb39e02201aee2644fd38b6834271d5eade8a1e2bcfc6fafccf98005d89148078b82cceef0657af71cbf968d</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -169,7 +169,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>40cae9c936d713875e84f102df379f8dce3bc89a46fe6b8af04234837887984917e3ccfcb53503543c0b461f50aa5ee6eb51a5db530c395d38df62a64bb7c78a</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -245,7 +245,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>14e1b5a9c9b475750ed59dedb0c69892ca12f105cf7fb8d5c43cfd260bd28b5470cd7535a4052676e3d0de4d6c944153ac2eeadc76c2270ac8da5784bfce3809</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -264,7 +264,7 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>b047ad8f865f5408aba4ef5975a2d8ea542a405f617ca504a40e68473b9db3f9093339422a3cc35771ccd83543335fafcf7cbde24f0096a2563077d514792713</sha512>
 	</update>
 	<update>
 		<name>Component Builder</name>
@@ -283,6 +283,6 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="4\.[01234]"/>
-		<sha512>f34ef98029367df99202b9c78321923e4014847d30efad21c35705eb9d9da018914d5a9f07f067e16bb343f41d63e736ba0a5780ea764a405726bdcf9f3480a8</sha512>
+		<sha512>b047ad8f865f5408aba4ef5975a2d8ea542a405f617ca504a40e68473b9db3f9093339422a3cc35771ccd83543335fafcf7cbde24f0096a2563077d514792713</sha512>
 	</update>
 </updates>
