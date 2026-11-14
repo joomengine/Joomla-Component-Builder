@@ -231,15 +231,33 @@ class AjaxModel extends ListModel
 	{
 		try {
 			$githubUrl = $this->toRawJcbDocGithubMarkdownUrl($path);
-			if (($page = SessionHelper::get($githubUrl, 'not_found')) === 'not_found')
+			$cacheKey = $githubUrl;
+			if (($page = SessionHelper::get($cacheKey, 'not_found')) === 'not_found')
 			{
-				$page = FileHelper::getContent($githubUrl);
+				// Restrict fallback to supported languages in the official documentation.
+				$englishUrl = preg_replace(
+					'~^(https://raw\\.githubusercontent\\.com/joomengine/jcb-documentation/refs/heads/master/)(?:french|persian)/~',
+					'${1}english/',
+					$githubUrl
+				);
+				try {
+					$page = FileHelper::getContent($githubUrl);
+				} catch (\Throwable $e) {
+					if ($englishUrl === $githubUrl) {
+						throw $e;
+					}
+					$page = false;
+				}
+				if (empty($page) && $englishUrl !== $githubUrl) {
+					$page = FileHelper::getContent($englishUrl);
+					$githubUrl = $englishUrl;
+				}
 				if (!empty($page))
 				{
 					$page = $this->rewriteJcbDocRelativeMarkdownLinks($page, $githubUrl);
 				}
 
-				SessionHelper::set($githubUrl, $page);
+				SessionHelper::set($cacheKey, $page);
 			}
 
 			if (!empty($page))

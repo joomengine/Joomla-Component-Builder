@@ -593,7 +593,14 @@ class ComponentbuilderModel extends ListModel
 	public function getJcbDocGitHubMd()
 	{
 		// call the ajax get wiki endpoint
-		$call_url = Uri::base() . 'index.php?option=com_componentbuilder&task=ajax.getJcbDocGitHubMd&format=json&raw=true&' . Session::getFormToken() . '=1&path=joomengine.jcb-documentation.refs.heads.master.english.README';
+		$language = strtolower(explode('-', Factory::getApplication()->getLanguage()->getTag())[0]);
+		$directory = match ($language) {
+			'fr' => 'french',
+			'fa' => 'persian',
+			default => 'english',
+		};
+		$path = 'joomengine.jcb-documentation.refs.heads.master.' . $directory . '.README';
+		$call_url = Uri::base() . 'index.php?option=com_componentbuilder&task=ajax.getJcbDocGitHubMd&format=json&raw=true&' . Session::getFormToken() . '=1&path=' . $path;
 
 		/** \Joomla\CMS\WebAsset\WebAssetManager $wa */
 		$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
