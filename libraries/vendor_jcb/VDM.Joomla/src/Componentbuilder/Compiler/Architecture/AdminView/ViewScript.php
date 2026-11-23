@@ -48,12 +48,12 @@ use VDM\Joomla\Utilities\StringHelper;
  * minified when the build asks for it and stored for the view's edit file, its
  * footer and its list file.
  * 
- * Shared condition generation retains its builder and placeholder lifecycle.
- * Target renderers select media events, asset paths and footer output.
+ * Nothing here is decided by the Joomla version being compiled for, so there
+ * is one class for every target.
  * 
  * @since  6.1.7
  */
-class ViewScript
+final class ViewScript
 {
 	/**
 	 * The Config Class.
@@ -281,6 +281,7 @@ class ViewScript
 			$functions      = [];
 			$serverConditions = [];
 			$serverGroups = [];
+			$conditionTargets = [];
 
 			foreach ($viewArray['settings']->conditions as $condition)
 			{
@@ -377,7 +378,7 @@ class ViewScript
 										= $this->valuescript->get(
 										$relation['match_type'],
 										(string) $relation['match_name'],
-										$condition['match_extends'],
+										$relation['match_extends'],
 										(string) $uniqueVar
 									);
 									$ifValue[$relationName]
@@ -437,80 +438,62 @@ class ViewScript
 			// reset buckets
 			$initial    = '';
 			$func       = '';
-			$validation = '';
 			$isSet      = '';
 			$listener   = '';
 			if (ArrayHelper::check($functions))
 			{
-				// now build the initial script
-				$initial .= "//" . Line::_(__Line__, __Class__) . " Initial Script"
-					. PHP_EOL . "document.addEventListener('DOMContentLoaded', function()";
-				$initial .= PHP_EOL . "{";
+				$refreshName = 'update' . str_replace(
+					' ', '', ucwords(str_replace('_', ' ', $nameSingleCode))
+				) . 'Conditions';
+				$calls = '';
 				foreach ($functions as $function => $matchKeys)
 				{
-					$func_call = $this->functionCall(
-						$function, $matchKeys, $getValue
-					);
-					$initial   .= $func_call['code'];
-				}
-				$initial .= "});" . PHP_EOL;
-				// for modal fields
-				$modal = '';
-				// now build the listener scripts
-				foreach ($functions as $l_function => $l_matchKeys)
-				{
-					$funcCall = '';
-					foreach ($l_matchKeys as $l_matchKey)
+					foreach ($matchKeys as $matchKey)
 					{
-						$name         = $matchNames[$l_matchKey];
-						$matchTypeKey = $typeBuket[$l_matchKey];
-						$funcCall     = $this->functionCall(
-							$l_function, $l_matchKeys, $getValue
-						);
-
-						if ($this->usesModalMediaListener() && $this->scriptmediaswitch->inArray($matchTypeKey))
+						if ($ifValue[$matchKey] === 0 || $getValue[$matchKey]['get'] === '')
 						{
-							$modal .= $funcCall['code'];
-						}
-						else
-						{
-							if ($this->scriptuserswitch->inArray($matchTypeKey))
-							{
-								$name = $name . '_id';
-							}
-
-							$listener .= PHP_EOL . "//" . Line::_(
-									__LINE__,__CLASS__
-								) . " #jform_" . $name . " listeners for "
-								. $l_matchKey . " function";
-							$listener .= PHP_EOL . "jQuery('#jform_" . $name
-								. "').on('keyup',function()";
-							$listener .= PHP_EOL . "{";
-							$listener .= $funcCall['code'];
-							$listener .= PHP_EOL . "});";
-							$listener .= PHP_EOL
-								. "jQuery('#adminForm').on('change', '#jform_"
-								. $name . "',function (e)";
-							$listener .= PHP_EOL . "{";
-							$listener .= PHP_EOL . Indent::_(1)
-								. "e.preventDefault();";
-							$listener .= $funcCall['code'];
-							$listener .= PHP_EOL . "});" . PHP_EOL;
+							throw new \UnexpectedValueException(sprintf(
+								'Unsupported condition in view "%s": field "%s", operator %d, type "%s". '
+								. 'Select an operator supported by the watched field type.',
+								$nameSingleCode,
+								$matchNames[$matchKey],
+								$serverConditions[$matchKey]['behavior'],
+								$typeBuket[$matchKey]
+							));
 						}
 					}
+					$calls .= $this->functionCall($function, $matchKeys, $getValue)['code'];
 				}
-				if (StringHelper::check($modal))
+
+				// Every selector change recomputes the complete ordered decision.
+				$watched = [];
+				$modal = false;
+				foreach ($matchNames as $matchKey => $name)
 				{
-					$listener .= PHP_EOL . "window.SqueezeBox.initialize({";
-					$listener .= PHP_EOL . Indent::_(1) . "onClose:function(){";
-					$listener .= $modal;
-					$listener .= PHP_EOL . Indent::_(1) . "}";
-					$listener .= PHP_EOL . "});" . PHP_EOL;
+					$matchType = $typeBuket[$matchKey];
+					if ($this->scriptmediaswitch->inArray($matchType))
+					{
+						$modal = true;
+						continue;
+					}
+					if ($this->scriptuserswitch->inArray($matchType))
+					{
+						$name .= '_id';
+					}
+					$watched[$name] = true;
+				}
+				foreach (array_keys($watched) as $name)
+				{
+					$listener .= PHP_EOL . "jQuery('#jform_" . $name . "').on('keyup', " . $refreshName . ");"
+						. PHP_EOL . "jQuery('#adminForm').on('change', '#jform_" . $name . "', " . $refreshName . ");" . PHP_EOL;
+				}
+				if ($modal)
+				{
+					$listener .= PHP_EOL . "window.SqueezeBox.initialize({onClose: " . $refreshName . "});" . PHP_EOL;
 				}
 
 				// now build the function
 				$func = '';
-				$head = '';
 				foreach ($functions as $f_function => $f_matchKeys)
 				{
 					$map = '';
@@ -626,6 +609,7 @@ class ViewScript
 							$if = $ifValue[$f_matchKey];
 							if (StringHelper::check($if))
 							{
+								$if = count($f_matchKeys) > 1 ? '(' . $if . ')' : $if;
 								if ($ifcounter == 0)
 								{
 									$func .= $if;
@@ -647,7 +631,8 @@ class ViewScript
 					$requiredTargets = [];
 					foreach ($controls as $target => $action)
 					{
-						if ($action['requiredVar'] !== '')
+						$conditionTargets[$target] = $action;
+						if ($action['required'])
 						{
 							$requiredTargets[] = $target;
 						}
@@ -678,7 +663,6 @@ class ViewScript
 						))
 						{
 							$func .= $action[$targetBehavior];
-							$head .= $action['requiredVar'];
 						}
 					}
 					// check if this is a toggle switch
@@ -702,16 +686,15 @@ class ViewScript
 					$func .= PHP_EOL . Indent::_(1) . "}" . PHP_EOL . "}"
 						. PHP_EOL . $map;
 				}
-				// add the needed validation to file
-				$validation = $this->validationScript($nameSingleCode);
+				$initial = $this->refreshScript($refreshName, $conditionTargets, $calls);
 
 				// set the isSet function
 				$this->validationfix->setConditions($nameSingleCode, $serverGroups);
 				$isSet = $this->isSetFunction();
 			}
 			// load to this buket
-			$fileScript   = $initial . $func . $validation . $isSet;
-			$footerScript = $this->prepareListeners($listener);
+			$fileScript   = $initial . $func . $isSet;
+			$footerScript = $listener;
 		}
 		// add custom script to edit form JS file
 		if (!isset($fileScript))
@@ -741,6 +724,10 @@ class ViewScript
 				unset($customFooterScript);
 			}
 		}
+		// Legacy custom scripts may still call the retired browser transport helper.
+		$fileScript = $this->validationScript(
+			$fileScript . ($footerScript ?? '') . ($customFooterScript ?? '')
+		) . $fileScript;
 		// set view listname
 		$nameListCode = $viewArray['settings']->name_list_code;
 		// add custom script to list view JS file
@@ -760,7 +747,8 @@ class ViewScript
 				Placefix::_h('VERSION') => $viewArray['settings']->version);
 			$this->structure->build($_target, 'javascript_file', false, $_config);
 			// set path
-			$_path = $this->listScriptPath($nameListCode);
+			$_path = '/administrator/components/com_' . $this->config->component_code_name
+				. '/assets/js/' . $nameListCode . '.js';
 			// load the file to the list view
 			$this->contentmulti->set($nameListCode . '|ADMIN_ADD_JAVASCRIPT_FILE', PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
 					__LINE__,__CLASS__
@@ -811,12 +799,6 @@ class ViewScript
 				$fileScript
 			))
 		{
-			// add the head script if set
-			if (isset($head) && StringHelper::check($head))
-			{
-				$fileScript = "// Some Global Values" . PHP_EOL . $head
-					. PHP_EOL . $fileScript;
-			}
 			// load the script
 			$this->viewscript->set(
 				$nameSingleCode . '.fileScript', $fileScript
@@ -841,11 +823,116 @@ class ViewScript
 			))
 		{
 			// add the needed script tags
-			$footerScript = $this->footerScript($footerScript, $nameSingleCode);
+			$footerScript = PHP_EOL
+				. PHP_EOL . '<script type="text/javascript">' . PHP_EOL
+				. $footerScript . PHP_EOL . "</script>";
 			$this->viewscript->set(
 				$nameSingleCode . '.footerScript', $footerScript
 			);
 		}
+	}
+
+	/**
+	 * Reconcile every condition without exceeding the rendered form's required state.
+	 *
+	 * The public browser function is named update<ViewCode>Conditions. Authored
+	 * AJAX handlers can call it after assigning watched values. Original optional
+	 * or disabled controls remain optional. One-way actions leave the current pass
+	 * unchanged when unmatched; no event history is used.
+	 *
+	 * @param   string  $function  The view-specific refresh function name.
+	 * @param   array   $targets   Target selectors and authored required flags.
+	 * @param   string  $calls     All condition calls in their authored order.
+	 *
+	 * @return  string  The baseline state, refresh function and initial listener.
+	 *
+	 * @since   6.2.1
+	 */
+	private function refreshScript(string $function, array $targets, string $calls): string
+	{
+		$selectors = [];
+		$required = [];
+		foreach ($targets as $name => $target)
+		{
+			$selectors[$target['selector']] = $target['selector'];
+			if ($target['required'])
+			{
+				$required[] = $name;
+			}
+		}
+
+		return '//' . Line::_(__LINE__, __CLASS__) . ' Original display and required state are captured before conditions run.'
+			. PHP_EOL . 'var ' . $function . 'Baseline = null;'
+			. PHP_EOL
+			. PHP_EOL . '/**'
+			. PHP_EOL . ' * Recompute this view\'s conditions in definition order from the original baseline.'
+			. PHP_EOL . ' * Call after authored code assigns watched values, including AJAX defaults.'
+			. PHP_EOL . ' * @return {void}'
+			. PHP_EOL . ' * @since 6.2.1'
+			. PHP_EOL . ' */'
+			. PHP_EOL . 'function ' . $function . '()'
+			. PHP_EOL . '{'
+			. PHP_EOL . Indent::_(1) . 'if (' . $function . 'Baseline === null)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . $function . 'Baseline = {containers: [], required: []};'
+			. PHP_EOL . Indent::_(2) . 'var selectors = ' . json_encode(array_values($selectors)) . ';'
+			. PHP_EOL . Indent::_(2) . 'var elements = [];'
+			. PHP_EOL . Indent::_(2) . 'for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . 'var containers = jQuery(selectors[selectorIndex]).closest(\'.control-group\').get();'
+			. PHP_EOL . Indent::_(3) . 'for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)'
+			. PHP_EOL . Indent::_(3) . '{'
+			. PHP_EOL . Indent::_(4) . 'var element = containers[containerIndex];'
+			. PHP_EOL . Indent::_(4) . 'if (element && element.style && elements.indexOf(element) === -1)'
+			. PHP_EOL . Indent::_(4) . '{'
+			. PHP_EOL . Indent::_(5) . 'elements.push(element);'
+			. PHP_EOL . Indent::_(5) . $function . 'Baseline.containers.push({element: element, display: element.style.display});'
+			. PHP_EOL . Indent::_(4) . '}'
+			. PHP_EOL . Indent::_(3) . '}'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL . Indent::_(2) . 'var requiredNames = ' . json_encode($required) . ';'
+			. PHP_EOL . Indent::_(2) . 'for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . 'var controls = jQuery(\'#jform_\' + requiredNames[requiredIndex]).get();'
+			. PHP_EOL . Indent::_(3) . 'for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)'
+			. PHP_EOL . Indent::_(3) . '{'
+			. PHP_EOL . Indent::_(4) . 'var element = controls[controlIndex];'
+			. PHP_EOL . Indent::_(4) . 'var control = jQuery(element);'
+			. PHP_EOL . Indent::_(4) . $function . 'Baseline.required.push({'
+			. PHP_EOL . Indent::_(5) . 'element: element,'
+			. PHP_EOL . Indent::_(5) . 'required: !control.is(\':disabled\')'
+			. PHP_EOL . Indent::_(6) . '&& (Boolean(element.required) || element.hasAttribute(\'required\') || control.hasClass(\'required\'))'
+			. PHP_EOL . Indent::_(4) . '});'
+			. PHP_EOL . Indent::_(3) . '}'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL . Indent::_(1) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(1) . 'for (var index = 0; index < ' . $function . 'Baseline.containers.length; index++)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . 'var baseline = ' . $function . 'Baseline.containers[index];'
+			. PHP_EOL . Indent::_(2) . 'baseline.element.style.display = baseline.display;'
+			. PHP_EOL . Indent::_(1) . '}'
+			. PHP_EOL . Indent::_(1) . 'var required = ' . $function . 'Baseline.required;'
+			. PHP_EOL . Indent::_(1) . 'for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . 'if (required[requiredIndex].required)'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . 'jQuery(required[requiredIndex].element).prop(\'required\', true)'
+			. PHP_EOL . Indent::_(4) . '.attr(\'aria-required\', true).addClass(\'required\');'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL . Indent::_(1) . '}'
+			. PHP_EOL . $calls
+			. PHP_EOL . Indent::_(1) . 'for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . 'if (!required[requiredIndex].required)'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . 'jQuery(required[requiredIndex].element).removeAttr(\'required\')'
+			. PHP_EOL . Indent::_(4) . '.removeAttr(\'aria-required\').removeClass(\'required\');'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL . Indent::_(1) . '}'
+			. PHP_EOL . '}'
+			. PHP_EOL
+			. PHP_EOL . 'document.addEventListener(\'DOMContentLoaded\', ' . $function . ');' . PHP_EOL;
 	}
 
 	/**
@@ -874,59 +961,6 @@ class ViewScript
 			'user' => $this->scriptuserswitch->inArray($condition['match_type']),
 			'checkbox' => $condition['match_type'] === 'checkbox',
 		];
-	}
-
-	/**
-	 * Preserve the target's listener execution timing.
-	 *
-	 * @param   string  $listeners  The generated listener setup.
-	 *
-	 * @return  string
-	 * @since   6.2.0
-	 */
-	protected function prepareListeners(string $listeners): string
-	{
-		return $listeners;
-	}
-
-	/**
-	 * Whether media conditions use the legacy modal callback.
-	 *
-	 * @return  bool
-	 * @since   6.2.0
-	 */
-	protected function usesModalMediaListener(): bool
-	{
-		return true;
-	}
-
-	/**
-	 * Get the published list script URI.
-	 *
-	 * @param   string  $name  The list view name.
-	 *
-	 * @return  string
-	 * @since   6.2.0
-	 */
-	protected function listScriptPath(string $name): string
-	{
-		return '/administrator/components/com_' . $this->config->component_code_name
-			. '/assets/js/' . $name . '.js';
-	}
-
-	/**
-	 * Wrap a footer script, preserving embedded PHP.
-	 *
-	 * @param   string  $script  The script source.
-	 * @param   string  $view    The view name.
-	 *
-	 * @return  string
-	 * @since   6.2.0
-	 */
-	protected function footerScript(string $script, string $view): string
-	{
-		return PHP_EOL . PHP_EOL . '<script type="text/javascript">' . PHP_EOL
-			. $script . PHP_EOL . '</script>';
 	}
 
 	/**
@@ -993,103 +1027,38 @@ class ViewScript
 	}
 
 	/**
-	 * Build the form validation override this view's switched fields need.
+	 * Keep legacy custom calls callable without accepting browser validation policy.
 	 *
-	 * A field whose required attribute is switched at runtime has to be taken
-	 * out of Joomla's own validation while it is hidden, and put back when it
-	 * returns. A view where no condition does that needs none of this.
+	 * Required fields are decided from compiler conditions on the server. The
+	 * compatibility function deliberately performs no form or data mutation.
+	 * It is included only when an authored script references the retired helper.
 	 *
-	 * @param   string  $nameSingleCode  The single view code name.
+	 * @param   string  $script  The assembled edit-form scripts.
 	 *
-	 * @return  string  The override, or an empty string when no field switches.
+	 * @return  string  The compatibility function, or an empty string.
 	 *
 	 * @since   6.1.7
+	 * @since   6.2.1  Removed the browser-owned required-field transport.
 	 */
-	protected function validationScript(string $nameSingleCode): string
+	protected function validationScript(string $script): string
 	{
-		$validation = '';
+		if (strpos($script, 'updateFieldRequired') === false)
+		{
+			return '';
+		}
 
-	// add the needed validation to file
-	if (ArrayHelper::check(
-		$this->validationfix->get($nameSingleCode)
-	))
-	{
-		$validation .= PHP_EOL . "/**";
-		$validation .= PHP_EOL . " * Update the \"not required\" field list by adding or removing a field name.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * Mirrors the original jQuery logic exactly but uses pure JavaScript.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @param  {string}  name    The field name to add or remove.";
-		$validation .= PHP_EOL . " * @param  {number}  status  1 to add as not required, 0 to remove.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @return {void}";
-		$validation .= PHP_EOL . " * @since  3.1.3";
-		$validation .= PHP_EOL . " */";
-		$validation .= PHP_EOL . "function updateFieldRequired(name, status) {";
-		$validation .= PHP_EOL . Indent::_(1) . "// Check if #jform_not_required exists";
-		$validation .= PHP_EOL . Indent::_(1) . "const notRequiredField = document.getElementById('jform_not_required');";
-		$validation .= PHP_EOL . Indent::_(1) . "if (!notRequiredField) {";
-		$validation .= PHP_EOL . Indent::_(2) . "return;";
-		$validation .= PHP_EOL . Indent::_(1) . "}" . PHP_EOL;
-		$validation .= PHP_EOL . Indent::_(1) . "// Split the comma-separated list into an array";
-		$validation .= PHP_EOL . Indent::_(1) . "let not_required = notRequiredField.value ? notRequiredField.value.split(',') : [];" . PHP_EOL;
-		$validation .= PHP_EOL . Indent::_(1) . "// Add or remove the field name from the list";
-		$validation .= PHP_EOL . Indent::_(1) . "if (status == 1) {";
-		$validation .= PHP_EOL . Indent::_(2) . "not_required.push(name);";
-		$validation .= PHP_EOL . Indent::_(1) . "} else {";
-		$validation .= PHP_EOL . Indent::_(2) . "not_required = removeFieldFromNotRequired(not_required, name);";
-		$validation .= PHP_EOL . Indent::_(1) . "}" . PHP_EOL;
-		$validation .= PHP_EOL . Indent::_(1) . "// Clean and deduplicate the list";
-		$validation .= PHP_EOL . Indent::_(1) . "const fixedList = fixNotRequiredArray(not_required);" . PHP_EOL;
-		$validation .= PHP_EOL . Indent::_(1) . "// Write back the updated comma-separated list";
-		$validation .= PHP_EOL . Indent::_(1) . "notRequiredField.value = fixedList.toString();";
-		$validation .= PHP_EOL . "}" . PHP_EOL;
-		$validation .= PHP_EOL . "/**";
-		$validation .= PHP_EOL . " * Remove a specific field name from the \"not required\" array.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @param  {Array<string>} array  The list of not-required field names.";
-		$validation .= PHP_EOL . " * @param  {string}        what   The field name to remove.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @return {Array<string>}        The updated array.";
-		$validation .= PHP_EOL . " * @since  3.1.3";
-		$validation .= PHP_EOL . " */";
-		$validation .= PHP_EOL . "function removeFieldFromNotRequired(array, what) {";
-		$validation .= PHP_EOL . Indent::_(1) . "return array.filter(function (element) {";
-		$validation .= PHP_EOL . Indent::_(2) . "return element !== what;";
-		$validation .= PHP_EOL . Indent::_(1) . "});";
-		$validation .= PHP_EOL . "}" . PHP_EOL;
-		$validation .= PHP_EOL . "/**";
-		$validation .= PHP_EOL . " * Deduplicate and clean a \"not required\" array.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @param  {Array<string>} array  The array to fix.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @return {Array<string>}        A cleaned, unique array.";
-		$validation .= PHP_EOL . " * @since  3.1.3";
-		$validation .= PHP_EOL . " */";
-		$validation .= PHP_EOL . "function fixNotRequiredArray(array) {";
-		$validation .= PHP_EOL . Indent::_(1) . "const seen = {};";
-		$validation .= PHP_EOL . Indent::_(1) . "return removeEmptyFromNotRequiredArray(array).filter(function (item) {";
-		$validation .= PHP_EOL . Indent::_(2) . "return seen.hasOwnProperty(item) ? false : (seen[item] = true);";
-		$validation .= PHP_EOL . Indent::_(1) . "});";
-		$validation .= PHP_EOL . "}" . PHP_EOL;
-		$validation .= PHP_EOL . "/**";
-		$validation .= PHP_EOL . " * Remove empty or invalid entries from a \"not required\" array.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * Also removes the literal '一_一' token (legacy quirk preserved for compatibility).";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @param  {Array<string>} array  The array to process.";
-		$validation .= PHP_EOL . " *";
-		$validation .= PHP_EOL . " * @return {Array<string>}        The cleaned array.";
-		$validation .= PHP_EOL . " * @since  3.1.3";
-		$validation .= PHP_EOL . " */";
-		$validation .= PHP_EOL . "function removeEmptyFromNotRequiredArray(array) {";
-		$validation .= PHP_EOL . Indent::_(1) . "return array.filter(function (el) {";
-		$validation .= PHP_EOL . Indent::_(2) . "return el && el.length > 0 && el !== '一_一';";
-		$validation .= PHP_EOL . Indent::_(1) . "});";
-		$validation .= PHP_EOL . "}" . PHP_EOL;
-	}
-
-		return $validation;
+		return PHP_EOL . "/**"
+			. PHP_EOL . " * Compatibility for custom scripts using the retired required-field helper."
+			. PHP_EOL . " *"
+			. PHP_EOL . " * @param  {string}  name    The legacy field name, ignored."
+			. PHP_EOL . " * @param  {number}  status  The legacy required state, ignored."
+			. PHP_EOL . " *"
+			. PHP_EOL . " * @return {void}"
+			. PHP_EOL . " * @deprecated 6.2.1 Required fields are decided by server-side conditions."
+			. PHP_EOL . " */"
+			. PHP_EOL . "function updateFieldRequired(name, status)"
+			. PHP_EOL . "{"
+			. PHP_EOL . "}" . PHP_EOL;
 	}
 
 	/**

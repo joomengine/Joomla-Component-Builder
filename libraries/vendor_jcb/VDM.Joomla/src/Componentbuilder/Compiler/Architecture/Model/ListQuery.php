@@ -41,14 +41,6 @@ use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Model\ListQuery
 class ListQuery implements ListQueryInterface
 {
 	/**
-	 * Category table construction expression for the generated target.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $categoryTable = "Table::getInstance('Category', 'JTable')";
-
-	/**
 	 * The Config Class.
 	 *
 	 * @var   Config
@@ -137,14 +129,6 @@ class ListQuery implements ListQueryInterface
 	protected ViewsDefaultOrdering $viewsdefaultordering;
 
 	/**
-	 * Fresh-query method emitted by this target renderer.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $queryMethod = 'getQuery(true)';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Config                $config                 The Config Class.
@@ -217,7 +201,7 @@ class ListQuery implements ListQueryInterface
 		$query .= PHP_EOL . Indent::_(2) . "//" . Line::_(__Line__, __Class__)
 			. " Create a new query object.";
 		$query .= $this->getDatabaseObject();
-		$query .= PHP_EOL . Indent::_(2) . "\$query = \$db->{$this->queryMethod};";
+		$query .= PHP_EOL . Indent::_(2) . "\$query = \$db->getQuery(true);";
 		$query .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
 				__LINE__,__CLASS__
 			) . " Select some fields";
@@ -333,7 +317,7 @@ class ListQuery implements ListQueryInterface
 			$query .= PHP_EOL . Indent::_(2) . "if (is_numeric(\$categoryId))";
 			$query .= PHP_EOL . Indent::_(2) . "{";
 			$query .= PHP_EOL . Indent::_(3)
-				. "\$cat_tbl = " . $this->categoryTable . ";";
+				. "\$cat_tbl = Table::getInstance('Category', 'JTable');";
 			$query .= PHP_EOL . Indent::_(3) . "\$cat_tbl->load(\$categoryId);";
 			$query .= PHP_EOL . Indent::_(3) . "\$rgt = \$cat_tbl->rgt;";
 			$query .= PHP_EOL . Indent::_(3) . "\$lft = \$cat_tbl->lft;";

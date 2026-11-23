@@ -22,7 +22,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
  * 
  * @since 3.2.0
  */
-class RouterMethodsManual
+final class RouterMethodsManual
 {
 	/**
 	 * The Router Class.
@@ -31,14 +31,6 @@ class RouterMethodsManual
 	 * @since 3.2.0
 	 */
 	protected Router $router;
-
-	/**
-	 * Fresh-query method emitted by this target renderer.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $queryMethod = 'getQuery(true)';
 
 	/**
 	 * Constructor.
@@ -87,7 +79,7 @@ class RouterMethodsManual
 				$code[] = Indent::_(1) . "{";
 				$code[] = Indent::_(2) . "if (\$this->noIDs)";
 				$code[] = Indent::_(2) . "{";
-				$code[] = Indent::_(3) . "\$dbquery = \$this->db->{$this->queryMethod};";
+				$code[] = Indent::_(3) . "\$dbquery = \$this->db->getQuery(true);";
 				$code[] = Indent::_(3) . "\$dbquery->select(\$this->db->quoteName('{$view->key}'))";
 				$code[] = Indent::_(4) . "->from(\$this->db->quoteName('{$view->table}'))";
 				$code[] = Indent::_(4) . "->where(";
@@ -123,7 +115,7 @@ class RouterMethodsManual
 				$code[] = '';
 				$code[] = Indent::_(2) . "if (strpos(\$id, ':') === false)";
 				$code[] = Indent::_(2) . "{";
-				$code[] = Indent::_(3) . "\$dbquery = \$this->db->{$this->queryMethod};";
+				$code[] = Indent::_(3) . "\$dbquery = \$this->db->getQuery(true);";
 				$code[] = Indent::_(3) . "\$dbquery->select(\$this->db->quoteName('{$view->alias}'))";
 				$code[] = Indent::_(4) . "->from(\$this->db->quoteName('{$view->table}'))";
 				$code[] = Indent::_(4) . "->where(\$this->db->quoteName('{$view->key}') . ' = :id')";

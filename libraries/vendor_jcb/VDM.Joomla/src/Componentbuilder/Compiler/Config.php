@@ -57,7 +57,7 @@ class Config extends ComponentConfig
 	{
 		parent::__construct($input, $params);
 
-		$this->config = $config ?: JoomlaFactory::getApplication()->getConfig();
+		$this->config = $config ?: JoomlaFactory::getConfig();
 	}
 
 	/**
@@ -422,7 +422,7 @@ class Config extends ComponentConfig
 			3 => ['folder_key' => 3, 'xml_version' => '3.10'],
 			4 => ['folder_key' => 4, 'xml_version' => '4.0'],
 			5 => ['folder_key' => 4, 'xml_version' => '5.0'],
-			6 => ['folder_key' => 6, 'xml_version' => '6.0']
+			6 => ['folder_key' => 4, 'xml_version' => '6.0'] // for now we build 4 to 6 from same templates ;)
 		];
 	}
 

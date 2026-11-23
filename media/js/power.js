@@ -8,18 +8,87 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+// Original display and required state are captured before conditions run.
+var updatePowerConditionsBaseline = null;
+
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updatePowerConditions()
 {
+	if (updatePowerConditionsBaseline === null)
+	{
+		updatePowerConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_head-lbl"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updatePowerConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = [];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updatePowerConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updatePowerConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updatePowerConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updatePowerConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var add_head_vvvvvxe = jQuery("#jform_add_head input[type='radio']:checked").val();
 	vvvvvxe(add_head_vvvvvxe);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updatePowerConditions);
 
 // the vvvvvxe function
 function vvvvvxe(add_head_vvvvvxe)
 {
 	// set the function logic
-	if (add_head_vvvvvxe == 1)
+	if (add_head_vvvvvxe == Number('1'))
 	{
 		jQuery('#jform_head-lbl').closest('.control-group').show();
 	}

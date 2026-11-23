@@ -32,7 +32,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
  * 
  * @since 5.1.4
  */
-class Helper
+final class Helper
 {
 	/**
 	 * The Config Class.
@@ -67,14 +67,6 @@ class Helper
 	protected ContentMulti $contentmulti;
 
 	/**
-	 * Fresh-query method emitted by this target renderer.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $queryMethod = 'getQuery(true)';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Config         $config         The Config Class.
@@ -105,7 +97,7 @@ class Helper
 	{
 		$help   = [];
 		$help[] = PHP_EOL . PHP_EOL . Indent::_(1) . "/**";
-		$help[] = Indent::_(1) . " *" . Indent::_(1) . "Can be used to build help urls.";
+		$help[] = Indent::_(1) . " *	Can be used to build help urls.";
 		$help[] = Indent::_(1) . " **/";
 		$help[] = Indent::_(1) . "public static function getHelpUrl(string \$view)";
 		$help[] = Indent::_(1) . "{";
@@ -182,7 +174,7 @@ class Helper
 
 		$help   = [];
 		$help[] = PHP_EOL . PHP_EOL . Indent::_(1) . "/**";
-		$help[] = Indent::_(1) . " *" . Indent::_(1) . "Load the Component Help URLs.";
+		$help[] = Indent::_(1) . " *	Load the Component Help URLs.";
 		$help[] = Indent::_(1) . " **/";
 		$help[] = Indent::_(1) . "public static function getHelpUrl(string \$view)";
 		$help[] = Indent::_(1) . "{";
@@ -190,26 +182,26 @@ class Helper
 		// User resolution
 		if ($this->config->get('joomla_version', 3) == 3)
 		{
-			$help[] = Indent::_(2) . "\$user" . Indent::_(1) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getUser();";
+			$help[] = Indent::_(2) . "\$user	= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getUser();";
 		}
 		else
 		{
-			$help[] = Indent::_(2) . "\$user" . Indent::_(1) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
+			$help[] = Indent::_(2) . "\$user	= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
 		}
 
-		$help[] = Indent::_(2) . "\$groups = \$user->groups;";
+		$help[] = Indent::_(2) . "\$groups = \$user->get('groups');";
 
 		// DB resolution
 		if ($this->config->get('joomla_version', 3) == 3)
 		{
-			$help[] = Indent::_(2) . "\$db" . Indent::_(1) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getDbo();";
+			$help[] = Indent::_(2) . "\$db	= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getDbo();";
 		}
 		else
 		{
-			$help[] = Indent::_(2) . "\$db" . Indent::_(1) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getContainer()->get(Joomla__"."_7bd29d76_73c9_4c07_a5da_4f7a32aff78f___Power::class);";
+			$help[] = Indent::_(2) . "\$db	= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getContainer()->get(Joomla__"."_7bd29d76_73c9_4c07_a5da_4f7a32aff78f___Power::class);";
 		}
 
-		$help[] = Indent::_(2) . "\$query" . Indent::_(1) . "= \$db->{$this->queryMethod};";
+		$help[] = Indent::_(2) . "\$query	= \$db->getQuery(true);";
 		$help[] = Indent::_(2) . "\$query->select(array('a.id','a.groups','a.target','a.type','a.article','a.url'));";
 		$help[] = Indent::_(2) . "\$query->from('#__" . $this->config->component_code_name . "_help_document AS a');";
 		$help[] = Indent::_(2) . "\$query->where('a." . $target . " = '.\$db->quote(\$view));";
@@ -253,7 +245,7 @@ class Helper
 
 		// Article helper
 		$help[] = PHP_EOL . Indent::_(1) . "/**";
-		$help[] = Indent::_(1) . " *" . Indent::_(1) . "Get the Article Link.";
+		$help[] = Indent::_(1) . " *	Get the Article Link.";
 		$help[] = Indent::_(1) . " **/";
 		$help[] = Indent::_(1) . "protected static function loadArticleLink(\$id)";
 		$help[] = Indent::_(1) . "{";
@@ -263,7 +255,7 @@ class Helper
 
 		// Text helper
 		$help[] = PHP_EOL . Indent::_(1) . "/**";
-		$help[] = Indent::_(1) . " *" . Indent::_(1) . "Get the Help Text Link.";
+		$help[] = Indent::_(1) . " *	Get the Help Text Link.";
 		$help[] = Indent::_(1) . " **/";
 		$help[] = Indent::_(1) . "protected static function loadHelpTextLink(\$id)";
 		$help[] = Indent::_(1) . "{";

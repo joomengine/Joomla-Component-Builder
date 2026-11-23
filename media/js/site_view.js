@@ -8,9 +8,67 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+// Original display and required state are captured before conditions run.
+var updateSiteViewConditionsBaseline = null;
+
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updateSiteViewConditions()
 {
+	if (updateSiteViewConditionsBaseline === null)
+	{
+		updateSiteViewConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_php_view-lbl","#jform_php_jview_display-lbl","#jform_php_jview-lbl","#jform_php_document-lbl","#jform_css_document-lbl","#jform_javascript_file-lbl","#jform_js_document-lbl","#jform_css-lbl","#jform_ajax_input-lbl","#jform_php_ajaxmethod-lbl","#jform_custom_button-lbl","#jform_php_controller-lbl","#jform_php_model-lbl",".note_custom_toolbar_placeholder"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updateSiteViewConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = [];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updateSiteViewConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updateSiteViewConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updateSiteViewConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updateSiteViewConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var add_php_view_vvvvvyv = jQuery("#jform_add_php_view input[type='radio']:checked").val();
 	vvvvvyv(add_php_view_vvvvvyv);
 
@@ -43,13 +101,24 @@ document.addEventListener('DOMContentLoaded', function()
 
 	var button_position_vvvvvzf = jQuery("#jform_button_position").val();
 	vvvvvzf(button_position_vvvvvzf);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updateSiteViewConditions);
 
 // the vvvvvyv function
 function vvvvvyv(add_php_view_vvvvvyv)
 {
 	// set the function logic
-	if (add_php_view_vvvvvyv == 1)
+	if (add_php_view_vvvvvyv == Number('1'))
 	{
 		jQuery('#jform_php_view-lbl').closest('.control-group').show();
 	}
@@ -63,7 +132,7 @@ function vvvvvyv(add_php_view_vvvvvyv)
 function vvvvvyw(add_php_jview_display_vvvvvyw)
 {
 	// set the function logic
-	if (add_php_jview_display_vvvvvyw == 1)
+	if (add_php_jview_display_vvvvvyw == Number('1'))
 	{
 		jQuery('#jform_php_jview_display-lbl').closest('.control-group').show();
 	}
@@ -77,7 +146,7 @@ function vvvvvyw(add_php_jview_display_vvvvvyw)
 function vvvvvyx(add_php_jview_vvvvvyx)
 {
 	// set the function logic
-	if (add_php_jview_vvvvvyx == 1)
+	if (add_php_jview_vvvvvyx == Number('1'))
 	{
 		jQuery('#jform_php_jview-lbl').closest('.control-group').show();
 	}
@@ -91,7 +160,7 @@ function vvvvvyx(add_php_jview_vvvvvyx)
 function vvvvvyy(add_php_document_vvvvvyy)
 {
 	// set the function logic
-	if (add_php_document_vvvvvyy == 1)
+	if (add_php_document_vvvvvyy == Number('1'))
 	{
 		jQuery('#jform_php_document-lbl').closest('.control-group').show();
 	}
@@ -105,7 +174,7 @@ function vvvvvyy(add_php_document_vvvvvyy)
 function vvvvvyz(add_css_document_vvvvvyz)
 {
 	// set the function logic
-	if (add_css_document_vvvvvyz == 1)
+	if (add_css_document_vvvvvyz == Number('1'))
 	{
 		jQuery('#jform_css_document-lbl').closest('.control-group').show();
 	}
@@ -119,7 +188,7 @@ function vvvvvyz(add_css_document_vvvvvyz)
 function vvvvvza(add_javascript_file_vvvvvza)
 {
 	// set the function logic
-	if (add_javascript_file_vvvvvza == 1)
+	if (add_javascript_file_vvvvvza == Number('1'))
 	{
 		jQuery('#jform_javascript_file-lbl').closest('.control-group').show();
 	}
@@ -133,7 +202,7 @@ function vvvvvza(add_javascript_file_vvvvvza)
 function vvvvvzb(add_js_document_vvvvvzb)
 {
 	// set the function logic
-	if (add_js_document_vvvvvzb == 1)
+	if (add_js_document_vvvvvzb == Number('1'))
 	{
 		jQuery('#jform_js_document-lbl').closest('.control-group').show();
 	}
@@ -147,7 +216,7 @@ function vvvvvzb(add_js_document_vvvvvzb)
 function vvvvvzc(add_css_vvvvvzc)
 {
 	// set the function logic
-	if (add_css_vvvvvzc == 1)
+	if (add_css_vvvvvzc == Number('1'))
 	{
 		jQuery('#jform_css-lbl').closest('.control-group').show();
 	}
@@ -161,7 +230,7 @@ function vvvvvzc(add_css_vvvvvzc)
 function vvvvvzd(add_php_ajax_vvvvvzd)
 {
 	// set the function logic
-	if (add_php_ajax_vvvvvzd == 1)
+	if (add_php_ajax_vvvvvzd == Number('1'))
 	{
 		jQuery('#jform_ajax_input-lbl').closest('.control-group').show();
 		jQuery('#jform_php_ajaxmethod-lbl').closest('.control-group').show();
@@ -177,7 +246,7 @@ function vvvvvzd(add_php_ajax_vvvvvzd)
 function vvvvvze(add_custom_button_vvvvvze)
 {
 	// set the function logic
-	if (add_custom_button_vvvvvze == 1)
+	if (add_custom_button_vvvvvze == Number('1'))
 	{
 		jQuery('#jform_custom_button-lbl').closest('.control-group').show();
 		jQuery('#jform_php_controller-lbl').closest('.control-group').show();
@@ -222,7 +291,7 @@ function vvvvvzf(button_position_vvvvvzf)
 function button_position_vvvvvzf_SomeFunc(button_position_vvvvvzf)
 {
 	// set the function logic
-	if (button_position_vvvvvzf == 5)
+	if (button_position_vvvvvzf == Number('5'))
 	{
 		return true;
 	}

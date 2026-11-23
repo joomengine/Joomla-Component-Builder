@@ -115,6 +115,119 @@ class Help_documentModel extends AdminModel
 	public $typeAlias = 'com_componentbuilder.help_document';
 
 	/**
+	 * Conditional requirements generated from this view's field conditions.
+	 *
+	 * Matches within a group are combined with AND. Groups retain their
+	 * authored order; the shared rule evaluates filtered values before
+	 * Joomla checks required fields. Browser exemption lists are ignored.
+	 *
+	 * @var    array
+	 * @since  6.2.1
+	 */
+	protected $conditionalRequirements = [
+		[
+			'matches' => [
+				[
+					'name' => 'location',
+					'behavior' => 1,
+					'options' => [
+						'1',
+					],
+					'user' => false,
+					'checkbox' => false,
+					'array' => false,
+					'supported' => true,
+				],
+			],
+			'targets' => [
+				'admin_view',
+			],
+			'show' => true,
+			'toggle' => true,
+		],
+		[
+			'matches' => [
+				[
+					'name' => 'location',
+					'behavior' => 1,
+					'options' => [
+						'2',
+					],
+					'user' => false,
+					'checkbox' => false,
+					'array' => false,
+					'supported' => true,
+				],
+			],
+			'targets' => [
+				'site_view',
+			],
+			'show' => true,
+			'toggle' => true,
+		],
+		[
+			'matches' => [
+				[
+					'name' => 'type',
+					'behavior' => 1,
+					'options' => [
+						'3',
+					],
+					'user' => false,
+					'checkbox' => false,
+					'array' => true,
+					'supported' => true,
+				],
+			],
+			'targets' => [
+				'url',
+			],
+			'show' => true,
+			'toggle' => true,
+		],
+		[
+			'matches' => [
+				[
+					'name' => 'type',
+					'behavior' => 1,
+					'options' => [
+						'1',
+					],
+					'user' => false,
+					'checkbox' => false,
+					'array' => true,
+					'supported' => true,
+				],
+			],
+			'targets' => [
+				'article',
+			],
+			'show' => true,
+			'toggle' => true,
+		],
+		[
+			'matches' => [
+				[
+					'name' => 'target',
+					'behavior' => 1,
+					'options' => [
+						'1',
+					],
+					'user' => false,
+					'checkbox' => false,
+					'array' => false,
+					'supported' => true,
+				],
+			],
+			'targets' => [
+				'groups',
+			],
+			'show' => true,
+			'toggle' => true,
+		],
+	];
+
+	/**
 	 * Returns a Table object, always creating it
 	 *
 	 * @param   type    $type    The table type to instantiate
@@ -565,289 +678,91 @@ class Help_documentModel extends AdminModel
 	}
 
 	/**
-	 * Method to validate the form data.
+	 * Validate conditional requirements through Joomla's native form lifecycle.
 	 *
-	 * @param   Form   $form   The form to validate against.
-	 * @param   array   $data   The data to validate.
-	 * @param   string  $group  The name of the field group to validate.
+	 * @param   Form    $form   The original form to validate.
+	 * @param   array   $data   Submitted data, before native filtering.
+	 * @param   string  $group  The optional field group to validate.
 	 *
-	 * @return  mixed  Array of filtered data if valid, false otherwise.
+	 * @return  array|false  Filtered valid data, or false when validation fails.
 	 *
-	 * @see     JFormRule
-	 * @see     JFilterInput
-	 * @since   12.2
+	 * @since   6.2.1
 	 */
 	public function validate($form, $data, $group = null)
 	{
-		$conditionRule = FormHelper::loadRuleType('jcbconditionalrequired');
-		$conditionField = '__jcb_conditional_required';
-		if (!$conditionRule || $form->getFieldXml($conditionField, $group) !== false)
+		$rule = FormHelper::loadRuleType('conditionalrequired');
+		if (!$rule)
 		{
+			$this->setError('The conditional validation rule could not be loaded.');
 			return false;
 		}
-		$conditionRan = false;
-		$conditionAttributes = [];
-		$conditionCallback = function (array $data) use ($form, $group, &$conditionRan, &$conditionAttributes): bool
-		{
-			if ($conditionRan)
-			{
-				return false;
-			}
-			$conditionRan = true;
-			$conditionGroups = [0 => ['matches' => [0 => ['name' => 'location', 'behavior' => 1, 'options' => [0 => '1'], 'user' => false, 'checkbox' => false, 'array' => false, 'supported' => true]], 'targets' => [0 => 'admin_view'], 'show' => true, 'toggle' => true], 1 => ['matches' => [0 => ['name' => 'location', 'behavior' => 1, 'options' => [0 => '2'], 'user' => false, 'checkbox' => false, 'array' => false, 'supported' => true]], 'targets' => [0 => 'site_view'], 'show' => true, 'toggle' => true], 2 => ['matches' => [0 => ['name' => 'type', 'behavior' => 1, 'options' => [0 => '3'], 'user' => false, 'checkbox' => false, 'array' => true, 'supported' => true]], 'targets' => [0 => 'url'], 'show' => true, 'toggle' => true], 3 => ['matches' => [0 => ['name' => 'type', 'behavior' => 1, 'options' => [0 => '1'], 'user' => false, 'checkbox' => false, 'array' => true, 'supported' => true]], 'targets' => [0 => 'article'], 'show' => true, 'toggle' => true], 4 => ['matches' => [0 => ['name' => 'target', 'behavior' => 1, 'options' => [0 => '1'], 'user' => false, 'checkbox' => false, 'array' => false, 'supported' => true]], 'targets' => [0 => 'groups'], 'show' => true, 'toggle' => true]];
-			// The browser's not_required list is informational, never an authority.
-			$conditionInput = new Registry($data);
-			$conditionData = $group ? (array) $conditionInput->get($group, []) : $data;
-			$conditionStored = [];
-			$conditionApp = Factory::getApplication();
-			$conditionPatch = $conditionApp->isClient('api') && $conditionApp->getInput()->getMethod() === 'PATCH';
-			$recordId = (int) ($data['id'] ?? $this->getState($this->getName() . '.id', 0));
-			if ($recordId > 0)
-			{
-				$stored = $this->getItem($recordId);
-				if ($stored === false || $stored === null)
-				{
-					return false;
-				}
-				$conditionStored = new Registry($stored);
-				$conditionStored = $group ? (array) $conditionStored->get($group, []) : $conditionStored->toArray();
-			}
-			$conditionPresent = static function ($value): bool
-			{
-				return $value !== null && $value !== '' && $value !== [];
-			};
-			$conditionEquals = static function ($value, $option): bool
-			{
-				// Selection values arrive as DOM strings; numeric/boolean options use JS equality.
-				if (is_numeric($option) || $option === 'true' || $option === 'false')
-				{
-					if ($value === null)
-					{
-						return false;
-					}
-					$number = $option === 'true' ? 1 : ($option === 'false' ? 0 : (float) $option);
-					if (is_bool($value) || (is_string($value) && trim($value) === ''))
-					{
-						return (float) $value === (float) $number;
-					}
-					return is_numeric($value) && (float) $value === (float) $number;
-				}
-				return is_scalar($value) && (string) $value === (string) $option;
-			};
-			$conditionMatch = static function ($value, array $rule) use ($conditionPresent, $conditionEquals): bool
-			{
-				$behavior = $rule['behavior'];
-				$options = $rule['options'];
-				if ($behavior >= 1 && $behavior <= 3)
-				{
-					if ($options !== [])
-					{
-						foreach ($options as $option)
-						{
-							$equal = $conditionEquals($value, $option);
-							// Preserve the browser's OR across options, including Is Not.
-							if ($behavior === 2 ? !$equal : $equal)
-							{
-								return true;
-							}
-						}
-						return false;
-					}
-					$present = $conditionPresent($value);
-					if ($behavior === 2)
-					{
-						return !$present;
-					}
-					return $present && !($behavior === 3 && $rule['user'] && $conditionEquals($value, '0'));
-				}
-				if ($behavior === 4 || $behavior === 5)
-				{
-					return $behavior === 4 ? $conditionPresent($value) : !$conditionPresent($value);
-				}
-				if (!is_scalar($value) && $value !== null)
-				{
-					return false;
-				}
-				$value = (string) $value;
-				if ($behavior >= 6 && $behavior <= 9)
-				{
-					$keywords = $options['keywords'] ?? [];
-					if ($keywords === [])
-					{
-						return $value === 'error';
-					}
-					$all = $behavior === 6 || $behavior === 8;
-					if ($behavior === 8 || $behavior === 9)
-					{
-						$value = StringHelper::strtolower($value);
-					}
-					foreach ($keywords as $keyword)
-					{
-						$found = strpos($value, $keyword) !== false;
-						if ($all ? !$found : $found)
-						{
-							return !$all;
-						}
-					}
-					return $all;
-				}
-				// JavaScript length counts UTF-16 code units, including surrogate pairs.
-				$length = StringHelper::strlen($value) + preg_match_all('/[\x{10000}-\x{10FFFF}]/u', $value);
-				$expected = (int) (($options['length'] ?? 0) ?: 5);
-				switch ($behavior)
-				{
-					case 10:
-						return $length >= $expected;
-					case 11:
-						return $length <= $expected;
-					case 12:
-						return $length == $expected;
-				}
-				return false;
-			};
-			$conditionalRequired = [];
-			foreach ($conditionGroups as $conditionGroup)
-			{
-				foreach ($conditionGroup['targets'] as $target)
-				{
-					$conditionalRequired[$target] = true;
-				}
-			}
-			foreach ($conditionGroups as $conditionGroup)
-			{
-				$matched = true;
-				foreach ($conditionGroup['matches'] as $rule)
-				{
-					// Unsupported definitions cannot relax a required field.
-					if (!$rule['supported'])
-					{
-						continue 2;
-					}
-					// ACL-denied selectors cannot change applicability through discarded input.
-					$disabled = strtolower((string) $form->getFieldAttribute($rule['name'], 'disabled', '', $group));
-					$filter = strtolower((string) $form->getFieldAttribute($rule['name'], 'filter', '', $group));
-					$available = $form->getFieldAttribute($rule['name'], 'name', null, $group) !== null;
-					$protected = !$available || in_array($disabled, ['true', '1', 'disabled'], true) || $filter === 'unset';
-					$values = $protected ? $conditionStored : $conditionData;
-					if (array_key_exists($rule['name'], $values))
-					{
-						$value = $values[$rule['name']];
-					}
-					elseif (!$protected && $conditionPatch && array_key_exists($rule['name'], $conditionStored))
-					{
-						$value = $conditionStored[$rule['name']];
-					}
-					elseif (!$protected && $rule['checkbox'])
-					{
-						// Native unchecked checkboxes omit their key on ordinary form submissions.
-						$value = false;
-					}
-					else
-					{
-						$value = $form->getFieldAttribute($rule['name'], 'default', null, $group);
-					}
-					if ($rule['checkbox'])
-					{
-						$value = (bool) $value;
-					}
-					if ($rule['array'])
-					{
-						$values = $conditionPresent($value) ? (array) $value : [];
-						$oneMatches = false;
-						foreach ($values as $entry)
-						{
-							if ($conditionMatch($entry, $rule))
-							{
-								$oneMatches = true;
-								break;
-							}
-						}
-					}
-					else
-					{
-						$oneMatches = $conditionMatch($value, $rule);
-					}
-					$matched = $matched && $oneMatches;
-				}
-				if ($matched || $conditionGroup['toggle'])
-				{
-					$required = $matched ? $conditionGroup['show'] : !$conditionGroup['show'];
-					foreach ($conditionGroup['targets'] as $target)
-					{
-						$conditionalRequired[$target] = $required;
-					}
-				}
-			}
-			foreach ($conditionalRequired as $field => $required)
-			{
-				$conditionElement = $form->getFieldXml($field, $group);
-				if ($conditionElement !== false)
-				{
-					// Snapshot after native validation plugins have finished changing the form.
-					$conditionAttributes[] = [$conditionElement, isset($conditionElement['required']) ? (string) $conditionElement['required'] : null];
-					$form->setFieldAttribute($field, 'required', $required ? 'true' : 'false', $group);
-				}
-			}
-			// Inactive fields keep their values; ordinary filtering and validation still apply.
-			return true;
-		};
-		if (!$conditionRule::attach($form, $conditionCallback, $group, $conditionField))
-		{
-			return false;
-		}
-		$conditionNode = null;
+
 		try
 		{
-			$element = new \SimpleXMLElement('<field name="__jcb_conditional_required" type="hidden" filter="unset" validate="jcbconditionalrequired" />');
-			if (!$form->setField($element, $group))
+			$prepared = $rule->prepare(
+				$form,
+				$this->conditionalRequirements,
+				\Closure::fromCallable([$this, 'resolveConditionalData']),
+				$group
+			);
+			if (!$prepared)
 			{
+				$this->setError($rule->getError());
 				return false;
 			}
-			$element = $form->getFieldXml($conditionField, $group);
-			if ($element === false)
+
+			$result = $rule->complete(
+				parent::validate($form, $rule->filterInternalInput($data), $group)
+			);
+			if ($rule->getError() !== null)
 			{
-				return false;
+				$this->setError($rule->getError());
 			}
-			$conditionNode = dom_import_simplexml($element);
-			$container = $conditionNode->parentNode;
-			while ($container->nodeName !== 'form' && $container->nodeName !== 'fields')
-			{
-				$container = $container->parentNode;
-			}
-			$container->insertBefore($conditionNode, $container->firstChild);
-			// The internal rule needs no submitted value and must never reach persistence.
-			$conditionPath = $group ? $group . '.' . $conditionField : $conditionField;
-			$conditionInput = new Registry($data);
-			$conditionInput->remove($conditionPath);
-			$result = parent::validate($form, $conditionInput->toArray(), $group);
-			if (!$conditionRan || $result === false)
-			{
-				return false;
-			}
-			$conditionOutput = new Registry($result);
-			$conditionOutput->remove($conditionPath);
-			return $conditionOutput->toArray();
+
+			return $result;
 		}
 		finally
 		{
-			if ($conditionNode !== null && $conditionNode->parentNode !== null)
-			{
-				$conditionNode->parentNode->removeChild($conditionNode);
-			}
-			foreach ($conditionAttributes as [$conditionElement, $conditionRequired])
-			{
-				if ($conditionRequired === null)
-				{
-					unset($conditionElement['required']);
-				}
-				else
-				{
-					$conditionElement['required'] = $conditionRequired;
-				}
-			}
-			$form->removeField($conditionField, $group);
-			$conditionRule::detach($form);
+			$rule->release();
 		}
+	}
+
+	/**
+	 * Load permitted stored selector values after native input filtering.
+	 *
+	 * PATCH omission and protected selectors can require the stored record.
+	 * Keeping this lookup here preserves model-specific getItem() behavior.
+	 *
+	 * @param   array   $data   Filtered input received by the native rule.
+	 * @param   Form    $form   The form after native validation plugins have run.
+	 * @param   string  $group  The optional field group being validated.
+	 *
+	 * @return  array|false  Stored values and PATCH mode, or false for a missing record.
+	 *
+	 * @since   6.2.1
+	 */
+	protected function resolveConditionalData(array $data, $form, $group = null)
+	{
+		$application = Factory::getApplication();
+		$context = [
+			'stored' => [],
+			'patch' => $application->isClient('api')
+				&& $application->getInput()->getMethod() === 'PATCH',
+		];
+		$recordId = (int) ($data['id'] ?? $this->getState($this->getName() . '.id', 0));
+		if ($recordId > 0)
+		{
+			$stored = $this->getItem($recordId);
+			if ($stored === false || $stored === null)
+			{
+				return false;
+			}
+
+			$stored = new Registry($stored);
+			$context['stored'] = $group ? (array) $stored->get($group, []) : $stored->toArray();
+		}
+
+		return $context;
 	}
 
 	/**

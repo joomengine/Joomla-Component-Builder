@@ -70,7 +70,7 @@ class ###View###Model extends AdminModel
 	 * @var      string
 	 * @since    3.2
 	 */
-	public $typeAlias = 'com_###component###.###view###';
+	public $typeAlias = 'com_###component###.###view###';###VALIDATION_PROPERTIES###
 
 	/**
 	 * Returns a Table object, always creating it

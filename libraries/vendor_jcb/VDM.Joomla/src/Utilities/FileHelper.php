@@ -222,8 +222,8 @@ abstract class FileHelper
 				curl_setopt_array($ch, $options);
 				// get the content
 				$content = curl_exec($ch);
-				// Release the handle; PHP 8 closes it when the object is destroyed.
-				unset($ch);
+				// close the connection
+				curl_close($ch);
 
 				// return if found
 				if (StringHelper::check($content))
@@ -455,8 +455,8 @@ abstract class FileHelper
 					$exists = true;
 				}
 			}
-			// Release the handle; PHP 8 closes it when the object is destroyed.
-			unset($ch);
+			// close the connection
+			curl_close($ch);
 		}
 		elseif ($headers = @get_headers($path))
 		{

@@ -8,9 +8,67 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+// Original display and required state are captured before conditions run.
+var updateJoomlaPluginConditionsBaseline = null;
+
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updateJoomlaPluginConditions()
 {
+	if (updateJoomlaPluginConditionsBaseline === null)
+	{
+		updateJoomlaPluginConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_update_server",".note_update_server_note_ftp",".note_update_server_note_zip",".note_update_server_note_other","#jform_head-lbl"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updateJoomlaPluginConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = [];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updateJoomlaPluginConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updateJoomlaPluginConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updateJoomlaPluginConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updateJoomlaPluginConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var update_server_target_vvvvvwx = jQuery("#jform_update_server_target input[type='radio']:checked").val();
 	var add_update_server_vvvvvwx = jQuery("#jform_add_update_server input[type='radio']:checked").val();
 	vvvvvwx(update_server_target_vvvvvwx,add_update_server_vvvvvwx);
@@ -29,13 +87,24 @@ document.addEventListener('DOMContentLoaded', function()
 
 	var add_head_vvvvvxd = jQuery("#jform_add_head input[type='radio']:checked").val();
 	vvvvvxd(add_head_vvvvvxd);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updateJoomlaPluginConditions);
 
 // the vvvvvwx function
 function vvvvvwx(update_server_target_vvvvvwx,add_update_server_vvvvvwx)
 {
 	// set the function logic
-	if (update_server_target_vvvvvwx == 1 && add_update_server_vvvvvwx == 1)
+	if ((update_server_target_vvvvvwx == Number('1')) && (add_update_server_vvvvvwx == Number('1')))
 	{
 		jQuery('#jform_update_server').closest('.control-group').show();
 		jQuery('.note_update_server_note_ftp').closest('.control-group').show();
@@ -51,7 +120,7 @@ function vvvvvwx(update_server_target_vvvvvwx,add_update_server_vvvvvwx)
 function vvvvvwy(add_update_server_vvvvvwy,update_server_target_vvvvvwy)
 {
 	// set the function logic
-	if (add_update_server_vvvvvwy == 1 && update_server_target_vvvvvwy == 1)
+	if ((add_update_server_vvvvvwy == Number('1')) && (update_server_target_vvvvvwy == Number('1')))
 	{
 		jQuery('#jform_update_server').closest('.control-group').show();
 		jQuery('.note_update_server_note_ftp').closest('.control-group').show();
@@ -67,7 +136,7 @@ function vvvvvwy(add_update_server_vvvvvwy,update_server_target_vvvvvwy)
 function vvvvvwz(update_server_target_vvvvvwz,add_update_server_vvvvvwz)
 {
 	// set the function logic
-	if (update_server_target_vvvvvwz == 2 && add_update_server_vvvvvwz == 1)
+	if ((update_server_target_vvvvvwz == Number('2')) && (add_update_server_vvvvvwz == Number('1')))
 	{
 		jQuery('.note_update_server_note_zip').closest('.control-group').show();
 	}
@@ -81,7 +150,7 @@ function vvvvvwz(update_server_target_vvvvvwz,add_update_server_vvvvvwz)
 function vvvvvxb(update_server_target_vvvvvxb,add_update_server_vvvvvxb)
 {
 	// set the function logic
-	if (update_server_target_vvvvvxb == 3 && add_update_server_vvvvvxb == 1)
+	if ((update_server_target_vvvvvxb == Number('3')) && (add_update_server_vvvvvxb == Number('1')))
 	{
 		jQuery('.note_update_server_note_other').closest('.control-group').show();
 	}
@@ -95,7 +164,7 @@ function vvvvvxb(update_server_target_vvvvvxb,add_update_server_vvvvvxb)
 function vvvvvxd(add_head_vvvvvxd)
 {
 	// set the function logic
-	if (add_head_vvvvvxd == 1)
+	if (add_head_vvvvvxd == Number('1'))
 	{
 		jQuery('#jform_head-lbl').closest('.control-group').show();
 	}

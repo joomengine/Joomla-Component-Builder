@@ -8,14 +8,67 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Some Global Values
-jform_vvvvwaqvwp_required = false;
-jform_vvvvwbevwq_required = false;
-jform_vvvvwbevwr_required = false;
+// Original display and required state are captured before conditions run.
+var updateLibraryConditionsBaseline = null;
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updateLibraryConditions()
 {
+	if (updateLibraryConditionsBaseline === null)
+	{
+		updateLibraryConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_addconditions-lbl","#jform_php_setdocument",".note_display_library_config",".note_display_library_files_folders_urls",".note_no_behaviour_one",".note_no_behaviour_three",".note_no_behaviour_two",".note_yes_behaviour_one",".note_yes_behaviour_two",".note_build_in_behaviour_one",".note_build_in_behaviour_three",".note_build_in_behaviour_two","#jform_libraries","#jform_how","#jform_type",".note_yes_behaviour_library"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updateLibraryConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = ["php_setdocument","how","type"];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updateLibraryConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updateLibraryConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updateLibraryConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updateLibraryConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var how_vvvvwao = jQuery("#jform_how").val();
 	var target_vvvvwao = jQuery("#jform_target input[type='radio']:checked").val();
 	vvvvwao(how_vvvvwao,target_vvvvwao);
@@ -65,7 +118,18 @@ document.addEventListener('DOMContentLoaded', function()
 
 	var target_vvvvwbf = jQuery("#jform_target input[type='radio']:checked").val();
 	vvvvwbf(target_vvvvwbf);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updateLibraryConditions);
 
 // the vvvvwao function
 function vvvvwao(how_vvvvwao,target_vvvvwao)
@@ -110,7 +174,7 @@ function vvvvwao(how_vvvvwao,target_vvvvwao)
 function how_vvvvwao_SomeFunc(how_vvvvwao)
 {
 	// set the function logic
-	if (how_vvvvwao == 2)
+	if (how_vvvvwao == Number('2'))
 	{
 		return true;
 	}
@@ -121,7 +185,7 @@ function how_vvvvwao_SomeFunc(how_vvvvwao)
 function target_vvvvwao_SomeFunc(target_vvvvwao)
 {
 	// set the function logic
-	if (target_vvvvwao == 1)
+	if (target_vvvvwao == Number('1'))
 	{
 		return true;
 	}
@@ -160,28 +224,18 @@ function vvvvwaq(how_vvvvwaq,target_vvvvwaq)
 	if (how && target)
 	{
 		jQuery('#jform_php_setdocument').closest('.control-group').show();
-		// add required attribute to php_setdocument field
-		if (jform_vvvvwaqvwp_required)
-		{
-			updateFieldRequired('php_setdocument',0);
-			jQuery('#jform_php_setdocument').prop('required','required');
-			jQuery('#jform_php_setdocument').attr('aria-required',true);
-			jQuery('#jform_php_setdocument').addClass('required');
-			jform_vvvvwaqvwp_required = false;
-		}
+		// Add required attributes to php_setdocument.
+		jQuery('#jform_php_setdocument').prop('required', true);
+		jQuery('#jform_php_setdocument').attr('aria-required', true);
+		jQuery('#jform_php_setdocument').addClass('required');
 	}
 	else
 	{
 		jQuery('#jform_php_setdocument').closest('.control-group').hide();
-		// remove required attribute from php_setdocument field
-		if (!jform_vvvvwaqvwp_required)
-		{
-			updateFieldRequired('php_setdocument',1);
-			jQuery('#jform_php_setdocument').removeAttr('required');
-			jQuery('#jform_php_setdocument').removeAttr('aria-required');
-			jQuery('#jform_php_setdocument').removeClass('required');
-			jform_vvvvwaqvwp_required = true;
-		}
+		// Remove required attributes from php_setdocument.
+		jQuery('#jform_php_setdocument').removeAttr('required');
+		jQuery('#jform_php_setdocument').removeAttr('aria-required');
+		jQuery('#jform_php_setdocument').removeClass('required');
 	}
 }
 
@@ -189,7 +243,7 @@ function vvvvwaq(how_vvvvwaq,target_vvvvwaq)
 function how_vvvvwaq_SomeFunc(how_vvvvwaq)
 {
 	// set the function logic
-	if (how_vvvvwaq == 3)
+	if (how_vvvvwaq == Number('3'))
 	{
 		return true;
 	}
@@ -200,7 +254,7 @@ function how_vvvvwaq_SomeFunc(how_vvvvwaq)
 function target_vvvvwaq_SomeFunc(target_vvvvwaq)
 {
 	// set the function logic
-	if (target_vvvvwaq == 1)
+	if (target_vvvvwaq == Number('1'))
 	{
 		return true;
 	}
@@ -250,7 +304,7 @@ function vvvvwas(how_vvvvwas,target_vvvvwas)
 function how_vvvvwas_SomeFunc(how_vvvvwas)
 {
 	// set the function logic
-	if (how_vvvvwas == 2 || how_vvvvwas == 3)
+	if (how_vvvvwas == Number('2') || how_vvvvwas == Number('3'))
 	{
 		return true;
 	}
@@ -261,7 +315,7 @@ function how_vvvvwas_SomeFunc(how_vvvvwas)
 function target_vvvvwas_SomeFunc(target_vvvvwas)
 {
 	// set the function logic
-	if (target_vvvvwas == 1)
+	if (target_vvvvwas == Number('1'))
 	{
 		return true;
 	}
@@ -311,7 +365,7 @@ function vvvvwau(how_vvvvwau,target_vvvvwau)
 function how_vvvvwau_SomeFunc(how_vvvvwau)
 {
 	// set the function logic
-	if (how_vvvvwau == 1 || how_vvvvwau == 2 || how_vvvvwau == 3)
+	if (how_vvvvwau == Number('1') || how_vvvvwau == Number('2') || how_vvvvwau == Number('3'))
 	{
 		return true;
 	}
@@ -322,7 +376,7 @@ function how_vvvvwau_SomeFunc(how_vvvvwau)
 function target_vvvvwau_SomeFunc(target_vvvvwau)
 {
 	// set the function logic
-	if (target_vvvvwau == 1)
+	if (target_vvvvwau == Number('1'))
 	{
 		return true;
 	}
@@ -376,7 +430,7 @@ function vvvvwaw(how_vvvvwaw,target_vvvvwaw)
 function how_vvvvwaw_SomeFunc(how_vvvvwaw)
 {
 	// set the function logic
-	if (how_vvvvwaw == 0)
+	if (how_vvvvwaw == Number('0'))
 	{
 		return true;
 	}
@@ -387,7 +441,7 @@ function how_vvvvwaw_SomeFunc(how_vvvvwaw)
 function target_vvvvwaw_SomeFunc(target_vvvvwaw)
 {
 	// set the function logic
-	if (target_vvvvwaw == 1)
+	if (target_vvvvwaw == Number('1'))
 	{
 		return true;
 	}
@@ -441,7 +495,7 @@ function vvvvwax(target_vvvvwax,how_vvvvwax)
 function target_vvvvwax_SomeFunc(target_vvvvwax)
 {
 	// set the function logic
-	if (target_vvvvwax == 1)
+	if (target_vvvvwax == Number('1'))
 	{
 		return true;
 	}
@@ -452,7 +506,7 @@ function target_vvvvwax_SomeFunc(target_vvvvwax)
 function how_vvvvwax_SomeFunc(how_vvvvwax)
 {
 	// set the function logic
-	if (how_vvvvwax == 0)
+	if (how_vvvvwax == Number('0'))
 	{
 		return true;
 	}
@@ -504,7 +558,7 @@ function vvvvway(how_vvvvway,target_vvvvway)
 function how_vvvvway_SomeFunc(how_vvvvway)
 {
 	// set the function logic
-	if (how_vvvvway == 1)
+	if (how_vvvvway == Number('1'))
 	{
 		return true;
 	}
@@ -515,7 +569,7 @@ function how_vvvvway_SomeFunc(how_vvvvway)
 function target_vvvvway_SomeFunc(target_vvvvway)
 {
 	// set the function logic
-	if (target_vvvvway == 1)
+	if (target_vvvvway == Number('1'))
 	{
 		return true;
 	}
@@ -567,7 +621,7 @@ function vvvvwaz(target_vvvvwaz,how_vvvvwaz)
 function target_vvvvwaz_SomeFunc(target_vvvvwaz)
 {
 	// set the function logic
-	if (target_vvvvwaz == 1)
+	if (target_vvvvwaz == Number('1'))
 	{
 		return true;
 	}
@@ -578,7 +632,7 @@ function target_vvvvwaz_SomeFunc(target_vvvvwaz)
 function how_vvvvwaz_SomeFunc(how_vvvvwaz)
 {
 	// set the function logic
-	if (how_vvvvwaz == 1)
+	if (how_vvvvwaz == Number('1'))
 	{
 		return true;
 	}
@@ -632,7 +686,7 @@ function vvvvwba(how_vvvvwba,target_vvvvwba)
 function how_vvvvwba_SomeFunc(how_vvvvwba)
 {
 	// set the function logic
-	if (how_vvvvwba == 4)
+	if (how_vvvvwba == Number('4'))
 	{
 		return true;
 	}
@@ -643,7 +697,7 @@ function how_vvvvwba_SomeFunc(how_vvvvwba)
 function target_vvvvwba_SomeFunc(target_vvvvwba)
 {
 	// set the function logic
-	if (target_vvvvwba == 1)
+	if (target_vvvvwba == Number('1'))
 	{
 		return true;
 	}
@@ -697,7 +751,7 @@ function vvvvwbb(target_vvvvwbb,how_vvvvwbb)
 function target_vvvvwbb_SomeFunc(target_vvvvwbb)
 {
 	// set the function logic
-	if (target_vvvvwbb == 1)
+	if (target_vvvvwbb == Number('1'))
 	{
 		return true;
 	}
@@ -708,7 +762,7 @@ function target_vvvvwbb_SomeFunc(target_vvvvwbb)
 function how_vvvvwbb_SomeFunc(how_vvvvwbb)
 {
 	// set the function logic
-	if (how_vvvvwbb == 4)
+	if (how_vvvvwbb == Number('4'))
 	{
 		return true;
 	}
@@ -719,7 +773,7 @@ function how_vvvvwbb_SomeFunc(how_vvvvwbb)
 function vvvvwbc(target_vvvvwbc,type_vvvvwbc)
 {
 	// set the function logic
-	if (target_vvvvwbc == 1 && type_vvvvwbc == 2)
+	if ((target_vvvvwbc == Number('1')) && (type_vvvvwbc == Number('2')))
 	{
 		jQuery('#jform_libraries').closest('.control-group').show();
 	}
@@ -733,51 +787,31 @@ function vvvvwbc(target_vvvvwbc,type_vvvvwbc)
 function vvvvwbe(target_vvvvwbe)
 {
 	// set the function logic
-	if (target_vvvvwbe == 1)
+	if (target_vvvvwbe == Number('1'))
 	{
 		jQuery('#jform_how').closest('.control-group').show();
-		// add required attribute to how field
-		if (jform_vvvvwbevwq_required)
-		{
-			updateFieldRequired('how',0);
-			jQuery('#jform_how').prop('required','required');
-			jQuery('#jform_how').attr('aria-required',true);
-			jQuery('#jform_how').addClass('required');
-			jform_vvvvwbevwq_required = false;
-		}
+		// Add required attributes to how.
+		jQuery('#jform_how').prop('required', true);
+		jQuery('#jform_how').attr('aria-required', true);
+		jQuery('#jform_how').addClass('required');
 		jQuery('#jform_type').closest('.control-group').show();
-		// add required attribute to type field
-		if (jform_vvvvwbevwr_required)
-		{
-			updateFieldRequired('type',0);
-			jQuery('#jform_type').prop('required','required');
-			jQuery('#jform_type').attr('aria-required',true);
-			jQuery('#jform_type').addClass('required');
-			jform_vvvvwbevwr_required = false;
-		}
+		// Add required attributes to type.
+		jQuery('#jform_type').prop('required', true);
+		jQuery('#jform_type').attr('aria-required', true);
+		jQuery('#jform_type').addClass('required');
 	}
 	else
 	{
 		jQuery('#jform_how').closest('.control-group').hide();
-		// remove required attribute from how field
-		if (!jform_vvvvwbevwq_required)
-		{
-			updateFieldRequired('how',1);
-			jQuery('#jform_how').removeAttr('required');
-			jQuery('#jform_how').removeAttr('aria-required');
-			jQuery('#jform_how').removeClass('required');
-			jform_vvvvwbevwq_required = true;
-		}
+		// Remove required attributes from how.
+		jQuery('#jform_how').removeAttr('required');
+		jQuery('#jform_how').removeAttr('aria-required');
+		jQuery('#jform_how').removeClass('required');
 		jQuery('#jform_type').closest('.control-group').hide();
-		// remove required attribute from type field
-		if (!jform_vvvvwbevwr_required)
-		{
-			updateFieldRequired('type',1);
-			jQuery('#jform_type').removeAttr('required');
-			jQuery('#jform_type').removeAttr('aria-required');
-			jQuery('#jform_type').removeClass('required');
-			jform_vvvvwbevwr_required = true;
-		}
+		// Remove required attributes from type.
+		jQuery('#jform_type').removeAttr('required');
+		jQuery('#jform_type').removeAttr('aria-required');
+		jQuery('#jform_type').removeClass('required');
 	}
 }
 
@@ -785,7 +819,7 @@ function vvvvwbe(target_vvvvwbe)
 function vvvvwbf(target_vvvvwbf)
 {
 	// set the function logic
-	if (target_vvvvwbf == 2)
+	if (target_vvvvwbf == Number('2'))
 	{
 		jQuery('.note_yes_behaviour_library').closest('.control-group').show();
 	}
@@ -793,87 +827,6 @@ function vvvvwbf(target_vvvvwbf)
 	{
 		jQuery('.note_yes_behaviour_library').closest('.control-group').hide();
 	}
-}
-
-/**
- * Update the "not required" field list by adding or removing a field name.
- *
- * Mirrors the original jQuery logic exactly but uses pure JavaScript.
- *
- * @param  {string}  name    The field name to add or remove.
- * @param  {number}  status  1 to add as not required, 0 to remove.
- *
- * @return {void}
- * @since  3.1.3
- */
-function updateFieldRequired(name, status) {
-	// Check if #jform_not_required exists
-	const notRequiredField = document.getElementById('jform_not_required');
-	if (!notRequiredField) {
-		return;
-	}
-
-	// Split the comma-separated list into an array
-	let not_required = notRequiredField.value ? notRequiredField.value.split(',') : [];
-
-	// Add or remove the field name from the list
-	if (status == 1) {
-		not_required.push(name);
-	} else {
-		not_required = removeFieldFromNotRequired(not_required, name);
-	}
-
-	// Clean and deduplicate the list
-	const fixedList = fixNotRequiredArray(not_required);
-
-	// Write back the updated comma-separated list
-	notRequiredField.value = fixedList.toString();
-}
-
-/**
- * Remove a specific field name from the "not required" array.
- *
- * @param  {Array<string>} array  The list of not-required field names.
- * @param  {string}        what   The field name to remove.
- *
- * @return {Array<string>}        The updated array.
- * @since  3.1.3
- */
-function removeFieldFromNotRequired(array, what) {
-	return array.filter(function (element) {
-		return element !== what;
-	});
-}
-
-/**
- * Deduplicate and clean a "not required" array.
- *
- * @param  {Array<string>} array  The array to fix.
- *
- * @return {Array<string>}        A cleaned, unique array.
- * @since  3.1.3
- */
-function fixNotRequiredArray(array) {
-	const seen = {};
-	return removeEmptyFromNotRequiredArray(array).filter(function (item) {
-		return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-	});
-}
-
-/**
- * Remove empty or invalid entries from a "not required" array.
- *
- * Also removes the literal '一_一' token (legacy quirk preserved for compatibility).
- *
- * @param  {Array<string>} array  The array to process.
- *
- * @return {Array<string>}        The cleaned array.
- * @since  3.1.3
- */
-function removeEmptyFromNotRequiredArray(array) {
-	return array.filter(function (el) {
-		return el && el.length > 0 && el !== '一_一';
-	});
 }
 
 // the isSet function

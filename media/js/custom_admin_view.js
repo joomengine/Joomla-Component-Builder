@@ -8,9 +8,67 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+// Original display and required state are captured before conditions run.
+var updateCustomAdminViewConditionsBaseline = null;
+
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updateCustomAdminViewConditions()
 {
+	if (updateCustomAdminViewConditionsBaseline === null)
+	{
+		updateCustomAdminViewConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_php_view-lbl","#jform_php_jview_display-lbl","#jform_php_jview-lbl","#jform_php_document-lbl","#jform_css_document-lbl","#jform_javascript_file-lbl","#jform_js_document-lbl","#jform_custom_button-lbl","#jform_php_controller-lbl","#jform_php_model-lbl","#jform_css-lbl","#jform_ajax_input-lbl","#jform_php_ajaxmethod-lbl"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updateCustomAdminViewConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = [];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updateCustomAdminViewConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updateCustomAdminViewConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updateCustomAdminViewConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updateCustomAdminViewConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var add_php_view_vvvvvyl = jQuery("#jform_add_php_view input[type='radio']:checked").val();
 	vvvvvyl(add_php_view_vvvvvyl);
 
@@ -40,13 +98,24 @@ document.addEventListener('DOMContentLoaded', function()
 
 	var add_php_ajax_vvvvvyu = jQuery("#jform_add_php_ajax input[type='radio']:checked").val();
 	vvvvvyu(add_php_ajax_vvvvvyu);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updateCustomAdminViewConditions);
 
 // the vvvvvyl function
 function vvvvvyl(add_php_view_vvvvvyl)
 {
 	// set the function logic
-	if (add_php_view_vvvvvyl == 1)
+	if (add_php_view_vvvvvyl == Number('1'))
 	{
 		jQuery('#jform_php_view-lbl').closest('.control-group').show();
 	}
@@ -60,7 +129,7 @@ function vvvvvyl(add_php_view_vvvvvyl)
 function vvvvvym(add_php_jview_display_vvvvvym)
 {
 	// set the function logic
-	if (add_php_jview_display_vvvvvym == 1)
+	if (add_php_jview_display_vvvvvym == Number('1'))
 	{
 		jQuery('#jform_php_jview_display-lbl').closest('.control-group').show();
 	}
@@ -74,7 +143,7 @@ function vvvvvym(add_php_jview_display_vvvvvym)
 function vvvvvyn(add_php_jview_vvvvvyn)
 {
 	// set the function logic
-	if (add_php_jview_vvvvvyn == 1)
+	if (add_php_jview_vvvvvyn == Number('1'))
 	{
 		jQuery('#jform_php_jview-lbl').closest('.control-group').show();
 	}
@@ -88,7 +157,7 @@ function vvvvvyn(add_php_jview_vvvvvyn)
 function vvvvvyo(add_php_document_vvvvvyo)
 {
 	// set the function logic
-	if (add_php_document_vvvvvyo == 1)
+	if (add_php_document_vvvvvyo == Number('1'))
 	{
 		jQuery('#jform_php_document-lbl').closest('.control-group').show();
 	}
@@ -102,7 +171,7 @@ function vvvvvyo(add_php_document_vvvvvyo)
 function vvvvvyp(add_css_document_vvvvvyp)
 {
 	// set the function logic
-	if (add_css_document_vvvvvyp == 1)
+	if (add_css_document_vvvvvyp == Number('1'))
 	{
 		jQuery('#jform_css_document-lbl').closest('.control-group').show();
 	}
@@ -116,7 +185,7 @@ function vvvvvyp(add_css_document_vvvvvyp)
 function vvvvvyq(add_javascript_file_vvvvvyq)
 {
 	// set the function logic
-	if (add_javascript_file_vvvvvyq == 1)
+	if (add_javascript_file_vvvvvyq == Number('1'))
 	{
 		jQuery('#jform_javascript_file-lbl').closest('.control-group').show();
 	}
@@ -130,7 +199,7 @@ function vvvvvyq(add_javascript_file_vvvvvyq)
 function vvvvvyr(add_js_document_vvvvvyr)
 {
 	// set the function logic
-	if (add_js_document_vvvvvyr == 1)
+	if (add_js_document_vvvvvyr == Number('1'))
 	{
 		jQuery('#jform_js_document-lbl').closest('.control-group').show();
 	}
@@ -144,7 +213,7 @@ function vvvvvyr(add_js_document_vvvvvyr)
 function vvvvvys(add_custom_button_vvvvvys)
 {
 	// set the function logic
-	if (add_custom_button_vvvvvys == 1)
+	if (add_custom_button_vvvvvys == Number('1'))
 	{
 		jQuery('#jform_custom_button-lbl').closest('.control-group').show();
 		jQuery('#jform_php_controller-lbl').closest('.control-group').show();
@@ -162,7 +231,7 @@ function vvvvvys(add_custom_button_vvvvvys)
 function vvvvvyt(add_css_vvvvvyt)
 {
 	// set the function logic
-	if (add_css_vvvvvyt == 1)
+	if (add_css_vvvvvyt == Number('1'))
 	{
 		jQuery('#jform_css-lbl').closest('.control-group').show();
 	}
@@ -176,7 +245,7 @@ function vvvvvyt(add_css_vvvvvyt)
 function vvvvvyu(add_php_ajax_vvvvvyu)
 {
 	// set the function logic
-	if (add_php_ajax_vvvvvyu == 1)
+	if (add_php_ajax_vvvvvyu == Number('1'))
 	{
 		jQuery('#jform_ajax_input-lbl').closest('.control-group').show();
 		jQuery('#jform_php_ajaxmethod-lbl').closest('.control-group').show();

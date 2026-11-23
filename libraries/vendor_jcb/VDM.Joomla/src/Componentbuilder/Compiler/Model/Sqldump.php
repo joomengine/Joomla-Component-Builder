@@ -17,8 +17,6 @@ use Joomla\Database\DatabaseInterface as JoomlaDatabase;
 use VDM\Joomla\Componentbuilder\Compiler\Registry;
 use VDM\Joomla\Database\QuoteTrait;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Placefix;
-use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
-use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 
 
 /**
@@ -248,8 +246,7 @@ class Sqldump
 		// No data to process
 		if (empty($data))
 		{
-			return Indent::_(0) . '--' . Line::_(__LINE__, __CLASS__)
-				. " No data available for `{$view}`" . PHP_EOL;
+			return "-- No data available for `{$view}`\n";
 		}
 
 		// Define table and fields
@@ -257,12 +254,12 @@ class Sqldump
 		$fields    = array_keys((array) $data[0]);
 
 		// Header
-		$header = Indent::_(0) . '--' . Line::_(__LINE__, __CLASS__) . ' --------------------------------------------------------'
-			. PHP_EOL . Indent::_(0) . '--' . Line::_(__LINE__, __CLASS__) . " Dumping data for table `{$tableName}`"
-			. PHP_EOL . Indent::_(0) . '--' . Line::_(__LINE__, __CLASS__) . ' --------------------------------------------------------';
+		$header = "-- --------------------------------------------------------\n";
+		$header .= "-- Dumping data for table `{$tableName}`\n";
+		$header .= "-- --------------------------------------------------------\n\n";
 
 		// Base insert prefix
-		$insertPrefix = "INSERT INTO `{$tableName}` (" . implode(', ', array_map([$this->db, 'quoteName'], $fields)) . ') VALUES';
+		$insertPrefix = "INSERT INTO `{$tableName}` (" . implode(', ', array_map([$this->db, 'quoteName'], $fields)) . ") VALUES\n";
 
 		// Determine optimal chunk size based on dataset size
 		$totalRows  = count($data);
@@ -272,23 +269,20 @@ class Sqldump
 		$chunks = array_chunk($data, $chunkSize);
 
 		// Build SQL dump
-		$sqlDump = $header . PHP_EOL;
+		$sqlDump = $header;
 		foreach ($chunks as $i => $chunk)
 		{
 			$rows = array_map(function ($row)
 			{
 				$values = array_map([$this, 'escape'], (array) $row);
-
 				return '(' . implode(', ', $values) . ')';
 			}, $chunk);
 
-			$sqlDump .= PHP_EOL . Indent::_(0) . '--' . Line::_(__LINE__, __CLASS__)
-				. sprintf(' Batch %d of %d (%d rows)', $i + 1, count($chunks), count($chunk))
-				. PHP_EOL . Indent::_(0) . $insertPrefix
-				. PHP_EOL . Indent::_(0) . implode(',' . PHP_EOL . Indent::_(0), $rows) . ';' . PHP_EOL;
+			$sqlDump .= sprintf("-- Batch %d of %d (%d rows)\n", $i + 1, count($chunks), count($chunk));
+			$sqlDump .= $insertPrefix . implode(",\n", $rows) . ";\n\n";
 		}
 
-		return $sqlDump . PHP_EOL;
+		return $sqlDump;
 	}
 
 	/**
