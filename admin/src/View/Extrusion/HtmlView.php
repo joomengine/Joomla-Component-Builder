@@ -32,7 +32,6 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\Input\Input;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Toolbar\Toolbar;
-use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
 \defined('_JEXEC') or die;
@@ -128,7 +127,6 @@ class HtmlView extends BaseHtmlView
 
 		// Load module values
 		$model = $this->getModel();
-		$model->setUseExceptions(true);
 		$this->styles = $model->getStyles() ?? [];
 		$this->scripts = $model->getScripts() ?? [];
 		// Initialise variables.
@@ -150,6 +148,12 @@ class HtmlView extends BaseHtmlView
 		{
 			// add the tool bar
 			$this->addToolBar();
+		}
+
+		// Check for errors.
+		if (count($errors = $model->getErrors()))
+		{
+			throw new \Exception(implode(PHP_EOL, $errors), 500);
 		}
 
 		// Set the html view document stuff
@@ -451,11 +455,11 @@ class HtmlView extends BaseHtmlView
 		// add title to the page
 		ToolbarHelper::title(Text::_('COM_COMPONENTBUILDER_EXTRUSION'), 'shuffle');
 		// add cpanel button
-		$this->getDocument()->getToolbar()->standardButton('grid-2', 'COM_COMPONENTBUILDER_DASH', 'extrusion.dashboard')->listCheck(false);
+		ToolbarHelper::custom('extrusion.dashboard', 'grid-2', '', 'COM_COMPONENTBUILDER_DASH', false);
 		if ($this->canDo->get('extrusion.health_check'))
 		{
 			// add Health Check button.
-			$this->getDocument()->getToolbar()->standardButton('health custom-button-healthcheck', 'COM_COMPONENTBUILDER_HEALTH_CHECK', 'extrusion.healthCheck')->listCheck(false);
+			ToolbarHelper::custom('extrusion.healthCheck', 'health custom-button-healthcheck', '', 'COM_COMPONENTBUILDER_HEALTH_CHECK', false);
 		}
 		// set help url for this view if found
 		$this->help_url = ComponentbuilderHelper::getHelpUrl('extrusion');
@@ -483,50 +487,23 @@ class HtmlView extends BaseHtmlView
 		// Only load jQuery if needed. (default is true)
 		if ($this->params->get('add_jquery_framework', 1) == 1)
 		{
-			$this->getDocument()->getWebAssetManager()->useScript('jquery')->useScript('jquery-noconflict');
+			Html::_('jquery.framework');
 		}
 		// Load the header checker class.
 		// Initialize the header checker.
 		$HeaderCheck = new HeaderCheck();
 
 		// Add View JavaScript File
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.f772ffbe57700e7bc7325417ab297aee5125d10007aeca1ba744db0c724c7147'))
-{
-	$jcbAssetManager->registerScript('jcb.script.f772ffbe57700e7bc7325417ab297aee5125d10007aeca1ba744db0c724c7147', Uri::root() . 'media/com_componentbuilder/js/admin/extrusion.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.f772ffbe57700e7bc7325417ab297aee5125d10007aeca1ba744db0c724c7147');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.f772ffbe57700e7bc7325417ab297aee5125d10007aeca1ba744db0c724c7147'])));
-		$wa = $this->getDocument()->getWebAssetManager();
+		Html::_('script', 'administrator/components/com_componentbuilder/assets/js/extrusion.js', ['version' => 'auto']);
 		// add styles
-		$jcbStyleDependencies = $jcbStyleDependencies ?? [];
 		foreach ($this->styles as $style)
 		{
-			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
-			$assetName = 'jcb.style.' . hash('sha256', $style);
-			if (!$wa->assetExists('style', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
-					? $style : Uri::root() . $style;
-				$wa->registerStyle($assetName, $assetUri, ['version' => 'auto'], [], $jcbStyleDependencies);
-			}
-			$wa->useStyle($assetName);
-			$jcbStyleDependencies = array_values(array_unique([...$jcbStyleDependencies, $assetName]));
+			Html::_('stylesheet', $style, ['version' => 'auto']);
 		}
 		// add scripts
-		$jcbScriptDependencies = $jcbScriptDependencies ?? ['core'];
 		foreach ($this->scripts as $script)
 		{
-			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
-			$assetName = 'jcb.script.' . hash('sha256', $script);
-			if (!$wa->assetExists('script', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
-					? $script : Uri::root() . $script;
-				$wa->registerScript($assetName, $assetUri, ['version' => 'auto'], [], $jcbScriptDependencies);
-			}
-			$wa->useScript($assetName);
-			$jcbScriptDependencies = array_values(array_unique([...$jcbScriptDependencies, $assetName]));
+			Html::_('script', $script, ['version' => 'auto']);
 		}
 	}
 

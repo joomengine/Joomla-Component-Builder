@@ -29,55 +29,33 @@ $layout  = $this->isModal ? 'modal' : 'edit';
 $tmpl    = $this->input->get('tmpl');
 $tmpl    = $tmpl ? '&tmpl=' . $tmpl : '';
 ?>
-<?php
-$jcbLoadingOverlay = '(function () {'
-	. PHP_EOL . '	const initialise = function () {'
-	. PHP_EOL . '		if (document.readyState === \'complete\') {'
-	. PHP_EOL . '			const container = document.getElementById("componentbuilder_loader");'
-	. PHP_EOL . '			if (container) {'
-	. PHP_EOL . '				container.style.display = \'block\';'
-	. PHP_EOL . '			}'
-	. PHP_EOL . '			return;'
-	. PHP_EOL . '		}'
-	. PHP_EOL . '		(function() {'
-	. PHP_EOL . '			// create loading overlay'
-	. PHP_EOL . '			var loadingDiv = document.createElement(\'div\');'
-	. PHP_EOL . '			loadingDiv.id = \'loading\';'
-	. PHP_EOL . '			loadingDiv.style.position = \'fixed\';'
-	. PHP_EOL . '			loadingDiv.style.top = \'0\';'
-	. PHP_EOL . '			loadingDiv.style.left = \'0\';'
-	. PHP_EOL . '			loadingDiv.style.right = \'0\';'
-	. PHP_EOL . '			loadingDiv.style.bottom = \'0\';'
-	. PHP_EOL . '			loadingDiv.style.width = \'100%\';'
-	. PHP_EOL . '			loadingDiv.style.height = \'100%\';'
-	. PHP_EOL . '			loadingDiv.style.background = "rgba(255,255,255,0.8) url(\'components/com_componentbuilder/assets/images/ajax.gif\') 50% 35% no-repeat";'
-	. PHP_EOL . '			loadingDiv.style.opacity = \'0.8\';'
-	. PHP_EOL . '			loadingDiv.style.zIndex = \'9999\';'
-	. PHP_EOL . '			loadingDiv.style.display = \'block\';'
-	. PHP_EOL . '			loadingDiv.style.msFilter = "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";'
-	. PHP_EOL . '			loadingDiv.style.filter = "alpha(opacity=80)";'
-	. PHP_EOL . '			document.body.appendChild(loadingDiv);'
-	. PHP_EOL . '			// remove overlay when page fully loaded'
-	. PHP_EOL . '			window.addEventListener(\'load\', function() {'
-	. PHP_EOL . '				var componentLoader = document.getElementById(\'componentbuilder_loader\');'
-	. PHP_EOL . '				if (componentLoader)'
-	. PHP_EOL . '				{'
-	. PHP_EOL . '					componentLoader.style.display = \'block\';'
-	. PHP_EOL . '				}'
-	. PHP_EOL . '				loadingDiv.style.display = \'none\';'
-	. PHP_EOL . '			});'
-	. PHP_EOL . '		})();'
-	. PHP_EOL . '	};'
-	. PHP_EOL . '	if (document.readyState === \'loading\') {'
-	. PHP_EOL . '		document.addEventListener(\'DOMContentLoaded\', initialise, {once: true});'
-	. PHP_EOL . '	} else {'
-	. PHP_EOL . '		initialise();'
-	. PHP_EOL . '	}'
-	. PHP_EOL . '})();';
-$this->getDocument()->getWebAssetManager()->addInlineScript(
-	$jcbLoadingOverlay, ['name' => 'com_componentbuilder.loading-overlay'], [], ['core']
-);
-?>
+<script type="text/javascript">
+	(function() {
+		// create loading overlay
+		var loadingDiv = document.createElement('div');
+		loadingDiv.id = 'loading';
+		loadingDiv.style.position = 'fixed';
+		loadingDiv.style.top = '0';
+		loadingDiv.style.left = '0';
+		loadingDiv.style.right = '0';
+		loadingDiv.style.bottom = '0';
+		loadingDiv.style.width = '100%';
+		loadingDiv.style.height = '100%';
+		loadingDiv.style.background = "rgba(255,255,255,0.8) url('components/com_componentbuilder/assets/images/ajax.gif') 50% 35% no-repeat";
+		loadingDiv.style.opacity = '0.8';
+		loadingDiv.style.zIndex = '9999';
+		loadingDiv.style.display = 'block';
+		loadingDiv.style.msFilter = "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+		loadingDiv.style.filter = "alpha(opacity=80)";
+		document.body.appendChild(loadingDiv);
+		// remove overlay when page fully loaded
+		window.addEventListener('load', function() {
+			var componentLoader = document.getElementById('componentbuilder_loader');
+			if (componentLoader) componentLoader.style.display = 'block';
+			loadingDiv.style.display = 'none';
+		});
+	})();
+</script>
 <div id="componentbuilder_loader" style="display: none;">
 <form action="<?php echo Route::_('index.php?option=com_componentbuilder&view=field&layout=' . $layout . $tmpl . '&id='. (int) $this->item->id . $this->referral); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" enctype="multipart/form-data">
 
@@ -179,144 +157,34 @@ $this->getDocument()->getWebAssetManager()->addInlineScript(
 </div>
 
 <script type="text/javascript">
-jQuery(function () {
 
-// #jform_datalenght listeners for datalenght_vvvvwbg function
-jQuery('#jform_datalenght').on('keyup',function()
-{
-	var datalenght_vvvvwbg = jQuery("#jform_datalenght").val();
-	vvvvwbg(datalenght_vvvvwbg);
+jQuery('#jform_datalenght').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_datalenght', updateFieldConditions);
 
-});
-jQuery('#adminForm').on('change', '#jform_datalenght',function (e)
-{
-	e.preventDefault();
-	var datalenght_vvvvwbg = jQuery("#jform_datalenght").val();
-	vvvvwbg(datalenght_vvvvwbg);
+jQuery('#jform_datadefault').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_datadefault', updateFieldConditions);
 
-});
+jQuery('#jform_datatype').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_datatype', updateFieldConditions);
 
-// #jform_datadefault listeners for datadefault_vvvvwbh function
-jQuery('#jform_datadefault').on('keyup',function()
-{
-	var datadefault_vvvvwbh = jQuery("#jform_datadefault").val();
-	vvvvwbh(datadefault_vvvvwbh);
+jQuery('#jform_store').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_store', updateFieldConditions);
 
-});
-jQuery('#adminForm').on('change', '#jform_datadefault',function (e)
-{
-	e.preventDefault();
-	var datadefault_vvvvwbh = jQuery("#jform_datadefault").val();
-	vvvvwbh(datadefault_vvvvwbh);
+jQuery('#jform_add_css_view').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_add_css_view', updateFieldConditions);
 
-});
+jQuery('#jform_add_css_views').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_add_css_views', updateFieldConditions);
 
-// #jform_datatype listeners for datatype_vvvvwbi function
-jQuery('#jform_datatype').on('keyup',function()
-{
-	var datatype_vvvvwbi = jQuery("#jform_datatype").val();
-	vvvvwbi(datatype_vvvvwbi);
+jQuery('#jform_add_javascript_view_footer').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_add_javascript_view_footer', updateFieldConditions);
 
-});
-jQuery('#adminForm').on('change', '#jform_datatype',function (e)
-{
-	e.preventDefault();
-	var datatype_vvvvwbi = jQuery("#jform_datatype").val();
-	vvvvwbi(datatype_vvvvwbi);
+jQuery('#jform_add_javascript_views_footer').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_add_javascript_views_footer', updateFieldConditions);
 
-});
+jQuery('#jform_fieldtype').on('keyup', updateFieldConditions);
+jQuery('#adminForm').on('change', '#jform_fieldtype', updateFieldConditions);
 
-// #jform_datatype listeners for datatype_vvvvwbj function
-jQuery('#jform_datatype').on('keyup',function()
-{
-	var datatype_vvvvwbj = jQuery("#jform_datatype").val();
-	vvvvwbj(datatype_vvvvwbj);
-
-});
-jQuery('#adminForm').on('change', '#jform_datatype',function (e)
-{
-	e.preventDefault();
-	var datatype_vvvvwbj = jQuery("#jform_datatype").val();
-	vvvvwbj(datatype_vvvvwbj);
-
-});
-
-// #jform_store listeners for store_vvvvwbm function
-jQuery('#jform_store').on('keyup',function()
-{
-	var store_vvvvwbm = jQuery("#jform_store").val();
-	vvvvwbm(store_vvvvwbm);
-
-});
-jQuery('#adminForm').on('change', '#jform_store',function (e)
-{
-	e.preventDefault();
-	var store_vvvvwbm = jQuery("#jform_store").val();
-	vvvvwbm(store_vvvvwbm);
-
-});
-
-// #jform_add_css_view listeners for add_css_view_vvvvwbn function
-jQuery('#jform_add_css_view').on('keyup',function()
-{
-	var add_css_view_vvvvwbn = jQuery("#jform_add_css_view input[type='radio']:checked").val();
-	vvvvwbn(add_css_view_vvvvwbn);
-
-});
-jQuery('#adminForm').on('change', '#jform_add_css_view',function (e)
-{
-	e.preventDefault();
-	var add_css_view_vvvvwbn = jQuery("#jform_add_css_view input[type='radio']:checked").val();
-	vvvvwbn(add_css_view_vvvvwbn);
-
-});
-
-// #jform_add_css_views listeners for add_css_views_vvvvwbo function
-jQuery('#jform_add_css_views').on('keyup',function()
-{
-	var add_css_views_vvvvwbo = jQuery("#jform_add_css_views input[type='radio']:checked").val();
-	vvvvwbo(add_css_views_vvvvwbo);
-
-});
-jQuery('#adminForm').on('change', '#jform_add_css_views',function (e)
-{
-	e.preventDefault();
-	var add_css_views_vvvvwbo = jQuery("#jform_add_css_views input[type='radio']:checked").val();
-	vvvvwbo(add_css_views_vvvvwbo);
-
-});
-
-// #jform_add_javascript_view_footer listeners for add_javascript_view_footer_vvvvwbp function
-jQuery('#jform_add_javascript_view_footer').on('keyup',function()
-{
-	var add_javascript_view_footer_vvvvwbp = jQuery("#jform_add_javascript_view_footer input[type='radio']:checked").val();
-	vvvvwbp(add_javascript_view_footer_vvvvwbp);
-
-});
-jQuery('#adminForm').on('change', '#jform_add_javascript_view_footer',function (e)
-{
-	e.preventDefault();
-	var add_javascript_view_footer_vvvvwbp = jQuery("#jform_add_javascript_view_footer input[type='radio']:checked").val();
-	vvvvwbp(add_javascript_view_footer_vvvvwbp);
-
-});
-
-// #jform_add_javascript_views_footer listeners for add_javascript_views_footer_vvvvwbq function
-jQuery('#jform_add_javascript_views_footer').on('keyup',function()
-{
-	var add_javascript_views_footer_vvvvwbq = jQuery("#jform_add_javascript_views_footer input[type='radio']:checked").val();
-	vvvvwbq(add_javascript_views_footer_vvvvwbq);
-
-});
-jQuery('#adminForm').on('change', '#jform_add_javascript_views_footer',function (e)
-{
-	e.preventDefault();
-	var add_javascript_views_footer_vvvvwbq = jQuery("#jform_add_javascript_views_footer input[type='radio']:checked").val();
-	vvvvwbq(add_javascript_views_footer_vvvvwbq);
-
-});
-
-});
 
 
 

@@ -18,7 +18,6 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\CMS\Document\Document;
 use VDM\Component\Componentbuilder\Administrator\Helper\ComponentbuilderHelper;
 use VDM\Joomla\Utilities\StringHelper;
-use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
 \defined('_JEXEC') or die;
@@ -95,11 +94,9 @@ class HtmlView extends BaseHtmlView
 	function display($tpl = null): void
 	{
 		// Assign data to the view
-		$model = $this->getModel();
-		$model->setUseExceptions(true);
-		$this->icons          = $model->getIcons();
-		$this->styles         = $model->getStyles();
-		$this->scripts        = $model->getScripts();
+		$this->icons          = $this->get('Icons');
+		$this->styles         = $this->get('Styles');
+		$this->scripts        = $this->get('Scripts');
 		$this->contributors   = ComponentbuilderHelper::getContributors();
 
 		// get the manifest details of the component
@@ -111,6 +108,11 @@ class HtmlView extends BaseHtmlView
 		// Set the toolbar
 		$this->addToolBar();
 
+		// Check for errors.
+		if (count($errors = $this->get('Errors')))
+		{
+			throw new \Exception(implode("\n", $errors), 500);
+		}
 
 		// Set the html view document stuff
 		$this->_prepareDocument();
@@ -160,34 +162,14 @@ class HtmlView extends BaseHtmlView
 			'var manifest = ' . json_encode($this->manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';'
 		);
 		// add styles
-		$jcbStyleDependencies = $jcbStyleDependencies ?? [];
 		foreach ($this->styles as $style)
 		{
-			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
-			$assetName = 'jcb.style.' . hash('sha256', $style);
-			if (!$wa->assetExists('style', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
-					? $style : Uri::root() . $style;
-				$wa->registerStyle($assetName, $assetUri, ['version' => 'auto'], [], $jcbStyleDependencies);
-			}
-			$wa->useStyle($assetName);
-			$jcbStyleDependencies = array_values(array_unique([...$jcbStyleDependencies, $assetName]));
+			Html::_('stylesheet', $style, ['version' => 'auto']);
 		}
 		// add scripts
-		$jcbScriptDependencies = $jcbScriptDependencies ?? ['core'];
 		foreach ($this->scripts as $script)
 		{
-			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
-			$assetName = 'jcb.script.' . hash('sha256', $script);
-			if (!$wa->assetExists('script', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
-					? $script : Uri::root() . $script;
-				$wa->registerScript($assetName, $assetUri, ['version' => 'auto'], [], $jcbScriptDependencies);
-			}
-			$wa->useScript($assetName);
-			$jcbScriptDependencies = array_values(array_unique([...$jcbScriptDependencies, $assetName]));
+			Html::_('script', $script, ['version' => 'auto']);
 		}
 	}
 }

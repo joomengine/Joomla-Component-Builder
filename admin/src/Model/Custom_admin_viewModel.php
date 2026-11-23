@@ -141,9 +141,9 @@ class Custom_admin_viewModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'media/com_componentbuilder/css/admin/admin.css',
-		'media/com_componentbuilder/css/admin/custom_admin_view.css'
-	];
+		'administrator/components/com_componentbuilder/assets/css/admin.css',
+		'administrator/components/com_componentbuilder/assets/css/custom_admin_view.css'
+ 	];
 
 	/**
 	 * The scripts array.
@@ -152,9 +152,9 @@ class Custom_admin_viewModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'media/com_componentbuilder/js/admin/admin.js',
-		'media/com_componentbuilder/js/admin/custom_admin_view.js'
-	];
+		'administrator/components/com_componentbuilder/assets/js/admin.js',
+		'media/com_componentbuilder/js/custom_admin_view.js'
+ 	];
 
 	/**
 	 * @var     string    The prefix to use with controller messages.
@@ -820,7 +820,7 @@ class Custom_admin_viewModel extends AdminModel
 
 		if (empty($table->id))
 		{
-			$table->created = $date->toSql(false, $this->getDatabase());
+			$table->created = $date->toSql();
 			// set the user
 			if ($table->created_by == 0 || empty($table->created_by))
 			{
@@ -830,7 +830,7 @@ class Custom_admin_viewModel extends AdminModel
 			if (empty($table->ordering))
 			{
 				$db = $this->getDatabase();
-				$query = $db->createQuery()
+				$query = $db->getQuery(true)
 					->select('MAX(ordering)')
 					->from($db->quoteName('#__componentbuilder_custom_admin_view'));
 				$db->setQuery($query);
@@ -841,7 +841,7 @@ class Custom_admin_viewModel extends AdminModel
 		}
 		else
 		{
-			$table->modified = $date->toSql(false, $this->getDatabase());
+			$table->modified = $date->toSql();
 			$table->modified_by = $user->id;
 		}
 
@@ -1056,7 +1056,9 @@ class Custom_admin_viewModel extends AdminModel
 
 			if (!$jcbPatchTable->load($jcbPatchId))
 			{
-				throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'), 404);
+				$this->setError(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'));
+
+				return false;
 			}
 
 			foreach ($jcbPatchTable->getFields() as $jcbPatchField)

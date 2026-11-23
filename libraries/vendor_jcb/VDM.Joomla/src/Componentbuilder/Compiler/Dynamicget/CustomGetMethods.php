@@ -44,7 +44,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
  * 
  * @since 5.1.2
  */
-class CustomGetMethods
+final class CustomGetMethods
 {
 	/**
 	 * The Config Class.
@@ -197,14 +197,6 @@ class CustomGetMethods
 	 * @since 5.1.2
 	 */
 	protected EventDispatcher $eventdispatcher;
-
-	/**
-	 * Fresh-query method emitted by this target renderer.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $queryMethod = 'getQuery(true)';
 
 	/**
 	 * Constructor.
@@ -416,7 +408,7 @@ class CustomGetMethods
 		}
 
 		$methods .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(__Line__, __Class__) . " Create a new query object.";
-		$methods .= PHP_EOL . Indent::_(2) . "\$query = \$db->{$this->queryMethod};";
+		$methods .= PHP_EOL . Indent::_(2) . "\$query = \$db->getQuery(true);";
 		$methods .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(__Line__, __Class__) . " Get from {$get['selection']['table']} as {$default['as']}";
 		$methods .= PHP_EOL . Indent::_(2) . $get['selection']['select'];
 		$methods .= PHP_EOL . Indent::_(2) . "\$query->from({$get['selection']['from']});";

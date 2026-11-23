@@ -27,7 +27,6 @@ use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\ComHelperClass\
 use VDM\Joomla\Componentbuilder\Compiler\Placeholder;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Counter;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
-use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 use VDM\Joomla\Utilities\ArrayHelper;
 
 
@@ -421,7 +420,7 @@ final class Details
 		{
 			// ADMIN_GLOBAL_EVENT
 			$this->contentone->add('ADMIN_GLOBAL_EVENT',
-				PHP_EOL . PHP_EOL . '//' . Line::_(__LINE__, __CLASS__) . ' Trigger the Global Admin Event'
+				PHP_EOL . PHP_EOL . '// Trigger the Global Admin Event'
 			);
 			$this->contentone->add('ADMIN_GLOBAL_EVENT',
 				PHP_EOL . $this->contentone->get('Component')
@@ -432,7 +431,7 @@ final class Details
 			);
 			$this->contentone->add('ADMIN_GLOBAL_EVENT_HELPER',
 				PHP_EOL . Indent::_(1)
-				. '*' . Indent::_(1) . 'The Global Admin Event Method.');
+				. '*	The Global Admin Event Method.');
 			$this->contentone->add('ADMIN_GLOBAL_EVENT_HELPER',
 				PHP_EOL . Indent::_(1) . '**/'
 			);

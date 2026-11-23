@@ -32,7 +32,6 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\Input\Input;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Toolbar\Toolbar;
-use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
 \defined('_JEXEC') or die; 
@@ -128,7 +127,6 @@ class HtmlView extends BaseHtmlView
 
 		// Load module values
 		$model = $this->getModel();
-		$model->setUseExceptions(true);
 		$this->styles = $model->getStyles();
 		$this->scripts = $model->getScripts();
 		// Initialise variables.
@@ -184,6 +182,12 @@ class HtmlView extends BaseHtmlView
 		{
 			// add the tool bar
 			$this->addToolBar();
+		}
+
+		// Check for errors.
+		if (count($errors = $model->getErrors()))
+		{
+			throw new \Exception(implode(PHP_EOL, $errors), 500);
 		}
 
 		// Set the html view document stuff
@@ -421,11 +425,11 @@ class HtmlView extends BaseHtmlView
 		// add title to the page
 		ToolbarHelper::title($title, 'search');
 		// add cpanel button
-		$this->getDocument()->getToolbar()->standardButton('grid-2', 'COM_COMPONENTBUILDER_DASH', 'search.dashboard')->listCheck(false);
+		ToolbarHelper::custom('search.dashboard', 'grid-2', '', 'COM_COMPONENTBUILDER_DASH', false);
 		if ($this->canDo->get('search.compiler'))
 		{
 			// add Compiler button.
-			$this->getDocument()->getToolbar()->standardButton('cogs custom-button-opencompiler', 'COM_COMPONENTBUILDER_COMPILER', 'search.openCompiler')->listCheck(false);
+			ToolbarHelper::custom('search.openCompiler', 'cogs custom-button-opencompiler', '', 'COM_COMPONENTBUILDER_COMPILER', false);
 		}
 		// set help url for this view if found
 		$this->help_url = ComponentbuilderHelper::getHelpUrl('search');
@@ -453,80 +457,29 @@ class HtmlView extends BaseHtmlView
 		// Only load jQuery if needed. (default is true)
 		if ($this->params->get('add_jquery_framework', 1) == 1)
 		{
-			$this->getDocument()->getWebAssetManager()->useScript('jquery')->useScript('jquery-noconflict');
+			Html::_('jquery.framework');
 		}
 		// Load the header checker class.
 		// Initialize the header checker.
 		$HeaderCheck = new HeaderCheck();
 
 		// always load these files.
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('style', 'jcb.style.597bee57aa6f693c319af305b27ff02d28543be95a85fb2d5c13442d72c98413'))
-{
-	$jcbAssetManager->registerStyle('jcb.style.597bee57aa6f693c319af305b27ff02d28543be95a85fb2d5c13442d72c98413', Uri::root() . 'media/com_componentbuilder/datatable/css/datatables.min.css', ['version' => 'auto'], [], $jcbStyleDependencies ?? []);
-}
-$jcbAssetManager->useStyle('jcb.style.597bee57aa6f693c319af305b27ff02d28543be95a85fb2d5c13442d72c98413');
-$jcbStyleDependencies = array_values(array_unique(array_merge($jcbStyleDependencies ?? [], ['jcb.style.597bee57aa6f693c319af305b27ff02d28543be95a85fb2d5c13442d72c98413'])));
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.54fe4c7c5c4dddd7936d1c5cf5115b8593cb2ff2a1c3aa6cd4b86d7344225359'))
-{
-	$jcbAssetManager->registerScript('jcb.script.54fe4c7c5c4dddd7936d1c5cf5115b8593cb2ff2a1c3aa6cd4b86d7344225359', Uri::root() . 'media/com_componentbuilder/datatable/js/pdfmake.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.54fe4c7c5c4dddd7936d1c5cf5115b8593cb2ff2a1c3aa6cd4b86d7344225359');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.54fe4c7c5c4dddd7936d1c5cf5115b8593cb2ff2a1c3aa6cd4b86d7344225359'])));
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.e4de5929a23cbb6c3e76294aaab49150cc6b6a086e2f20aa48f70e6b107d2000'))
-{
-	$jcbAssetManager->registerScript('jcb.script.e4de5929a23cbb6c3e76294aaab49150cc6b6a086e2f20aa48f70e6b107d2000', Uri::root() . 'media/com_componentbuilder/datatable/js/vfs_fonts.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.e4de5929a23cbb6c3e76294aaab49150cc6b6a086e2f20aa48f70e6b107d2000');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.e4de5929a23cbb6c3e76294aaab49150cc6b6a086e2f20aa48f70e6b107d2000'])));
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.f5545f934edee7769abf593a2918481038a311b8a235a5051bd9efc3da1cbe35'))
-{
-	$jcbAssetManager->registerScript('jcb.script.f5545f934edee7769abf593a2918481038a311b8a235a5051bd9efc3da1cbe35', Uri::root() . 'media/com_componentbuilder/datatable/js/datatables.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.f5545f934edee7769abf593a2918481038a311b8a235a5051bd9efc3da1cbe35');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.f5545f934edee7769abf593a2918481038a311b8a235a5051bd9efc3da1cbe35'])));
+		Html::_('stylesheet', 'media/com_componentbuilder/datatable/css/datatables.min.css', ['version' => 'auto']);
+		Html::_('script', 'media/com_componentbuilder/datatable/js/pdfmake.min.js', ['version' => 'auto']);
+		Html::_('script', 'media/com_componentbuilder/datatable/js/vfs_fonts.js', ['version' => 'auto']);
+		Html::_('script', 'media/com_componentbuilder/datatable/js/datatables.min.js', ['version' => 'auto']);
 
 		// Add View JavaScript File
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.6af30b09ec777ad19ac89e08d38891c0f5e86cf3c475db83b484ce6e1bf7b7ea'))
-{
-	$jcbAssetManager->registerScript('jcb.script.6af30b09ec777ad19ac89e08d38891c0f5e86cf3c475db83b484ce6e1bf7b7ea', Uri::root() . 'media/com_componentbuilder/js/admin/search.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.6af30b09ec777ad19ac89e08d38891c0f5e86cf3c475db83b484ce6e1bf7b7ea');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.6af30b09ec777ad19ac89e08d38891c0f5e86cf3c475db83b484ce6e1bf7b7ea'])));
-		$wa = $this->getDocument()->getWebAssetManager();
+		Html::_('script', 'administrator/components/com_componentbuilder/assets/js/search.js', ['version' => 'auto']);
 		// add styles
-		$jcbStyleDependencies = $jcbStyleDependencies ?? [];
 		foreach ($this->styles as $style)
 		{
-			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
-			$assetName = 'jcb.style.' . hash('sha256', $style);
-			if (!$wa->assetExists('style', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
-					? $style : Uri::root() . $style;
-				$wa->registerStyle($assetName, $assetUri, ['version' => 'auto'], [], $jcbStyleDependencies);
-			}
-			$wa->useStyle($assetName);
-			$jcbStyleDependencies = array_values(array_unique([...$jcbStyleDependencies, $assetName]));
+			Html::_('stylesheet', $style, ['version' => 'auto']);
 		}
 		// add scripts
-		$jcbScriptDependencies = $jcbScriptDependencies ?? ['core'];
 		foreach ($this->scripts as $script)
 		{
-			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
-			$assetName = 'jcb.script.' . hash('sha256', $script);
-			if (!$wa->assetExists('script', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
-					? $script : Uri::root() . $script;
-				$wa->registerScript($assetName, $assetUri, ['version' => 'auto'], [], $jcbScriptDependencies);
-			}
-			$wa->useScript($assetName);
-			$jcbScriptDependencies = array_values(array_unique([...$jcbScriptDependencies, $assetName]));
+			Html::_('script', $script, ['version' => 'auto']);
 		}
 	}
 

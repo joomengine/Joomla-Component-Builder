@@ -215,10 +215,10 @@ class BatchCopy implements BatchCopyInterface
 			. " Set some needed variables.";
 		$batchcopy[] = $this->getUserObject();
 		$batchcopy[] = Indent::_(3)
-			. "\$this->table " . Indent::_(2) . "= \$this->getTable();";
+			. "\$this->table 		= \$this->getTable();";
 		$batchcopy[] = Indent::_(3)
-			. "\$this->tableClassName" . Indent::_(1) . "= get_class(\$this->table);";
-		$batchcopy[] = Indent::_(3) . "\$this->canDo" . Indent::_(2) . "= " . Selection::permittedActionsToken() . "::get('" . $nameSingleCode . "');";
+			. "\$this->tableClassName	= get_class(\$this->table);";
+		$batchcopy[] = Indent::_(3) . "\$this->canDo		= " . Selection::permittedActionsToken() . "::get('" . $nameSingleCode . "');";
 		$batchcopy[] = Indent::_(2) . "}";
 		$batchcopy[] = PHP_EOL . Indent::_(2) . "if (!\$this->canDo->get('"
 			. $this->permission->getGlobal($nameSingleCode, 'core.create') . "') && !\$this->canDo->get('"
@@ -494,7 +494,7 @@ class BatchCopy implements BatchCopyInterface
 	protected function getUserObject(): string
 	{
 		return Indent::_(3)
-			. "\$this->user " . Indent::_(2) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
+			. "\$this->user 		= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
 	}
 }
 

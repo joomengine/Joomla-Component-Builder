@@ -28,7 +28,6 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\Input\Input;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Toolbar\Toolbar;
-use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
 \defined('_JEXEC') or die; 
@@ -124,7 +123,6 @@ class HtmlView extends BaseHtmlView
 
 		// Load module values
 		$model = $this->getModel();
-		$model->setUseExceptions(true);
 		$this->styles = $model->getStyles();
 		$this->scripts = $model->getScripts();
 		// Initialise variables.
@@ -135,6 +133,12 @@ class HtmlView extends BaseHtmlView
 		{
 			// add the tool bar
 			$this->addToolBar();
+		}
+
+		// Check for errors.
+		if (count($errors = $model->getErrors()))
+		{
+			throw new \Exception(implode(PHP_EOL, $errors), 500);
 		}
 
 		// Set the html view document stuff
@@ -177,16 +181,16 @@ class HtmlView extends BaseHtmlView
 		// add title to the page
 		ToolbarHelper::title($title, 'upload');
 		// add cpanel button
-		$this->getDocument()->getToolbar()->standardButton('grid-2', 'COM_COMPONENTBUILDER_DASH', 'import_translations.dashboard')->listCheck(false);
+		ToolbarHelper::custom('import_translations.dashboard', 'grid-2', '', 'COM_COMPONENTBUILDER_DASH', false);
 		if ($this->canDo->get('import_translations.language_translations'))
 		{
 			// add Language Translations button.
-			$this->getDocument()->getToolbar()->standardButton('comments-2 custom-button-backtolanguagetranslations', 'COM_COMPONENTBUILDER_LANGUAGE_TRANSLATIONS', 'import_translations.backToLanguageTranslations')->listCheck(false);
+			ToolbarHelper::custom('import_translations.backToLanguageTranslations', 'comments-2 custom-button-backtolanguagetranslations', '', 'COM_COMPONENTBUILDER_LANGUAGE_TRANSLATIONS', false);
 		}
 		if ($this->canDo->get('import_translations.example'))
 		{
 			// add Example button.
-			$this->getDocument()->getToolbar()->standardButton('download custom-button-getlanguagetranslationsexample', 'COM_COMPONENTBUILDER_EXAMPLE', 'import_translations.getLanguageTranslationsExample')->listCheck(false);
+			ToolbarHelper::custom('import_translations.getLanguageTranslationsExample', 'download custom-button-getlanguagetranslationsexample', '', 'COM_COMPONENTBUILDER_EXAMPLE', false);
 		}
 		// set help url for this view if found
 		$this->help_url = ComponentbuilderHelper::getHelpUrl('import_translations');
@@ -214,41 +218,17 @@ class HtmlView extends BaseHtmlView
 		// Only load jQuery if needed. (default is true)
 		if ($this->params->get('add_jquery_framework', 1) == 1)
 		{
-			$this->getDocument()->getWebAssetManager()->useScript('jquery')->useScript('jquery-noconflict');
+			Html::_('jquery.framework');
 		}
 		// Load the header checker class.
 		// Initialize the header checker.
 		$HeaderCheck = new HeaderCheck();
 
 		// always load these files.
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('style', 'jcb.style.d94cea8fcc25784cf34348940ba27c48ecd071018a1f16190adee122f606f368'))
-{
-	$jcbAssetManager->registerStyle('jcb.style.d94cea8fcc25784cf34348940ba27c48ecd071018a1f16190adee122f606f368', Uri::root() . 'media/com_componentbuilder/uikit-v3/css/uikit.min.css', ['version' => 'auto'], [], $jcbStyleDependencies ?? []);
-}
-$jcbAssetManager->useStyle('jcb.style.d94cea8fcc25784cf34348940ba27c48ecd071018a1f16190adee122f606f368');
-$jcbStyleDependencies = array_values(array_unique(array_merge($jcbStyleDependencies ?? [], ['jcb.style.d94cea8fcc25784cf34348940ba27c48ecd071018a1f16190adee122f606f368'])));
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.4f556f00229ce771c899fcb5d64497c448e51f4ece7a6024c1d3c495ae876d6e'))
-{
-	$jcbAssetManager->registerScript('jcb.script.4f556f00229ce771c899fcb5d64497c448e51f4ece7a6024c1d3c495ae876d6e', Uri::root() . 'media/com_componentbuilder/uikit-v3/js/uikit.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.4f556f00229ce771c899fcb5d64497c448e51f4ece7a6024c1d3c495ae876d6e');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.4f556f00229ce771c899fcb5d64497c448e51f4ece7a6024c1d3c495ae876d6e'])));
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.b6425190aa9f1cfedd1b898ade03d7f748878e8c27ba1fbb8d05ab9a9b57ec0f'))
-{
-	$jcbAssetManager->registerScript('jcb.script.b6425190aa9f1cfedd1b898ade03d7f748878e8c27ba1fbb8d05ab9a9b57ec0f', Uri::root() . 'media/com_componentbuilder/uikit-v3/js/uikit-icons.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.b6425190aa9f1cfedd1b898ade03d7f748878e8c27ba1fbb8d05ab9a9b57ec0f');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.b6425190aa9f1cfedd1b898ade03d7f748878e8c27ba1fbb8d05ab9a9b57ec0f'])));
-		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
-if (!$jcbAssetManager->assetExists('script', 'jcb.script.eddf5574101290c7ec01586124d5d2b8efaff2af8e87f793bb23482609a6b63b'))
-{
-	$jcbAssetManager->registerScript('jcb.script.eddf5574101290c7ec01586124d5d2b8efaff2af8e87f793bb23482609a6b63b', Uri::root() . 'media/com_componentbuilder/uikit-v3/js/Uploader.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
-}
-$jcbAssetManager->useScript('jcb.script.eddf5574101290c7ec01586124d5d2b8efaff2af8e87f793bb23482609a6b63b');
-$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.eddf5574101290c7ec01586124d5d2b8efaff2af8e87f793bb23482609a6b63b'])));
+		Html::_('stylesheet', 'media/com_componentbuilder/uikit-v3/css/uikit.min.css', ['version' => 'auto']);
+		Html::_('script', 'media/com_componentbuilder/uikit-v3/js/uikit.min.js', ['version' => 'auto']);
+		Html::_('script', 'media/com_componentbuilder/uikit-v3/js/uikit-icons.min.js', ['version' => 'auto']);
+		Html::_('script', 'media/com_componentbuilder/uikit-v3/js/Uploader.min.js', ['version' => 'auto']);
 		 		// these comments are here so the layouts will be linked and loaded for the ajax (don't remove it)
 		
 				// change this to the layout of your custom importer columns display
@@ -267,36 +247,15 @@ $jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDepende
 					->getWebAssetManager()
 					->addInlineStyle('.subform-table-sublayout-section .controls { margin-left: 0px }')
 					->addInlineStyle('.subform-table-sublayout-section .table-responsive { overflow-x: visible }');
-		$wa = $this->getDocument()->getWebAssetManager();
 		// add styles
-		$jcbStyleDependencies = $jcbStyleDependencies ?? [];
 		foreach ($this->styles as $style)
 		{
-			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
-			$assetName = 'jcb.style.' . hash('sha256', $style);
-			if (!$wa->assetExists('style', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
-					? $style : Uri::root() . $style;
-				$wa->registerStyle($assetName, $assetUri, ['version' => 'auto'], [], $jcbStyleDependencies);
-			}
-			$wa->useStyle($assetName);
-			$jcbStyleDependencies = array_values(array_unique([...$jcbStyleDependencies, $assetName]));
+			Html::_('stylesheet', $style, ['version' => 'auto']);
 		}
 		// add scripts
-		$jcbScriptDependencies = $jcbScriptDependencies ?? ['core'];
 		foreach ($this->scripts as $script)
 		{
-			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
-			$assetName = 'jcb.script.' . hash('sha256', $script);
-			if (!$wa->assetExists('script', $assetName))
-			{
-				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
-					? $script : Uri::root() . $script;
-				$wa->registerScript($assetName, $assetUri, ['version' => 'auto'], [], $jcbScriptDependencies);
-			}
-			$wa->useScript($assetName);
-			$jcbScriptDependencies = array_values(array_unique([...$jcbScriptDependencies, $assetName]));
+			Html::_('script', $script, ['version' => 'auto']);
 		}
 	}
 

@@ -47,7 +47,7 @@ class DynamicgetsfiltergettypeField extends ListField
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 
 		// Create a new query object.
-		$query = $db->createQuery();
+		$query = $db->getQuery(true);
 
 		// Select the text.
 		$query->select($db->quoteName('gettype'));

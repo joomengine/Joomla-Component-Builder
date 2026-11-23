@@ -52,9 +52,9 @@ class Custom_codesModel extends ListModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'media/com_componentbuilder/css/admin/admin.css',
-		'media/com_componentbuilder/css/admin/custom_codes.css'
-	];
+		'administrator/components/com_componentbuilder/assets/css/admin.css',
+		'administrator/components/com_componentbuilder/assets/css/custom_codes.css'
+ 	];
 
 	/**
 	 * The scripts array.
@@ -63,8 +63,8 @@ class Custom_codesModel extends ListModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'media/com_componentbuilder/js/admin/admin.js'
-	];
+		'administrator/components/com_componentbuilder/assets/js/admin.js'
+ 	];
 
 	/**
 	 * Constructor
@@ -323,7 +323,7 @@ class Custom_codesModel extends ListModel
 		$user = $this->getCurrentUser();
 		// Create a new query object.
 		$db = $this->getDatabase();
-		$query = $db->createQuery();
+		$query = $db->getQuery(true);
 
 		// Select some fields
 		$query->select('a.*');
@@ -545,21 +545,20 @@ class Custom_codesModel extends ListModel
 			// Get a db connection.
 			$db = $this->getDatabase();
 			// Reset query.
-			$query = $db->createQuery();
+			$query = $db->getQuery(true);
 			$query->select('*');
 			$query->from($db->quoteName('#__componentbuilder_custom_code'));
 			// Only select items that are checked out.
 			$query->where($db->quoteName('checked_out') . ' >= 0');
 			// Query only to see if we have a rows
-			$query->setLimit(1);
-			$db->setQuery($query);
+			$db->setQuery($query, 0, 1);
 			$db->execute();
 			if ($db->getNumRows())
 			{
 				// Get target date in the past.
 				$date = Factory::getDate()->modify($time)->toSql();
 				// Reset query.
-				$query = $db->createQuery();
+				$query = $db->getQuery(true);
 
 				// Fields to update.
 				$fields = [

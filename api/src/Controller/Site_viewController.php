@@ -202,7 +202,6 @@ class Site_viewController extends ApiController
 
 		$id = (int) $id;
 		$model = $this->getModel();
-		$model->setUseExceptions(true);
 		$table = $model->getTable();
 
 		if ($id < 1 || !$table->load($id))
@@ -218,16 +217,23 @@ class Site_viewController extends ApiController
 
 			if ($session->get('http_status_code_404', false))
 			{
-				$session->remove('http_status_code_404');
+				$session->clear('http_status_code_404');
 
 				throw new ResourceNotFound(Text::_('JLIB_APPLICATION_ERROR_RECORD'), 404);
 			}
 
 			if ($session->get('http_status_code_409', false))
 			{
-				$session->remove('http_status_code_409');
+				$session->clear('http_status_code_409');
 
 				throw new \RuntimeException('Resource not in state that can be deleted, must be trashed before it can be deleted', 409);
+			}
+
+			$error = $model->getError();
+
+			if ($error)
+			{
+				throw new \RuntimeException($error, 500);
 			}
 
 			throw new NotAllowed(Text::_('JLIB_APPLICATION_ERROR_DELETE_NOT_PERMITTED'), 403);

@@ -107,9 +107,9 @@ class SearchModel extends ItemModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'media/com_componentbuilder/css/admin/admin.css',
-		'media/com_componentbuilder/css/admin/search.css'
-	];
+		'administrator/components/com_componentbuilder/assets/css/admin.css',
+		'administrator/components/com_componentbuilder/assets/css/search.css'
+ 	];
 
 	/**
 	 * The scripts array.
@@ -118,8 +118,8 @@ class SearchModel extends ItemModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'media/com_componentbuilder/js/admin/admin.js'
-	];
+		'administrator/components/com_componentbuilder/assets/js/admin.js'
+ 	];
 
 	/**
 	 * A custom property for UI Kit components.
@@ -134,22 +134,6 @@ class SearchModel extends ItemModel
 	 * @since   1.6
 	 */
 	protected $item;
-
-	/**
-	 * Authorised groups for the injected user.
-	 *
-	 * @var   array
-	 * @since 6.2.0
-	 */
-	public array $authorisedGroups = [];
-
-	/**
-	 * Compatibility flag for existing custom model code.
-	 *
-	 * @var   bool
-	 * @since 6.2.0
-	 */
-	public bool $initSet = false;
 
 	/**
 	 * Constructor
@@ -167,28 +151,16 @@ class SearchModel extends ItemModel
 		$this->app ??= Factory::getApplication();
 		$this->input ??= $this->app->getInput();
 
+		// Set the current user for authorisation checks (for those calling this model directly)
+		$this->user ??= $this->getCurrentUser();
+		$this->userId = $this->user->id;
+		$this->guest = $this->user->guest;
+		$this->groups = $this->user->groups;
+		$this->authorisedGroups = $this->user->getAuthorisedGroups();
+		$this->levels = $this->user->getAuthorisedViewLevels();
+
 		// will be removed
 		$this->initSet = true;
-	}
-
-	/**
-	 * Refresh identity-dependent state after Joomla injects the current user.
-	 *
-	 * @param   User  $currentUser  The user supplied by the controller or helper.
-	 *
-	 * @return  void
-	 * @since   6.2.0
-	 */
-	public function setCurrentUser(User $currentUser): void
-	{
-		parent::setCurrentUser($currentUser);
-		$this->user = $currentUser;
-		$this->userId = $currentUser->id;
-		$this->guest = $currentUser->guest;
-		$this->groups = $currentUser->groups;
-		$this->authorisedGroups = $currentUser->getAuthorisedGroups();
-		$this->levels = $currentUser->getAuthorisedViewLevels();
-		$this->_item = null;
 	}
 
 	/**
@@ -239,11 +211,13 @@ class SearchModel extends ItemModel
 
 		if (!isset($this->_item[$pk]))
 		{
+			try
+			{
 				// Get a db connection.
 				$db = $this->getDatabase();
 
 				// Create a new query object.
-				$query = $db->createQuery();
+				$query = $db->getQuery(true);
 
 				// Get data
 				// load the tables and components
@@ -266,6 +240,20 @@ class SearchModel extends ItemModel
 
 				// set data object to item.
 				$this->_item[$pk] = $data;
+			}
+			catch (\Exception $e)
+			{
+				if ($e->getCode() == 404)
+				{
+					// Need to go thru the error handler to allow Redirect to work.
+					throw $e;
+				}
+				else
+				{
+					$this->setError($e);
+					$this->_item[$pk] = false;
+				}
+			}
 		}
 
 		return $this->_item[$pk];
@@ -327,7 +315,7 @@ class SearchModel extends ItemModel
 		$db = $this->getDatabase();
 
 		// Create a new query object.
-		$query = $db->createQuery();
+		$query = $db->getQuery(true);
 
 		// Get data
 		$data = [

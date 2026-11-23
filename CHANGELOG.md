@@ -1,53 +1,21 @@
-# v6.2.1-alpha2
+# v6.2.1
 
-- Fix language-translation imports and editing by restoring JSON storage, encoding and decoding for translation subforms.
-- Return decoded translation subform data in language-translation API responses.
-- Restore filter-specific caching in Language Translations so extension, translated and untranslated selections return the correct records and totals.
-- Fix infinite loops in Save as Copy and Batch Copy when unique numeric fields conflict with existing records, and report a clear error. #1328
-- Generate valid replacement GUIDs when copied records conflict on the GUID field.
-- Respect SQL column types, text-length limits and nullability when generating unique copy values, preserving available values and valid NULL entries.
-- Bound collision checks and detect repeated database matches when generating unique field values.
-- Handle omitted unique fields safely and stop saving copied records when unique-value generation fails, including batch title handling.
-- Fix empty Site View and Custom Admin View API lists returning HTTP 500 return HTTP 200. #1330
-- Return HTTP 404 from generated Joomla 6 API PATCH handlers when the target record cannot be loaded.
-- Apply configured indentation and source comment settings to generated API PATCH code.
-- Preserve plugin provider namespace placeholders during JCB self-compilation so generated Joomla 4, 5 and 6 plugins use the correct namespaces.
-- Fix Joomla 7.0 deprecation notices in the Component Builder helper and generated helper methods.
-- Replace deprecated global configuration access with the active Joomla application's configuration in JCB services and upload handling.
-- Declare optional AES parameters explicitly nullable to remove PHP 8.4 and 8.5 deprecation notices.
-- Replace deprecated GUID casts and cURL and MIME cleanup calls for PHP 8.5 compatibility.
-- Report localized SFTP private-key loading errors that distinguish key files from pasted key text.
-
-# v6.2.1-alpha
-
-- Add dedicated Joomla 6 compiler templates and generation settings.
-- Update generated Joomla 6 database queries to use native query creation and query-level limits.
-- Replace deprecated configuration and session calls with native Joomla 6 application access.
-- Update generated Joomla 6 views to retrieve data directly from their models.
-- Correct current-user injection and permission-state updates in generated Joomla 6 models.
-- Update generated Joomla 6 tables to use injected database connections.
-- Update generated Joomla 6 controllers and import handlers to use native input and cache services.
-- Improve generated Joomla 6 exception handling while preserving form data, edit redirects and API responses.
-- Move generated Joomla 6 component and module scripts and styles into their extension media directories.
-- Migrate generated Joomla 6 asset loading to the Web Asset Manager with ordered dependencies and duplicate prevention.
-- Update generated field scripts, charts, Footable, DKIM controls and loading overlays for native Joomla 6 asset handling.
-- Restore footer JavaScript execution after page markup across views, fields and modules.
-- Update generated Joomla 6 plugin providers to use configuration-only constructors and removed unused dispatcher imports.
-- Add native Joomla 6 plugin event subscriptions and migration diagnostics for incompatible custom handlers.
-- Updates bundled privacy handler generation to use native Joomla 6 events.
-- Update generated Joomla 6 installers to use native installer interfaces while preserving custom lifecycle hooks.
-- Correct the Joomla 6 installation checks and enforced PHP 8.3 requirements in generated component installers.
-- Update generated Joomla 6 toolbars to use native button APIs and supported save-as-copy and save-and-new methods.
-- Standardize the compiler-generated indentation, line endings and debug comments while preserving authored code.
-- Fix Joomla 6 plugin event registration to restore JCB compiler hooks.
-- Prevent unwanted constructor generation in compiler Power classes that inherit their parent's implementation.
-- Restore stable ID ordering in JCB Search batches to prevent matching records from being skipped.
+- Fix Note and Spacer fields failing to save because hidden database settings were incorrectly required.
+- Fix conditional field visibility and required-state updates after selector changes and AJAX refreshes.
+- Fix chained conditions and numeric comparisons producing inconsistent browser and server validation.
+- Fix generated JavaScript errors caused by special characters and leading-zero numbers in condition values.
+- Fix conditional validation incorrectly making optional or disabled fields required again.
+- Fix Markdown rendering of images, linked images and bracketed alternative text.
+- Fix JCB Search pagination skipping or repeating records and potentially failing to finish.
+- Fix legacy FOF encryption service initialization by removing unused dependency lookups.
 - Fix generated frontend form navigation when custom view names are used. #1118
 - Fix missing or misplaced Joomla Power imports, including Uri, in generated PHP classes. #1123
 - Fix sales-server uploads over FTP and SFTP, including credential handling, authentication checks and remote paths. #1283
 - Fix language-translation filtering for exact language matches, legacy NULL records, extension selections and cached results. #1309
 - Normalize compiler-created translation records to the same empty value used by manual saves. #1309
 - Correct the NotAllowed import so denied Site View and Custom Admin View API requests return HTTP 403 instead of HTTP 500. #1326
+- Fix empty Site View and Custom Admin View API lists returning HTTP 500 return HTTP 200. #1330
+- Fix infinite loops in Save as Copy and Batch Copy when unique numeric fields conflict with existing records, and report a clear error. #1328
 
 # v6.2.0
 

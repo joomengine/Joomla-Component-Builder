@@ -1,3 +1,0 @@
-###BOM###
-
-###VIEW_SCRIPT###

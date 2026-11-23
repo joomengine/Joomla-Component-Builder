@@ -119,8 +119,8 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 	 */
 	public function __construct()
 	{
-		$this->minimumJoomla = '6.0.0';
-		$this->minimumPhp = '8.3.0';
+		$this->minimumJoomla = '4.3';
+		$this->minimumPhp = JOOMLA_MINIMUM_PHP;
 		$this->app ??= Factory::getApplication();
 		$this->db = Factory::getContainer()->get(DatabaseInterface::class);
 
@@ -3293,7 +3293,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 			echo '<div style="background-color: #fff;" class="alert alert-info"><a target="_blank" href="https://dev.vdm.io" title="Component Builder">
 				<img src="components/com_componentbuilder/assets/images/vdm-component.jpg"/>
 				</a>
-				<h3>Upgrade to Version 6.2.1-alpha2 Was Successful! Let us know if anything is not working as expected.</h3></div>';
+				<h3>Upgrade to Version 6.2.1 Was Successful! Let us know if anything is not working as expected.</h3></div>';
 
 			// Add/Update component in the action logs extensions table.
 			$this->setActionLogsExtensions();
@@ -4285,7 +4285,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		$content->content_history_options = $contentHistoryOptions;
 
 		// Check if content type is already in content_type DB.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->select($this->db->quoteName(array('type_id')));
 		$query->from($this->db->quoteName('#__content_types'));
 		$query->where($this->db->quoteName('type_alias') . ' LIKE '. $this->db->quote($content->type_alias));
@@ -4345,7 +4345,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		$content->text_prefix = $textPrefix;
 
 		// Check if the action log config is already in action_log_config DB.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->select($this->db->quoteName(['id']));
 		$query->from($this->db->quoteName('#__action_log_config'));
 		$query->where($this->db->quoteName('type_alias') . ' LIKE '. $this->db->quote($content->type_alias));
@@ -4387,7 +4387,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		$data->extension = 'com_componentbuilder';
 
 		// Check if componentbuilder action log extension is already in action logs extensions DB.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->select($this->db->quoteName(['id']));
 		$query->from($this->db->quoteName('#__action_logs_extensions'));
 		$query->where($this->db->quoteName('extension') . ' = '. $this->db->quote($data->extension));
@@ -4433,7 +4433,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 			$this->db->quoteName('rules') . ' = ' . $this->db->quote($rules),
 		];
 
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->update(
 			$this->db->quoteName('#__assets')
 		)->set($fields)->where($conditions);
@@ -4471,7 +4471,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 			$this->db->quoteName('params') . ' = ' . $this->db->quote($params),
 		];
 
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->update(
 			$this->db->quoteName('#__extensions')
 		)->set($fields)->where($conditions);
@@ -4563,7 +4563,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 	protected function removeContentTypes(string $context): void
 	{
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 
 		// Select id from content type table
 		$query->select($this->db->quoteName('type_id'));
@@ -4589,7 +4589,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 			];
 
 			// Create a new query object.
-			$query = $this->db->createQuery();
+			$query = $this->db->getQuery(true);
 			$query->delete($this->db->quoteName('#__content_types'));
 			$query->where($condition);
 			$this->db->setQuery($query);
@@ -4620,7 +4620,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 	protected function removeFields(string $context): void
 	{
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 
 		// Select ids from fields
 		$query->select($this->db->quoteName('id'));
@@ -4643,7 +4643,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 			$ids = $this->db->loadColumn();
 
 			// Create a new query object.
-			$query = $this->db->createQuery();
+			$query = $this->db->getQuery(true);
 
 			// Remove context from the field table
 			$condition = [
@@ -4686,7 +4686,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__fields_values'));
 		$query->where($condition);
 		$this->db->setQuery($query);
@@ -4713,7 +4713,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 	protected function removeFieldsGroups(string $context): void
 	{
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 
 		// Select ids from fields
 		$query->select($this->db->quoteName('id'));
@@ -4733,7 +4733,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		if ($found)
 		{
 			// Create a new query object.
-			$query = $this->db->createQuery();
+			$query = $this->db->getQuery(true);
 
 			// Remove context from the field table
 			$condition = [
@@ -4773,7 +4773,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__history'));
 		$query->where($condition);
 		$this->db->setQuery($query);
@@ -4808,7 +4808,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 			];
 
 			// Create a new query object.
-			$query = $this->db->createQuery();
+			$query = $this->db->getQuery(true);
 			$query->delete($this->db->quoteName('#__ucm_base'));
 			$query->where($condition);
 			$this->db->setQuery($query);
@@ -4838,7 +4838,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__ucm_content'));
 		$query->where($condition);
 		$this->db->setQuery($query);
@@ -4865,7 +4865,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 	protected function removeContentItemTagMap(string $context): void
 	{
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 
 		// Remove Item items from the contentitem tag map table
 		$condition = [
@@ -4873,7 +4873,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__contentitem_tag_map'));
 		$query->where($condition);
 		$this->db->setQuery($query);
@@ -4905,7 +4905,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__action_log_config'));
 		$query->where($condition);
 		$this->db->setQuery($query);
@@ -4935,7 +4935,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__assets'));
 		$query->where($condition);
 		$this->db->setQuery($query);
@@ -4963,7 +4963,7 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		];
 
 		// Create a new query object.
-		$query = $this->db->createQuery();
+		$query = $this->db->getQuery(true);
 		$query->delete($this->db->quoteName('#__action_logs_extensions'));
 		$query->where($extension);
 		$this->db->setQuery($query);
@@ -5156,5 +5156,3 @@ class Com_ComponentbuilderInstallerScript implements InstallerScriptInterface
 		}
 	}
 }
-
-return new Com_ComponentbuilderInstallerScript();

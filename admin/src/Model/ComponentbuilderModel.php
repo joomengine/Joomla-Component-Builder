@@ -279,9 +279,9 @@ class ComponentbuilderModel extends ListModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'media/com_componentbuilder/css/admin/admin.css',
-		'media/com_componentbuilder/css/admin/dashboard.css'
-	];
+		'administrator/components/com_componentbuilder/assets/css/admin.css',
+		'administrator/components/com_componentbuilder/assets/css/dashboard.css'
+ 	];
 
 	/**
 	 * The scripts array.
@@ -290,8 +290,8 @@ class ComponentbuilderModel extends ListModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'media/com_componentbuilder/js/admin/admin.js'
-	];
+		'administrator/components/com_componentbuilder/assets/js/admin.js'
+ 	];
 
 	/**
 	 * Constructor
@@ -305,20 +305,8 @@ class ComponentbuilderModel extends ListModel
 	public function __construct($config = [], ?MVCFactoryInterface $factory = null)
 	{
 		parent::__construct($config, $factory);
-	}
 
-	/**
-	 * Use the identity supplied after model construction.
-	 *
-	 * @param   User  $currentUser  The user supplied by the controller or helper.
-	 *
-	 * @return  void
-	 * @since   6.2.0
-	 */
-	public function setCurrentUser(User $currentUser): void
-	{
-		parent::setCurrentUser($currentUser);
-		$this->user = $currentUser;
+		$this->user ??= $this->getCurrentUser();
 	}
 
 	/**

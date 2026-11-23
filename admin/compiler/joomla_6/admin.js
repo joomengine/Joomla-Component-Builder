@@ -1,4 +1,0 @@
-###BOM###
-
-/* JS Document */
-###ADMINJS###

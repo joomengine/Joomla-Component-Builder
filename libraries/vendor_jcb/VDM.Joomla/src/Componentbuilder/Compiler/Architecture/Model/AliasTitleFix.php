@@ -30,11 +30,11 @@ use VDM\Joomla\Utilities\StringHelper;
  * title and its alias stay unique within the view, and within its category
  * where the view is categorised.
  * 
- * Target variants supply the configuration lookup for Unicode slugs.
+ * The fix reads the same on every Joomla target, so this is one class.
  * 
  * @since  6.1.7
  */
-class AliasTitleFix
+final class AliasTitleFix
 {
 	/**
 	 * The Alias Class.
@@ -189,7 +189,7 @@ class AliasTitleFix
 					. ", \$" . $alias . ") = \$this->_generateNewTitle(\$data['"
 					. $alias . "'], array(" . implode(', ', $titleData) . "));";
 			}
-			$fixUnique[] = implode(PHP_EOL, $titleUpdate);
+			$fixUnique[] = implode("\n", $titleUpdate);
 			$fixUnique[] = Indent::_(4) . "\$data['" . $alias . "'] = \$"
 				. $alias . ";";
 			$fixUnique[] = Indent::_(3) . "}";
@@ -212,7 +212,8 @@ class AliasTitleFix
 			$fixUnique[] = Indent::_(3) . "if (\$data['" . $alias
 				. "'] == null || empty(\$data['" . $alias . "']))";
 			$fixUnique[] = Indent::_(3) . "{";
-			$fixUnique[] = $this->getUnicodeSlugsCondition();
+			$fixUnique[] = Indent::_(4)
+				. "if (Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getConfig()->get('unicodeslugs') == 1)";
 			$fixUnique[] = Indent::_(4) . "{";
 			$fixUnique[] = Indent::_(5) . "\$data['" . $alias
 				. "'] = OutputFilter::stringURLUnicodeSlug(" . implode(
@@ -314,18 +315,6 @@ class AliasTitleFix
 		$fixUnique[] = Indent::_(2) . "}";
 
 		return PHP_EOL . implode(PHP_EOL, $fixUnique);
-	}
-
-	/**
-	 * Get the generated condition that selects Unicode alias handling.
-	 *
-	 * @return  string
-	 * @since   6.2.0
-	 */
-	protected function getUnicodeSlugsCondition(): string
-	{
-		return Indent::_(4) . "if (Joomla__"
-			. "_39403062_84fb_46e0_bac4_0023f766e827___Power::getConfig()->get('unicodeslugs') == 1)";
 	}
 }
 
