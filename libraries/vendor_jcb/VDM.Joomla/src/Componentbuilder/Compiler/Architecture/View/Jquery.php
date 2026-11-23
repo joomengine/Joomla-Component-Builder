@@ -23,7 +23,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
  * 
  * @since 6.1.7
  */
-class Jquery
+final class Jquery
 {
 	/**
 	 * Build the jQuery loading statement of a view.

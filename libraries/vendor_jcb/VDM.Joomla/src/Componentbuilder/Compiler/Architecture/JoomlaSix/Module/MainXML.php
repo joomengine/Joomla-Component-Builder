@@ -236,10 +236,7 @@ final class MainXML implements MainXMLInterface
 
 				if ($addScriptsField && $add_scripts_field)
 				{
-					$namespace = $this->config->namespace_prefix . '\\Module\\' . $module->namespace
-						. '\\' . $module->target_client_namespace . '\\Field';
-					$xmlFields .= PHP_EOL . Indent::_(2) . '<field name="jcbassets" type="'
-						. $module->class_name . 'engine" addfieldprefix="' . $namespace . '" />';
+					$xmlFields .= PHP_EOL . Indent::_(2) . '<field type="modadminvvvvvvvdm" />';
 					$addScriptsField = false;
 				}
 
@@ -377,7 +374,7 @@ final class MainXML implements MainXMLInterface
 	{
 		$files = Folder::files($module->folder_path);
 		$folders = Folder::folders($module->folder_path);
-		$ignore = ['media', 'services', 'sql', 'language', 'script.php', "{$module->file_name}.xml", "{$module->file_name}.php"];
+		$ignore = ['services', 'sql', 'language', 'script.php', "{$module->file_name}.xml", "{$module->file_name}.php"];
 
 		$xml = PHP_EOL . PHP_EOL . Indent::_(1) . '<!--' . Line::_(
 			__LINE__, __CLASS__
@@ -413,23 +410,6 @@ final class MainXML implements MainXMLInterface
 		}
 
 		$xml .= PHP_EOL . Indent::_(1) . '</files>';
-
-		if (is_dir($module->folder_path . '/media'))
-		{
-			$xml .= PHP_EOL . Indent::_(1) . '<media destination="' . $module->folder_name . '" folder="media">';
-
-			foreach (Folder::folders($module->folder_path . '/media') as $folder)
-			{
-				$xml .= PHP_EOL . Indent::_(2) . '<folder>' . $folder . '</folder>';
-			}
-
-			foreach (Folder::files($module->folder_path . '/media') as $file)
-			{
-				$xml .= PHP_EOL . Indent::_(2) . '<filename>' . $file . '</filename>';
-			}
-
-			$xml .= PHP_EOL . Indent::_(1) . '</media>';
-		}
 
 		return $xml;
 	}

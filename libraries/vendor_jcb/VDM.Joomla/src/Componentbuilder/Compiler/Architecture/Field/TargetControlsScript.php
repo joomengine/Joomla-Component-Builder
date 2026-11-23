@@ -15,8 +15,6 @@ namespace VDM\Joomla\Componentbuilder\Compiler\Architecture\Field;
 use VDM\Joomla\Componentbuilder\Compiler\Field\Groups as FieldGroups;
 use VDM\Joomla\Componentbuilder\Compiler\Builder\ValidationFix;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
-use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
-use VDM\Joomla\Componentbuilder\Compiler\Utilities\Unique;
 use VDM\Joomla\Utilities\ArrayHelper;
 
 
@@ -24,8 +22,8 @@ use VDM\Joomla\Utilities\ArrayHelper;
  * Field Target Controls Script Class.
  * 
  * Builds the jQuery statements that reveal, hide and re-require every field a
- * form condition targets, along with the variables that remember whether a
- * target was required to begin with.
+ * form condition targets, with the metadata used to restore each
+ * target before all conditions are evaluated in their authored order.
  * 
  * @since  6.1.7
  */
@@ -97,18 +95,9 @@ final class TargetControlsScript
 			{
 				if (ArrayHelper::check($target))
 				{
-					// set the required var
-					if ($target['required'] === 'yes')
-					{
-						$unique                                 = $uniqueVar
-							. Unique::get(3);
-						$bucket[$target['name']]['requiredVar'] = "jform_"
-							. $unique . "_required = false;" . PHP_EOL;
-					}
-					else
-					{
-						$bucket[$target['name']]['requiredVar'] = '';
-					}
+					// Preserve the legacy result key without emitting per-condition flags.
+					$bucket[$target['name']]['requiredVar'] = '';
+					$bucket[$target['name']]['required'] = $target['required'] === 'yes';
 					// set target type
 					$targetTypeSufix = "";
 					if ($this->fieldgroups->check(
@@ -131,6 +120,7 @@ final class TargetControlsScript
 						// target an id if this is a field
 						$targetType = "#jform_";
 					}
+					$bucket[$target['name']]['selector'] = $targetType . $target['name'] . $targetTypeSufix;
 					// set the target behavior
 					$bucket[$target['name']]['behavior'] = PHP_EOL . Indent::_(
 							2
@@ -145,118 +135,8 @@ final class TargetControlsScript
 					// the hide required function
 					if ($target['required'] === 'yes')
 					{
-						if ($toggleSwitch)
-						{
-							$hide                            = PHP_EOL
-								. Indent::_(2) . "//" . Line::_(__Line__, __Class__)
-								. " remove required attribute from "
-								. $target['name'] . " field";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "if (!jform_" . $unique
-								. "_required)";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "{";
-							$hide                            .= PHP_EOL
-								. Indent::_(3) . "updateFieldRequired('"
-								. $target['name'] . "',1);";
-							$hide                            .= PHP_EOL
-								. Indent::_(3) . "jQuery('#jform_"
-								. $target['name']
-								. "').removeAttr('required');";
-							$hide                            .= PHP_EOL
-								. Indent::_(3) . "jQuery('#jform_"
-								. $target['name']
-								. "').removeAttr('aria-required');";
-							$hide                            .= PHP_EOL
-								. Indent::_(3) . "jQuery('#jform_"
-								. $target['name']
-								. "').removeClass('required');";
-							$hide                            .= PHP_EOL
-								. Indent::_(3) . "jform_" . $unique
-								. "_required = true;";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "}";
-							$bucket[$target['name']]['hide'] = $hide;
-							// the show required function
-							$show                            = PHP_EOL
-								. Indent::_(2) . "//" . Line::_(__Line__, __Class__)
-								. " add required attribute to "
-								. $target['name'] . " field";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "if (jform_" . $unique
-								. "_required)";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "{";
-							$show                            .= PHP_EOL
-								. Indent::_(3) . "updateFieldRequired('"
-								. $target['name'] . "',0);";
-							$show                            .= PHP_EOL
-								. Indent::_(3) . "jQuery('#jform_"
-								. $target['name']
-								. "').prop('required','required');";
-							$show                            .= PHP_EOL
-								. Indent::_(3) . "jQuery('#jform_"
-								. $target['name']
-								. "').attr('aria-required',true);";
-							$show                            .= PHP_EOL
-								. Indent::_(3) . "jQuery('#jform_"
-								. $target['name'] . "').addClass('required');";
-							$show                            .= PHP_EOL
-								. Indent::_(3) . "jform_" . $unique
-								. "_required = false;";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "}";
-							$bucket[$target['name']]['show'] = $show;
-						}
-						else
-						{
-							$hide                            = PHP_EOL
-								. Indent::_(2) . "//" . Line::_(__Line__, __Class__)
-								. " remove required attribute from "
-								. $target['name'] . " field";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "updateFieldRequired('"
-								. $target['name'] . "',1);";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "jQuery('#jform_"
-								. $target['name']
-								. "').removeAttr('required');";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "jQuery('#jform_"
-								. $target['name']
-								. "').removeAttr('aria-required');";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "jQuery('#jform_"
-								. $target['name']
-								. "').removeClass('required');";
-							$hide                            .= PHP_EOL
-								. Indent::_(2) . "jform_" . $unique
-								. "_required = true;" . PHP_EOL;
-							$bucket[$target['name']]['hide'] = $hide;
-							// the show required function
-							$show                            = PHP_EOL
-								. Indent::_(2) . "//" . Line::_(__Line__, __Class__)
-								. " add required attribute to "
-								. $target['name'] . " field";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "updateFieldRequired('"
-								. $target['name'] . "',0);";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "jQuery('#jform_"
-								. $target['name']
-								. "').prop('required','required');";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "jQuery('#jform_"
-								. $target['name']
-								. "').attr('aria-required',true);";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "jQuery('#jform_"
-								. $target['name'] . "').addClass('required');";
-							$show                            .= PHP_EOL
-								. Indent::_(2) . "jform_" . $unique
-								. "_required = false;" . PHP_EOL;
-							$bucket[$target['name']]['show'] = $show;
-						}
+						$bucket[$target['name']]['hide'] = $this->requiredScript($target['name'], false);
+						$bucket[$target['name']]['show'] = $this->requiredScript($target['name'], true);
 						// make sure that the axaj and other needed things for this view is loaded
 						$this->validationfix->add(
 							$nameSingleCode, $target['name']
@@ -273,6 +153,32 @@ final class TargetControlsScript
 		}
 
 		return $bucket;
+	}
+
+	/**
+	 * Set required state idempotently so later conditions can own the same target.
+	 *
+	 * @param   string  $name      The target field name.
+	 * @param   bool    $required  Whether the field is required in this pass.
+	 *
+	 * @return  string  The browser validation attributes, without request transport.
+	 *
+	 * @since   6.2.1
+	 */
+	private function requiredScript(string $name, bool $required): string
+	{
+		if ($required)
+		{
+			return PHP_EOL . Indent::_(2) . "// Add required attributes to " . $name . "."
+				. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').prop('required', true);"
+				. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').attr('aria-required', true);"
+				. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').addClass('required');";
+		}
+
+		return PHP_EOL . Indent::_(2) . "// Remove required attributes from " . $name . "."
+			. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').removeAttr('required');"
+			. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').removeAttr('aria-required');"
+			. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').removeClass('required');";
 	}
 }
 

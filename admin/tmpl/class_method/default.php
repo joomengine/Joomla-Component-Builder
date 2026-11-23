@@ -51,10 +51,7 @@ $tmpl    = $tmpl ? '&tmpl=' . $tmpl : '';
 		// remove overlay when page fully loaded
 		window.addEventListener('load', function() {
 			var componentLoader = document.getElementById('componentbuilder_loader');
-			if (componentLoader)
-			{
-				componentLoader.style.display = 'block';
-			}
+			if (componentLoader) componentLoader.style.display = 'block';
 			loadingDiv.style.display = 'none';
 		});
 	})();
@@ -126,20 +123,8 @@ $tmpl    = $tmpl ? '&tmpl=' . $tmpl : '';
 
 <script type="text/javascript">
 
-// #jform_extension_type listeners for extension_type_vvvvwar function
-jQuery('#jform_extension_type').on('keyup',function()
-{
-	var extension_type_vvvvwar = jQuery("#jform_extension_type").val();
-	vvvvwar(extension_type_vvvvwar);
-
-});
-jQuery('#adminForm').on('change', '#jform_extension_type',function (e)
-{
-	e.preventDefault();
-	var extension_type_vvvvwar = jQuery("#jform_extension_type").val();
-	vvvvwar(extension_type_vvvvwar);
-
-});
+jQuery('#jform_extension_type').on('keyup', updateClassMethodConditions);
+jQuery('#adminForm').on('change', '#jform_extension_type', updateClassMethodConditions);
 
 
 

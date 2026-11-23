@@ -22,7 +22,6 @@ use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\ComHelperClass
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\ComHelperClass\ExcelMethodsInterface;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\ComHelperClass\ExcelMethods as SharedExcelMethods;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\ComHelperClass\ExcelMethods as J3ExcelMethods;
-use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\ComHelperClass\ExcelMethods as J6ExcelMethods;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Component\AssetsTableInterface;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Component\AssetsTable as SharedAssetsTable;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Component\AssetsTable as J3AssetsTable;
@@ -123,9 +122,6 @@ class ArchitectureComponent implements ServiceProviderInterface
 
 		$container->alias(J3ExcelMethods::class, 'Architecture.ComHelperClass.J3.ExcelMethods')
 			->share('Architecture.ComHelperClass.J3.ExcelMethods', [$this, 'getJ3ExcelMethods'], true);
-
-		$container->alias(J6ExcelMethods::class, 'Architecture.ComHelperClass.J6.ExcelMethods')
-			->share('Architecture.ComHelperClass.J6.ExcelMethods', [$this, 'getJ6ExcelMethods'], true);
 
 		$container->alias(AssetsTableInterface::class, 'Architecture.Component.AssetsTable')
 			->share('Architecture.Component.AssetsTable', [$this, 'getAssetsTable'], true);
@@ -396,11 +392,6 @@ class ArchitectureComponent implements ServiceProviderInterface
 			return $container->get('Architecture.ComHelperClass.J3.ExcelMethods');
 		}
 
-		if ((int) $this->targetVersion === 6)
-		{
-			return $container->get('Architecture.ComHelperClass.J6.ExcelMethods');
-		}
-
 		return $container->get('Architecture.ComHelperClass.Shared.ExcelMethods');
 	}
 
@@ -431,22 +422,6 @@ class ArchitectureComponent implements ServiceProviderInterface
 	public function getJ3ExcelMethods(Container $container): J3ExcelMethods
 	{
 		return new J3ExcelMethods(
-			$container->get('Config'),
-			$container->get('Compiler.Builder.Content.One')
-		);
-	}
-
-	/**
-	 * Get the ExcelMethods renderer for Joomla 6.
-	 *
-	 * @param   Container  $container  The DI container.
-	 *
-	 * @return  J6ExcelMethods
-	 * @since   6.2.0
-	 */
-	public function getJ6ExcelMethods(Container $container): J6ExcelMethods
-	{
-		return new J6ExcelMethods(
 			$container->get('Config'),
 			$container->get('Compiler.Builder.Content.One')
 		);

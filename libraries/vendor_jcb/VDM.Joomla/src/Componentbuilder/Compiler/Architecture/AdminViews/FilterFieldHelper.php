@@ -99,14 +99,6 @@ class FilterFieldHelper implements FilterFieldHelperInterface
 	protected CMSApplicationInterface $app;
 
 	/**
-	 * Fresh-query method emitted by this target renderer.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $queryMethod = 'getQuery(true)';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Config                $config                 The Config Class.
@@ -184,7 +176,7 @@ class FilterFieldHelper implements FilterFieldHelperInterface
 						. Line::_(__Line__, __Class__)
 						. " Create a new query object.";
 					$function[] = Indent::_(2)
-						. "\$query = \$db->{$this->queryMethod};";
+						. "\$query = \$db->getQuery(true);";
 					$function[] = PHP_EOL . Indent::_(2) . "//"
 						. Line::_(__Line__, __Class__) . " Select the text.";
 					$function[] = Indent::_(2)
@@ -311,7 +303,7 @@ class FilterFieldHelper implements FilterFieldHelperInterface
 						. Line::_(__Line__, __Class__)
 						. " Create a new query object.";
 					$function[] = Indent::_(2)
-						. "\$query = \$db->{$this->queryMethod};";
+						. "\$query = \$db->getQuery(true);";
 
 					// check if usergroup as we change to an object query
 					if ($filter['type'] === 'usergroup' || $filter['type'] === 'usergrouplist')

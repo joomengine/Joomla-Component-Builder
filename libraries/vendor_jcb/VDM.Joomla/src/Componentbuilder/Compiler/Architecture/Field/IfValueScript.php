@@ -71,6 +71,7 @@ final class IfValueScript
 	 * @return  string|int  The test, or the integer 0 when the condition tests nothing.
 	 *
 	 * @since   6.1.7
+	 * @since   6.2.1  Escape text and parse numeric options without legacy octal syntax.
 	 */
 	public function get(string $value, $behavior, $type, $options): string|int
 	{
@@ -92,8 +93,13 @@ final class IfValueScript
 							{
 								if ($option != 'true' && $option != 'false')
 								{
-									$option = "'" . $option . "'";
+									$option = "'" . $this->escapeString($option, "'") . "'";
 								}
+							}
+							else
+							{
+								// Avoid legacy octal parsing and invalid leading-zero decimals.
+								$option = "Number('" . $this->escapeString((string) $option, "'") . "')";
 							}
 							if (StringHelper::check($string))
 							{
@@ -125,8 +131,13 @@ final class IfValueScript
 							{
 								if ($option != 'true' && $option != 'false')
 								{
-									$option = "'" . $option . "'";
+									$option = "'" . $this->escapeString($option, "'") . "'";
 								}
+							}
+							else
+							{
+								// Avoid legacy octal parsing and invalid leading-zero decimals.
+								$option = "Number('" . $this->escapeString((string) $option, "'") . "')";
 							}
 							if (StringHelper::check($string))
 							{
@@ -158,8 +169,13 @@ final class IfValueScript
 							{
 								if ($option != 'true' && $option != 'false')
 								{
-									$option = "'" . $option . "'";
+									$option = "'" . $this->escapeString($option, "'") . "'";
 								}
+							}
+							else
+							{
+								// Avoid legacy octal parsing and invalid leading-zero decimals.
+								$option = "Number('" . $this->escapeString((string) $option, "'") . "')";
 							}
 							if (StringHelper::check($string))
 							{
@@ -202,11 +218,12 @@ final class IfValueScript
 				if ($this->fieldgroups->check($type, 'text'))
 				{
 					if (ArrayHelper::check(
-						$options['keywords']
+						$options['keywords'] ?? []
 					))
 					{
 						foreach ($options['keywords'] as $keyword)
 						{
+							$keyword = $this->escapeString($keyword, '"');
 							if (StringHelper::check($string))
 							{
 								$string .= ' && ' . $value . '.indexOf("'
@@ -230,11 +247,12 @@ final class IfValueScript
 				if ($this->fieldgroups->check($type, 'text'))
 				{
 					if (ArrayHelper::check(
-						$options['keywords']
+						$options['keywords'] ?? []
 					))
 					{
 						foreach ($options['keywords'] as $keyword)
 						{
+							$keyword = $this->escapeString($keyword, '"');
 							if (StringHelper::check($string))
 							{
 								$string .= ' || ' . $value . '.indexOf("'
@@ -258,7 +276,7 @@ final class IfValueScript
 				if ($this->fieldgroups->check($type, 'text'))
 				{
 					if (ArrayHelper::check(
-						$options['keywords']
+						$options['keywords'] ?? []
 					))
 					{
 						foreach ($options['keywords'] as $keyword)
@@ -266,6 +284,7 @@ final class IfValueScript
 							$keyword = StringHelper::safe(
 								$keyword, 'w'
 							);
+							$keyword = $this->escapeString($keyword, '"');
 							if (StringHelper::check($string))
 							{
 								$string .= ' && ' . $value
@@ -290,7 +309,7 @@ final class IfValueScript
 				if ($this->fieldgroups->check($type, 'text'))
 				{
 					if (ArrayHelper::check(
-						$options['keywords']
+						$options['keywords'] ?? []
 					))
 					{
 						foreach ($options['keywords'] as $keyword)
@@ -298,6 +317,7 @@ final class IfValueScript
 							$keyword = StringHelper::safe(
 								$keyword, 'w'
 							);
+							$keyword = $this->escapeString($keyword, '"');
 							if (StringHelper::check($string))
 							{
 								$string .= ' || ' . $value
@@ -323,7 +343,7 @@ final class IfValueScript
 				{
 					if (ArrayHelper::check($options))
 					{
-						if ($options['length'])
+						if ($options['length'] ?? false)
 						{
 							$string .= $value . '.length >= '
 								. (int) $options['length'];
@@ -341,7 +361,7 @@ final class IfValueScript
 				{
 					if (ArrayHelper::check($options))
 					{
-						if ($options['length'])
+						if ($options['length'] ?? false)
 						{
 							$string .= $value . '.length <= '
 								. (int) $options['length'];
@@ -359,7 +379,7 @@ final class IfValueScript
 				{
 					if (ArrayHelper::check($options))
 					{
-						if ($options['length'])
+						if ($options['length'] ?? false)
 						{
 							$string .= $value . '.length == '
 								. (int) $options['length'];
@@ -378,6 +398,28 @@ final class IfValueScript
 		}
 
 		return $string;
+	}
+
+	/**
+	 * Escape literal text without changing numeric or boolean option coercion.
+	 *
+	 * @param   string  $value  The authored option or keyword.
+	 * @param   string  $quote  The delimiter used by the generated string.
+	 *
+	 * @return  string  Text safe inside the chosen JavaScript string delimiter.
+	 *
+	 * @since   6.2.1
+	 */
+	private function escapeString(string $value, string $quote): string
+	{
+		return strtr($value, [
+			"\\" => "\\\\",
+			$quote => "\\" . $quote,
+			"\r" => '\\r',
+			"\n" => '\\n',
+			"\u{2028}" => '\\u2028',
+			"\u{2029}" => '\\u2029',
+		]);
 	}
 }
 

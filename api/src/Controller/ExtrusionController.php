@@ -13,7 +13,7 @@ namespace VDM\Component\Componentbuilder\Api\Controller;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\ApiController;
-use Joomla\CMS\MVC\Controller\Exception\NotAllowed;
+use Joomla\CMS\Access\Exception\NotAllowed;
 use VDM\Component\Componentbuilder\Administrator\Helper\ComponentbuilderHelper;
 
 // No direct access to this file

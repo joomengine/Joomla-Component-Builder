@@ -16,7 +16,6 @@ use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Plugin\ExtensionInterface as Extension;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Plugin\Extension as J6Extension;
-use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Plugin\Privacy as J6Privacy;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaFive\Plugin\Extension as J5Extension;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaFour\Plugin\Extension as J4Extension;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Plugin\Extension as J3Extension;
@@ -59,9 +58,6 @@ class ArchitecturePlugin implements ServiceProviderInterface
 	{
 		$container->alias(Extension::class, 'Architecture.Plugin.Extension')
 			->share('Architecture.Plugin.Extension', [$this, 'getExtension'], true);
-
-		$container->alias(J6Privacy::class, 'Architecture.Plugin.J6.Privacy')
-			->share('Architecture.Plugin.J6.Privacy', [$this, 'getJ6Privacy'], true);
 
 		$container->alias(J6Extension::class, 'Architecture.Plugin.J6.Extension')
 			->share('Architecture.Plugin.J6.Extension', [$this, 'getJ6Extension'], true);
@@ -137,23 +133,8 @@ class ArchitecturePlugin implements ServiceProviderInterface
 		return new J6Extension(
 			$container->get('Placeholder'),
 			$container->get('Compiler.Builder.Content.One'),
-			$container->get('Power.Parser'),
-			$container->get('Joomla.Power'),
-			$container->get('Architecture.Plugin.J6.Privacy')
+			$container->get('Power.Parser')
 		);
-	}
-
-	/**
-	 * Get the bounded native privacy definition renderer.
-	 *
-	 * @param Container $container The DI container.
-	 *
-	 * @return J6Privacy
-	 * @since 6.2.0
-	 */
-	public function getJ6Privacy(Container $container): J6Privacy
-	{
-		return new J6Privacy();
 	}
 
 	/**

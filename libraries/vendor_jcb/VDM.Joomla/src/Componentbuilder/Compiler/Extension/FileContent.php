@@ -174,7 +174,7 @@ final class FileContent
 
 		$this->contentone->set('FILENAME', $name);
 
-		$phpHeader = $this->isPhpFile($name) ? '<?php' . PHP_EOL : '';
+		$phpHeader = $this->isPhpFile($name) ? "<?php\n" : '';
 
 		$string = FileHelper::getContent($path);
 

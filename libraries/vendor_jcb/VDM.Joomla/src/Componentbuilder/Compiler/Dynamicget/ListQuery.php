@@ -29,7 +29,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
  * 
  * @since 5.1.2
  */
-class ListQuery
+final class ListQuery
 {
 	/**
 	 * The Config Class.
@@ -86,14 +86,6 @@ class ListQuery
 	 * @since 5.1.2
 	 */
 	protected QueryGroup $querygroup;
-
-	/**
-	 * Fresh-query method emitted by this target renderer.
-	 *
-	 * @var   string
-	 * @since 6.2.0
-	 */
-	protected string $queryMethod = 'getQuery(true)';
 
 	/**
 	 * Constructor.
@@ -165,7 +157,7 @@ class ListQuery
 
 		$listQuery .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__)
 			. " Create a new query object.";
-		$listQuery .= PHP_EOL . Indent::_(2) . "\$query = \$db->{$this->queryMethod};";
+		$listQuery .= PHP_EOL . Indent::_(2) . "\$query = \$db->getQuery(true);";
 
 		// Main GET query
 		$listQuery .= $this->queries->get($get->main_get, $code);

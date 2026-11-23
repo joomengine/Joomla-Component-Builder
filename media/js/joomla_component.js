@@ -8,14 +8,67 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Some Global Values
-jform_vvvvvwcvvv_required = false;
-jform_vvvvvwjvvw_required = false;
-jform_vvvvvwkvvx_required = false;
+// Original display and required state are captured before conditions run.
+var updateJoomlaComponentConditionsBaseline = null;
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updateJoomlaComponentConditions()
 {
+	if (updateJoomlaComponentConditionsBaseline === null)
+	{
+		updateJoomlaComponentConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_number","#jform_update_server",".note_update_server_note_ftp",".note_update_server_note_zip",".note_update_server_note_other","#jform_update_server_target","#jform_changelog_server",".note_changelog_server_note_ftp",".note_changelog_server_note_zip",".note_changelog_server_note_other","#jform_changelog_server_target","#jform_buildcompsql","#jform_dashboard",".note_dynamic_dashboard",".note_botton_component_dashboard","#jform_crowdin_account_api_key",".note_crowdin","#jform_crowdin_project_api_key","#jform_crowdin_project_identifier","#jform_crowdin_username"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updateJoomlaComponentConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = ["update_server_target","changelog_server_target","buildcompsql"];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updateJoomlaComponentConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updateJoomlaComponentConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updateJoomlaComponentConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updateJoomlaComponentConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var emptycontributors_vvvvvvv = jQuery("#jform_emptycontributors input[type='radio']:checked").val();
 	vvvvvvv(emptycontributors_vvvvvvv);
 
@@ -68,13 +121,24 @@ document.addEventListener('DOMContentLoaded', function()
 
 	var translation_tool_vvvvvwn = jQuery("#jform_translation_tool").val();
 	vvvvvwn(translation_tool_vvvvvwn);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updateJoomlaComponentConditions);
 
 // the vvvvvvv function
 function vvvvvvv(emptycontributors_vvvvvvv)
 {
 	// set the function logic
-	if (emptycontributors_vvvvvvv == 1)
+	if (emptycontributors_vvvvvvv == Number('1'))
 	{
 		jQuery('#jform_number').closest('.control-group').show();
 	}
@@ -88,7 +152,7 @@ function vvvvvvv(emptycontributors_vvvvvvv)
 function vvvvvvw(update_server_target_vvvvvvw,add_update_server_vvvvvvw)
 {
 	// set the function logic
-	if (update_server_target_vvvvvvw == 1 && add_update_server_vvvvvvw == 1)
+	if ((update_server_target_vvvvvvw == Number('1')) && (add_update_server_vvvvvvw == Number('1')))
 	{
 		jQuery('#jform_update_server').closest('.control-group').show();
 		jQuery('.note_update_server_note_ftp').closest('.control-group').show();
@@ -104,7 +168,7 @@ function vvvvvvw(update_server_target_vvvvvvw,add_update_server_vvvvvvw)
 function vvvvvvx(add_update_server_vvvvvvx,update_server_target_vvvvvvx)
 {
 	// set the function logic
-	if (add_update_server_vvvvvvx == 1 && update_server_target_vvvvvvx == 1)
+	if ((add_update_server_vvvvvvx == Number('1')) && (update_server_target_vvvvvvx == Number('1')))
 	{
 		jQuery('#jform_update_server').closest('.control-group').show();
 		jQuery('.note_update_server_note_ftp').closest('.control-group').show();
@@ -120,7 +184,7 @@ function vvvvvvx(add_update_server_vvvvvvx,update_server_target_vvvvvvx)
 function vvvvvvy(update_server_target_vvvvvvy,add_update_server_vvvvvvy)
 {
 	// set the function logic
-	if (update_server_target_vvvvvvy == 2 && add_update_server_vvvvvvy == 1)
+	if ((update_server_target_vvvvvvy == Number('2')) && (add_update_server_vvvvvvy == Number('1')))
 	{
 		jQuery('.note_update_server_note_zip').closest('.control-group').show();
 	}
@@ -134,7 +198,7 @@ function vvvvvvy(update_server_target_vvvvvvy,add_update_server_vvvvvvy)
 function vvvvvwa(update_server_target_vvvvvwa,add_update_server_vvvvvwa)
 {
 	// set the function logic
-	if (update_server_target_vvvvvwa == 3 && add_update_server_vvvvvwa == 1)
+	if ((update_server_target_vvvvvwa == Number('3')) && (add_update_server_vvvvvwa == Number('1')))
 	{
 		jQuery('.note_update_server_note_other').closest('.control-group').show();
 	}
@@ -148,31 +212,21 @@ function vvvvvwa(update_server_target_vvvvvwa,add_update_server_vvvvvwa)
 function vvvvvwc(add_update_server_vvvvvwc)
 {
 	// set the function logic
-	if (add_update_server_vvvvvwc == 1)
+	if (add_update_server_vvvvvwc == Number('1'))
 	{
 		jQuery('#jform_update_server_target').closest('.control-group').show();
-		// add required attribute to update_server_target field
-		if (jform_vvvvvwcvvv_required)
-		{
-			updateFieldRequired('update_server_target',0);
-			jQuery('#jform_update_server_target').prop('required','required');
-			jQuery('#jform_update_server_target').attr('aria-required',true);
-			jQuery('#jform_update_server_target').addClass('required');
-			jform_vvvvvwcvvv_required = false;
-		}
+		// Add required attributes to update_server_target.
+		jQuery('#jform_update_server_target').prop('required', true);
+		jQuery('#jform_update_server_target').attr('aria-required', true);
+		jQuery('#jform_update_server_target').addClass('required');
 	}
 	else
 	{
 		jQuery('#jform_update_server_target').closest('.control-group').hide();
-		// remove required attribute from update_server_target field
-		if (!jform_vvvvvwcvvv_required)
-		{
-			updateFieldRequired('update_server_target',1);
-			jQuery('#jform_update_server_target').removeAttr('required');
-			jQuery('#jform_update_server_target').removeAttr('aria-required');
-			jQuery('#jform_update_server_target').removeClass('required');
-			jform_vvvvvwcvvv_required = true;
-		}
+		// Remove required attributes from update_server_target.
+		jQuery('#jform_update_server_target').removeAttr('required');
+		jQuery('#jform_update_server_target').removeAttr('aria-required');
+		jQuery('#jform_update_server_target').removeClass('required');
 	}
 }
 
@@ -180,7 +234,7 @@ function vvvvvwc(add_update_server_vvvvvwc)
 function vvvvvwd(changelog_server_target_vvvvvwd,add_changelog_server_vvvvvwd)
 {
 	// set the function logic
-	if (changelog_server_target_vvvvvwd == 1 && add_changelog_server_vvvvvwd == 1)
+	if ((changelog_server_target_vvvvvwd == Number('1')) && (add_changelog_server_vvvvvwd == Number('1')))
 	{
 		jQuery('#jform_changelog_server').closest('.control-group').show();
 		jQuery('.note_changelog_server_note_ftp').closest('.control-group').show();
@@ -196,7 +250,7 @@ function vvvvvwd(changelog_server_target_vvvvvwd,add_changelog_server_vvvvvwd)
 function vvvvvwe(add_changelog_server_vvvvvwe,changelog_server_target_vvvvvwe)
 {
 	// set the function logic
-	if (add_changelog_server_vvvvvwe == 1 && changelog_server_target_vvvvvwe == 1)
+	if ((add_changelog_server_vvvvvwe == Number('1')) && (changelog_server_target_vvvvvwe == Number('1')))
 	{
 		jQuery('#jform_changelog_server').closest('.control-group').show();
 		jQuery('.note_changelog_server_note_ftp').closest('.control-group').show();
@@ -212,7 +266,7 @@ function vvvvvwe(add_changelog_server_vvvvvwe,changelog_server_target_vvvvvwe)
 function vvvvvwf(changelog_server_target_vvvvvwf,add_changelog_server_vvvvvwf)
 {
 	// set the function logic
-	if (changelog_server_target_vvvvvwf == 2 && add_changelog_server_vvvvvwf == 1)
+	if ((changelog_server_target_vvvvvwf == Number('2')) && (add_changelog_server_vvvvvwf == Number('1')))
 	{
 		jQuery('.note_changelog_server_note_zip').closest('.control-group').show();
 	}
@@ -226,7 +280,7 @@ function vvvvvwf(changelog_server_target_vvvvvwf,add_changelog_server_vvvvvwf)
 function vvvvvwh(changelog_server_target_vvvvvwh,add_changelog_server_vvvvvwh)
 {
 	// set the function logic
-	if (changelog_server_target_vvvvvwh == 3 && add_changelog_server_vvvvvwh == 1)
+	if ((changelog_server_target_vvvvvwh == Number('3')) && (add_changelog_server_vvvvvwh == Number('1')))
 	{
 		jQuery('.note_changelog_server_note_other').closest('.control-group').show();
 	}
@@ -240,31 +294,21 @@ function vvvvvwh(changelog_server_target_vvvvvwh,add_changelog_server_vvvvvwh)
 function vvvvvwj(add_changelog_server_vvvvvwj)
 {
 	// set the function logic
-	if (add_changelog_server_vvvvvwj == 1)
+	if (add_changelog_server_vvvvvwj == Number('1'))
 	{
 		jQuery('#jform_changelog_server_target').closest('.control-group').show();
-		// add required attribute to changelog_server_target field
-		if (jform_vvvvvwjvvw_required)
-		{
-			updateFieldRequired('changelog_server_target',0);
-			jQuery('#jform_changelog_server_target').prop('required','required');
-			jQuery('#jform_changelog_server_target').attr('aria-required',true);
-			jQuery('#jform_changelog_server_target').addClass('required');
-			jform_vvvvvwjvvw_required = false;
-		}
+		// Add required attributes to changelog_server_target.
+		jQuery('#jform_changelog_server_target').prop('required', true);
+		jQuery('#jform_changelog_server_target').attr('aria-required', true);
+		jQuery('#jform_changelog_server_target').addClass('required');
 	}
 	else
 	{
 		jQuery('#jform_changelog_server_target').closest('.control-group').hide();
-		// remove required attribute from changelog_server_target field
-		if (!jform_vvvvvwjvvw_required)
-		{
-			updateFieldRequired('changelog_server_target',1);
-			jQuery('#jform_changelog_server_target').removeAttr('required');
-			jQuery('#jform_changelog_server_target').removeAttr('aria-required');
-			jQuery('#jform_changelog_server_target').removeClass('required');
-			jform_vvvvvwjvvw_required = true;
-		}
+		// Remove required attributes from changelog_server_target.
+		jQuery('#jform_changelog_server_target').removeAttr('required');
+		jQuery('#jform_changelog_server_target').removeAttr('aria-required');
+		jQuery('#jform_changelog_server_target').removeClass('required');
 	}
 }
 
@@ -272,31 +316,21 @@ function vvvvvwj(add_changelog_server_vvvvvwj)
 function vvvvvwk(buildcomp_vvvvvwk)
 {
 	// set the function logic
-	if (buildcomp_vvvvvwk == 1)
+	if (buildcomp_vvvvvwk == Number('1'))
 	{
 		jQuery('#jform_buildcompsql').closest('.control-group').show();
-		// add required attribute to buildcompsql field
-		if (jform_vvvvvwkvvx_required)
-		{
-			updateFieldRequired('buildcompsql',0);
-			jQuery('#jform_buildcompsql').prop('required','required');
-			jQuery('#jform_buildcompsql').attr('aria-required',true);
-			jQuery('#jform_buildcompsql').addClass('required');
-			jform_vvvvvwkvvx_required = false;
-		}
+		// Add required attributes to buildcompsql.
+		jQuery('#jform_buildcompsql').prop('required', true);
+		jQuery('#jform_buildcompsql').attr('aria-required', true);
+		jQuery('#jform_buildcompsql').addClass('required');
 	}
 	else
 	{
 		jQuery('#jform_buildcompsql').closest('.control-group').hide();
-		// remove required attribute from buildcompsql field
-		if (!jform_vvvvvwkvvx_required)
-		{
-			updateFieldRequired('buildcompsql',1);
-			jQuery('#jform_buildcompsql').removeAttr('required');
-			jQuery('#jform_buildcompsql').removeAttr('aria-required');
-			jQuery('#jform_buildcompsql').removeClass('required');
-			jform_vvvvvwkvvx_required = true;
-		}
+		// Remove required attributes from buildcompsql.
+		jQuery('#jform_buildcompsql').removeAttr('required');
+		jQuery('#jform_buildcompsql').removeAttr('aria-required');
+		jQuery('#jform_buildcompsql').removeClass('required');
 	}
 }
 
@@ -304,7 +338,7 @@ function vvvvvwk(buildcomp_vvvvvwk)
 function vvvvvwl(dashboard_type_vvvvvwl)
 {
 	// set the function logic
-	if (dashboard_type_vvvvvwl == 2)
+	if (dashboard_type_vvvvvwl == Number('2'))
 	{
 		jQuery('#jform_dashboard').closest('.control-group').show();
 		jQuery('.note_dynamic_dashboard').closest('.control-group').show();
@@ -320,7 +354,7 @@ function vvvvvwl(dashboard_type_vvvvvwl)
 function vvvvvwm(dashboard_type_vvvvvwm)
 {
 	// set the function logic
-	if (dashboard_type_vvvvvwm == 1)
+	if (dashboard_type_vvvvvwm == Number('1'))
 	{
 		jQuery('.note_botton_component_dashboard').closest('.control-group').show();
 	}
@@ -369,92 +403,11 @@ function vvvvvwn(translation_tool_vvvvvwn)
 function translation_tool_vvvvvwn_SomeFunc(translation_tool_vvvvvwn)
 {
 	// set the function logic
-	if (translation_tool_vvvvvwn == 1)
+	if (translation_tool_vvvvvwn == Number('1'))
 	{
 		return true;
 	}
 	return false;
-}
-
-/**
- * Update the "not required" field list by adding or removing a field name.
- *
- * Mirrors the original jQuery logic exactly but uses pure JavaScript.
- *
- * @param  {string}  name    The field name to add or remove.
- * @param  {number}  status  1 to add as not required, 0 to remove.
- *
- * @return {void}
- * @since  3.1.3
- */
-function updateFieldRequired(name, status) {
-	// Check if #jform_not_required exists
-	const notRequiredField = document.getElementById('jform_not_required');
-	if (!notRequiredField) {
-		return;
-	}
-
-	// Split the comma-separated list into an array
-	let not_required = notRequiredField.value ? notRequiredField.value.split(',') : [];
-
-	// Add or remove the field name from the list
-	if (status == 1) {
-		not_required.push(name);
-	} else {
-		not_required = removeFieldFromNotRequired(not_required, name);
-	}
-
-	// Clean and deduplicate the list
-	const fixedList = fixNotRequiredArray(not_required);
-
-	// Write back the updated comma-separated list
-	notRequiredField.value = fixedList.toString();
-}
-
-/**
- * Remove a specific field name from the "not required" array.
- *
- * @param  {Array<string>} array  The list of not-required field names.
- * @param  {string}        what   The field name to remove.
- *
- * @return {Array<string>}        The updated array.
- * @since  3.1.3
- */
-function removeFieldFromNotRequired(array, what) {
-	return array.filter(function (element) {
-		return element !== what;
-	});
-}
-
-/**
- * Deduplicate and clean a "not required" array.
- *
- * @param  {Array<string>} array  The array to fix.
- *
- * @return {Array<string>}        A cleaned, unique array.
- * @since  3.1.3
- */
-function fixNotRequiredArray(array) {
-	const seen = {};
-	return removeEmptyFromNotRequiredArray(array).filter(function (item) {
-		return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-	});
-}
-
-/**
- * Remove empty or invalid entries from a "not required" array.
- *
- * Also removes the literal '一_一' token (legacy quirk preserved for compatibility).
- *
- * @param  {Array<string>} array  The array to process.
- *
- * @return {Array<string>}        The cleaned array.
- * @since  3.1.3
- */
-function removeEmptyFromNotRequiredArray(array) {
-	return array.filter(function (el) {
-		return el && el.length > 0 && el !== '一_一';
-	});
 }
 
 // the isSet function

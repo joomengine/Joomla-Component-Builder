@@ -8,15 +8,81 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// Some Global Values
-jform_vvvvwarvwr_required = false;
+// Original display and required state are captured before conditions run.
+var updateClassMethodConditionsBaseline = null;
 
-// Initial Script
-document.addEventListener('DOMContentLoaded', function()
+/**
+ * Recompute this view's conditions in definition order from the original baseline.
+ * Call after authored code assigns watched values, including AJAX defaults.
+ * @return {void}
+ * @since 6.2.1
+ */
+function updateClassMethodConditions()
 {
+	if (updateClassMethodConditionsBaseline === null)
+	{
+		updateClassMethodConditionsBaseline = {containers: [], required: []};
+		var selectors = ["#jform_joomla_plugin_group"];
+		var elements = [];
+		for (var selectorIndex = 0; selectorIndex < selectors.length; selectorIndex++)
+		{
+			var containers = jQuery(selectors[selectorIndex]).closest('.control-group').get();
+			for (var containerIndex = 0; containerIndex < containers.length; containerIndex++)
+			{
+				var element = containers[containerIndex];
+				if (element && element.style && elements.indexOf(element) === -1)
+				{
+					elements.push(element);
+					updateClassMethodConditionsBaseline.containers.push({element: element, display: element.style.display});
+				}
+			}
+		}
+		var requiredNames = ["joomla_plugin_group"];
+		for (var requiredIndex = 0; requiredIndex < requiredNames.length; requiredIndex++)
+		{
+			var controls = jQuery('#jform_' + requiredNames[requiredIndex]).get();
+			for (var controlIndex = 0; controlIndex < controls.length; controlIndex++)
+			{
+				var element = controls[controlIndex];
+				var control = jQuery(element);
+				updateClassMethodConditionsBaseline.required.push({
+					element: element,
+					required: !control.is(':disabled')
+						&& (Boolean(element.required) || element.hasAttribute('required') || control.hasClass('required'))
+				});
+			}
+		}
+	}
+
+	for (var index = 0; index < updateClassMethodConditionsBaseline.containers.length; index++)
+	{
+		var baseline = updateClassMethodConditionsBaseline.containers[index];
+		baseline.element.style.display = baseline.display;
+	}
+	var required = updateClassMethodConditionsBaseline.required;
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).prop('required', true)
+				.attr('aria-required', true).addClass('required');
+		}
+	}
+
 	var extension_type_vvvvwar = jQuery("#jform_extension_type").val();
 	vvvvwar(extension_type_vvvvwar);
-});
+
+	for (var requiredIndex = 0; requiredIndex < required.length; requiredIndex++)
+	{
+		if (!required[requiredIndex].required)
+		{
+			jQuery(required[requiredIndex].element).removeAttr('required')
+				.removeAttr('aria-required').removeClass('required');
+		}
+	}
+}
+
+document.addEventListener('DOMContentLoaded', updateClassMethodConditions);
 
 // the vvvvwar function
 function vvvvwar(extension_type_vvvvwar)
@@ -38,28 +104,18 @@ function vvvvwar(extension_type_vvvvwar)
 	if (extension_type)
 	{
 		jQuery('#jform_joomla_plugin_group').closest('.control-group').show();
-		// add required attribute to joomla_plugin_group field
-		if (jform_vvvvwarvwr_required)
-		{
-			updateFieldRequired('joomla_plugin_group',0);
-			jQuery('#jform_joomla_plugin_group').prop('required','required');
-			jQuery('#jform_joomla_plugin_group').attr('aria-required',true);
-			jQuery('#jform_joomla_plugin_group').addClass('required');
-			jform_vvvvwarvwr_required = false;
-		}
+		// Add required attributes to joomla_plugin_group.
+		jQuery('#jform_joomla_plugin_group').prop('required', true);
+		jQuery('#jform_joomla_plugin_group').attr('aria-required', true);
+		jQuery('#jform_joomla_plugin_group').addClass('required');
 	}
 	else
 	{
 		jQuery('#jform_joomla_plugin_group').closest('.control-group').hide();
-		// remove required attribute from joomla_plugin_group field
-		if (!jform_vvvvwarvwr_required)
-		{
-			updateFieldRequired('joomla_plugin_group',1);
-			jQuery('#jform_joomla_plugin_group').removeAttr('required');
-			jQuery('#jform_joomla_plugin_group').removeAttr('aria-required');
-			jQuery('#jform_joomla_plugin_group').removeClass('required');
-			jform_vvvvwarvwr_required = true;
-		}
+		// Remove required attributes from joomla_plugin_group.
+		jQuery('#jform_joomla_plugin_group').removeAttr('required');
+		jQuery('#jform_joomla_plugin_group').removeAttr('aria-required');
+		jQuery('#jform_joomla_plugin_group').removeClass('required');
 	}
 }
 
@@ -72,87 +128,6 @@ function extension_type_vvvvwar_SomeFunc(extension_type_vvvvwar)
 		return true;
 	}
 	return false;
-}
-
-/**
- * Update the "not required" field list by adding or removing a field name.
- *
- * Mirrors the original jQuery logic exactly but uses pure JavaScript.
- *
- * @param  {string}  name    The field name to add or remove.
- * @param  {number}  status  1 to add as not required, 0 to remove.
- *
- * @return {void}
- * @since  3.1.3
- */
-function updateFieldRequired(name, status) {
-	// Check if #jform_not_required exists
-	const notRequiredField = document.getElementById('jform_not_required');
-	if (!notRequiredField) {
-		return;
-	}
-
-	// Split the comma-separated list into an array
-	let not_required = notRequiredField.value ? notRequiredField.value.split(',') : [];
-
-	// Add or remove the field name from the list
-	if (status == 1) {
-		not_required.push(name);
-	} else {
-		not_required = removeFieldFromNotRequired(not_required, name);
-	}
-
-	// Clean and deduplicate the list
-	const fixedList = fixNotRequiredArray(not_required);
-
-	// Write back the updated comma-separated list
-	notRequiredField.value = fixedList.toString();
-}
-
-/**
- * Remove a specific field name from the "not required" array.
- *
- * @param  {Array<string>} array  The list of not-required field names.
- * @param  {string}        what   The field name to remove.
- *
- * @return {Array<string>}        The updated array.
- * @since  3.1.3
- */
-function removeFieldFromNotRequired(array, what) {
-	return array.filter(function (element) {
-		return element !== what;
-	});
-}
-
-/**
- * Deduplicate and clean a "not required" array.
- *
- * @param  {Array<string>} array  The array to fix.
- *
- * @return {Array<string>}        A cleaned, unique array.
- * @since  3.1.3
- */
-function fixNotRequiredArray(array) {
-	const seen = {};
-	return removeEmptyFromNotRequiredArray(array).filter(function (item) {
-		return seen.hasOwnProperty(item) ? false : (seen[item] = true);
-	});
-}
-
-/**
- * Remove empty or invalid entries from a "not required" array.
- *
- * Also removes the literal '一_一' token (legacy quirk preserved for compatibility).
- *
- * @param  {Array<string>} array  The array to process.
- *
- * @return {Array<string>}        The cleaned array.
- * @since  3.1.3
- */
-function removeEmptyFromNotRequiredArray(array) {
-	return array.filter(function (el) {
-		return el && el.length > 0 && el !== '一_一';
-	});
 }
 
 // the isSet function

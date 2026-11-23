@@ -51,10 +51,7 @@ $tmpl    = $tmpl ? '&tmpl=' . $tmpl : '';
 		// remove overlay when page fully loaded
 		window.addEventListener('load', function() {
 			var componentLoader = document.getElementById('componentbuilder_loader');
-			if (componentLoader)
-			{
-				componentLoader.style.display = 'block';
-			}
+			if (componentLoader) componentLoader.style.display = 'block';
 			loadingDiv.style.display = 'none';
 		});
 	})();
@@ -146,20 +143,8 @@ $tmpl    = $tmpl ? '&tmpl=' . $tmpl : '';
 
 <script type="text/javascript">
 
-// #jform_add_php_view listeners for add_php_view_vvvvvzk function
-jQuery('#jform_add_php_view').on('keyup',function()
-{
-	var add_php_view_vvvvvzk = jQuery("#jform_add_php_view input[type='radio']:checked").val();
-	vvvvvzk(add_php_view_vvvvvzk);
-
-});
-jQuery('#adminForm').on('change', '#jform_add_php_view',function (e)
-{
-	e.preventDefault();
-	var add_php_view_vvvvvzk = jQuery("#jform_add_php_view input[type='radio']:checked").val();
-	vvvvvzk(add_php_view_vvvvvzk);
-
-});
+jQuery('#jform_add_php_view').on('keyup', updateLayoutConditions);
+jQuery('#adminForm').on('change', '#jform_add_php_view', updateLayoutConditions);
 
 
 
