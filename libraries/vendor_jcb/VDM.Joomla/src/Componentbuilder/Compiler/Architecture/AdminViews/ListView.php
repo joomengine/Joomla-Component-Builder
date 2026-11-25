@@ -73,7 +73,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
  * 
  * @since 6.1.7
  */
-final class ListView
+class ListView
 {
 	/**
 	 * The Config Class.
@@ -880,8 +880,7 @@ final class ListView
 					$footerScript = Minify::js($footerScript);
 				}
 				$this->contentmulti->set($nameListCode . '|VIEWS_FOOTER_SCRIPT',
-					PHP_EOL . '<script type="text/javascript">'
-					. $footerScript . "</script>");
+					$this->getFooterScript($footerScript, $nameListCode));
 				// clear some memory
 				unset($footerScript);
 			}
@@ -991,6 +990,20 @@ final class ListView
 				'jcb_ce_onAfterBuildAdminListViewContent', [&$view, &$nameSingleCode, &$nameListCode]
 			);
 		}
+	}
+
+	/**
+	 * Wrap the custom footer script for the generated list view.
+	 *
+	 * @param   string  $script  The JavaScript body, possibly containing PHP.
+	 * @param   string  $name    The list view code name.
+	 *
+	 * @return  string  The generated template fragment.
+	 * @since   6.2.0
+	 */
+	protected function getFooterScript(string $script, string $name): string
+	{
+		return PHP_EOL . '<script type="text/javascript">' . $script . '</script>';
 	}
 }
 

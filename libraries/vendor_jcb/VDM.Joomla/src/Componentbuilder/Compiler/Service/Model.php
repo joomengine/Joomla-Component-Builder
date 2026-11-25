@@ -38,6 +38,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Model\Loader;
 use VDM\Joomla\Componentbuilder\Compiler\Model\Phpadminview;
 use VDM\Joomla\Componentbuilder\Compiler\Model\Cssadminview;
 use VDM\Joomla\Componentbuilder\Compiler\Model\Javascriptadminview;
+use VDM\Joomla\Componentbuilder\Compiler\Model\JoomlaSix\Javascriptadminview as JavascriptadminviewJ6;
 use VDM\Joomla\Componentbuilder\Compiler\Model\Linkedviews;
 use VDM\Joomla\Componentbuilder\Compiler\Model\Relations;
 use VDM\Joomla\Componentbuilder\Compiler\Model\Conditions;
@@ -156,6 +157,14 @@ class Model implements ServiceProviderInterface
 
 		$container->alias(Javascriptadminview::class, 'Model.Javascriptadminview')
 			->share('Model.Javascriptadminview', [$this, 'getJavascriptadminview'], true);
+
+		$container->share('Model.Shared.Javascriptadminview', [$this, 'getSharedJavascriptadminview'], true)
+			->alias('Model.J3.Javascriptadminview', 'Model.Shared.Javascriptadminview')
+			->alias('Model.J4.Javascriptadminview', 'Model.Shared.Javascriptadminview')
+			->alias('Model.J5.Javascriptadminview', 'Model.Shared.Javascriptadminview');
+
+		$container->alias(JavascriptadminviewJ6::class, 'Model.J6.Javascriptadminview')
+			->share('Model.J6.Javascriptadminview', [$this, 'getJavascriptadminviewJ6'], true);
 
 		$container->alias(Linkedviews::class, 'Model.Linkedviews')
 			->share('Model.Linkedviews', [$this, 'getLinkedviews'], true);
@@ -606,7 +615,40 @@ class Model implements ServiceProviderInterface
 	 */
 	public function getJavascriptadminview(Container $container): Javascriptadminview
 	{
+		if ((int) $container->get('Config')->joomla_version === 6)
+		{
+			return $container->get('Model.J6.Javascriptadminview');
+		}
+
+		return $container->get('Model.Shared.Javascriptadminview');
+	}
+
+	/**
+	 * Get the unchanged JavaScript collector used by Joomla 3, 4 and 5.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  Javascriptadminview
+	 * @since   6.2.0
+	 */
+	public function getSharedJavascriptadminview(Container $container): Javascriptadminview
+	{
 		return new Javascriptadminview(
+			$container->get('Customcode.Dispenser')
+		);
+	}
+
+	/**
+	 * Get the Joomla 6 JavaScript collector with preserved footer semantics.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  JavascriptadminviewJ6
+	 * @since   6.2.0
+	 */
+	public function getJavascriptadminviewJ6(Container $container): JavascriptadminviewJ6
+	{
+		return new JavascriptadminviewJ6(
 			$container->get('Customcode.Dispenser')
 		);
 	}

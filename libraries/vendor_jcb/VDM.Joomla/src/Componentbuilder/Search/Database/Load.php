@@ -190,9 +190,8 @@ class Load implements LoadInterface
 			// add limitation and pagination
 			if ($bundle > 0)
 			{
-				// Continue on the same unique ID axis used by next().
+				// Continue on the same ID axis used by the last-record cursor.
 				$order = ['a.id' => 'ASC'];
-
 				// get the incremental number
 				$where = ['a.id' => [
 						'operator' => '>=',

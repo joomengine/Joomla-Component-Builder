@@ -25,8 +25,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\ComHelperClass\
  * Generates the component helper `xls()` export method, the
  * `getFileHeaders()` import-header reader, and the phpspreadsheet
  * composer loader used by the import/export feature. Joomla-target
- * variants supply the target-specific user lookup through the
- * `getUserLines()` extension point.
+ * variants supply the target-specific user and import-session lookups.
  * 
  * @since  6.1.7
  */
@@ -285,7 +284,7 @@ class ExcelMethods implements ExcelMethodsInterface
 				. "self::composerAutoload('phpspreadsheet');";
 			$exel[] = Indent::_(2) . "//" . Line::_(__Line__, __Class__)
 				. " get session object";
-			$exel[] = Indent::_(2) . "\$session = Joomla__" . "_39403062_84fb_46e0_bac4_0023f766e827___Power::getSession();";
+			$exel[] = $this->getSessionObject();
 			$exel[] = Indent::_(2)
 				. "\$package = \$session->get('package', null);";
 			$exel[] = Indent::_(2)
@@ -382,6 +381,18 @@ class ExcelMethods implements ExcelMethodsInterface
 	protected function getUserLines(): array
 	{
 		return [];
+	}
+
+	/**
+	 * Get the statement that loads the import-header reader's session.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function getSessionObject(): string
+	{
+		return Indent::_(2) . "\$session = Joomla__"
+			. "_39403062_84fb_46e0_bac4_0023f766e827___Power::getSession();";
 	}
 }
 

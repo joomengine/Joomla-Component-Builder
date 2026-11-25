@@ -143,7 +143,7 @@ final class SiteStatics
 				);
 				$this->contentone->add('SITE_GLOBAL_EVENT_HELPER',
 					PHP_EOL . Indent::_(1)
-					. '*	The Global Site Event Method.');
+					. '*' . Indent::_(1) . 'The Global Site Event Method.');
 				$this->contentone->add('SITE_GLOBAL_EVENT_HELPER',
 					PHP_EOL . Indent::_(1) . '**/'
 				);

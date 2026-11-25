@@ -18,6 +18,10 @@ use VDM\Joomla\Componentbuilder\Compiler\Library\Data;
 use VDM\Joomla\Componentbuilder\Compiler\Library\Structure;
 use VDM\Joomla\Componentbuilder\Compiler\Library\Document;
 use VDM\Joomla\Componentbuilder\Compiler\Library\IncludeHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Library\JoomlaThree\IncludeHelper as J3IncludeHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Library\JoomlaFour\IncludeHelper as J4IncludeHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Library\JoomlaFive\IncludeHelper as J5IncludeHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Library\JoomlaSix\IncludeHelper as J6IncludeHelper;
 
 
 /**
@@ -37,6 +41,18 @@ class Library implements ServiceProviderInterface
 	 */
 	public function register(Container $container)
 	{
+		$container->alias(J6IncludeHelper::class, 'Library.J6.IncludeHelper')
+			->share('Library.J6.IncludeHelper', [$this, 'getJ6IncludeHelper'], true);
+
+		$container->alias(J5IncludeHelper::class, 'Library.J5.IncludeHelper')
+			->share('Library.J5.IncludeHelper', [$this, 'getJ5IncludeHelper'], true);
+
+		$container->alias(J4IncludeHelper::class, 'Library.J4.IncludeHelper')
+			->share('Library.J4.IncludeHelper', [$this, 'getJ4IncludeHelper'], true);
+
+		$container->alias(J3IncludeHelper::class, 'Library.J3.IncludeHelper')
+			->share('Library.J3.IncludeHelper', [$this, 'getJ3IncludeHelper'], true);
+
 		$container->alias(Data::class, 'Library.Data')
 			->share('Library.Data', [$this, 'getData'], true);
 
@@ -123,7 +139,59 @@ class Library implements ServiceProviderInterface
 	 */
 	public function getIncludeHelper(Container $container): IncludeHelper
 	{
-		return new IncludeHelper();
+		return $container->get('Library.J' . $container->get('Config')->joomla_version . '.IncludeHelper');
+	}
+
+	/**
+	 * Build the Joomla 3 library asset renderer.
+	 *
+	 * @param   Container  $container  The compiler services.
+	 *
+	 * @return  J3IncludeHelper
+	 * @since   6.2.0
+	 */
+	public function getJ3IncludeHelper(Container $container): J3IncludeHelper
+	{
+		return new J3IncludeHelper();
+	}
+
+	/**
+	 * Build the Joomla 4 library asset renderer.
+	 *
+	 * @param   Container  $container  The compiler services.
+	 *
+	 * @return  J4IncludeHelper
+	 * @since   6.2.0
+	 */
+	public function getJ4IncludeHelper(Container $container): J4IncludeHelper
+	{
+		return new J4IncludeHelper();
+	}
+
+	/**
+	 * Build the Joomla 5 library asset renderer.
+	 *
+	 * @param   Container  $container  The compiler services.
+	 *
+	 * @return  J5IncludeHelper
+	 * @since   6.2.0
+	 */
+	public function getJ5IncludeHelper(Container $container): J5IncludeHelper
+	{
+		return new J5IncludeHelper();
+	}
+
+	/**
+	 * Build the Joomla 6 library asset renderer.
+	 *
+	 * @param   Container  $container  The compiler services.
+	 *
+	 * @return  J6IncludeHelper
+	 * @since   6.2.0
+	 */
+	public function getJ6IncludeHelper(Container $container): J6IncludeHelper
+	{
+		return new J6IncludeHelper();
 	}
 }
 

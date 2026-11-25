@@ -36,7 +36,7 @@ final class BatchCopy extends ExtendingBatchCopy implements BatchCopyInterface
 	protected function getUserObject(): string
 	{
 		return Indent::_(3)
-			. "\$this->user 		= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getUser();";
+			. "\$this->user " . Indent::_(2) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getUser();";
 	}
 }
 

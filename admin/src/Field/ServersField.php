@@ -103,7 +103,9 @@ class ServersField extends ListField
 				$script[] = "
 					document.addEventListener('DOMContentLoaded', function() {
 						let  ".$button_code_name."Field = document.getElementById('jform_".$button_code_name."');
-						if (!".$button_code_name."Field) { return; }
+						if (!".$button_code_name."Field) {
+							return;
+						}
 						".$button_code_name."Field.addEventListener('change', function(e) {
 							e.preventDefault();
 							let ".$button_code_name."Value = this.value;

@@ -155,7 +155,7 @@ final class InputButton implements InputButtonInterface
 			$addButton[] = Indent::_(3) . "//" . Line::_(__Line__, __Class__)
 				. " get the input from url";
 			$addButton[] = Indent::_(3) . "\$app = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication();";
-			$addButton[] = Indent::_(3) . "\$jinput = method_exists(\$app, 'getInput') ? \$app->getInput() : \$app->input;";
+			$addButton[] = Indent::_(3) . "\$jinput = \$app->getInput();";
 			$addButton[] = Indent::_(3) . "//" . Line::_(__Line__, __Class__)
 				. " get the view name & id";
 			$addButton[] = Indent::_(3)
@@ -269,12 +269,14 @@ final class InputButton implements InputButtonInterface
 
 			$addButton[] = Indent::_(4) . "//" . Line::_(__Line__, __Class__)
 				. " build script";
-$addButton[] = Indent::_(4) . "\$script[] = \"";
+			$addButton[] = Indent::_(4) . "\$script[] = \"";
 			$addButton[] = Indent::_(5) . "document.addEventListener('DOMContentLoaded', function() {";
 			$addButton[] = Indent::_(6)
 				. "let  \".\$button_code_name.\"Field = document.getElementById('jform_\".\$button_code_name.\"');";
 			$addButton[] = Indent::_(6)
-				. "if (!\".\$button_code_name.\"Field) { return; }";
+				. "if (!\".\$button_code_name.\"Field) {";
+			$addButton[] = Indent::_(7) . "return;";
+			$addButton[] = Indent::_(6) . "}";
 			$addButton[] = Indent::_(6)
 				. "\".\$button_code_name.\"Field.addEventListener('change', function(e) {";
 			$addButton[] = Indent::_(7) . "e.preventDefault();";
@@ -296,10 +298,10 @@ $addButton[] = Indent::_(4) . "\$script[] = \"";
 				. "var editButton = document.getElementById('\".\$button_code_name.\"Edit');";
 			$addButton[] = Indent::_(6)
 				. "if (value > 0) {"; // TODO not ideal since value may not be an (int)
-			$addButton[] = Indent::_(7) . "// hide the create button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " hide the create button";
 			$addButton[] = Indent::_(7)
 				. "createButton.style.display = 'none';";
-			$addButton[] = Indent::_(7) . "// show edit button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " show edit button";
 			$addButton[] = Indent::_(7)
 				. "editButton.style.display = 'block';";
 			$addButton[] = Indent::_(7) . "let url = 'index.php?option="
@@ -309,10 +311,10 @@ $addButton[] = Indent::_(4) . "\$script[] = \"";
 			$addButton[] = Indent::_(7)
 				. "editButton.setAttribute('href', url);";
 			$addButton[] = Indent::_(6) . "} else {";
-			$addButton[] = Indent::_(7) . "// show the create button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " show the create button";
 			$addButton[] = Indent::_(7)
 				. "createButton.style.display = 'block';";
-			$addButton[] = Indent::_(7) . "// hide edit button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " hide edit button";
 			$addButton[] = Indent::_(7)
 				. "editButton.style.display = 'none';";
 			$addButton[] = Indent::_(6) . "}";
@@ -330,7 +332,7 @@ $addButton[] = Indent::_(4) . "\$script[] = \"";
 			$addButton[] = Indent::_(4)
 				. "\$document = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getDocument();";
 			$addButton[] = Indent::_(4)
-				. "\$document->addScriptDeclaration(implode(' ',\$script));";
+				. "\$document->getWebAssetManager()->addInlineScript(implode(' ', \$script), [], [], ['core']);";
 			$addButton[] = Indent::_(4) . "//" . Line::_(__Line__, __Class__)
 				. " return the button attached to input field.";
 			$addButton[] = Indent::_(4)

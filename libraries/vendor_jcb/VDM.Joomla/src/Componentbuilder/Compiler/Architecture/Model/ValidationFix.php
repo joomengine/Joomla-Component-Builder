@@ -14,6 +14,7 @@ namespace VDM\Joomla\Componentbuilder\Compiler\Architecture\Model;
 
 use VDM\Joomla\Componentbuilder\Compiler\Builder\ValidationFix as ValidationFixRegistry;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 use VDM\Joomla\Componentbuilder\Compiler\Registry as CompilerRegistry;
 
 
@@ -92,21 +93,16 @@ final class ValidationFix
 			return '';
 		}
 
-		$lines = [
-			'/**',
-			' * Conditional requirements generated from this view\'s field conditions.',
-			' *',
-			' * Matches within a group are combined with AND. Groups retain their',
-			' * authored order; the shared rule evaluates filtered values before',
-			' * Joomla checks required fields. Browser exemption lists are ignored.',
-			' *',
-			' * @var    array',
-			' * @since  6.2.1',
-			' */',
-		];
-
-		return PHP_EOL . PHP_EOL . Indent::_(1)
-			. implode(PHP_EOL . Indent::_(1), $lines)
+		return PHP_EOL . PHP_EOL . Indent::_(1) . '/**'
+			. PHP_EOL . Indent::_(1) . ' * Conditional requirements generated from this view\'s field conditions.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * Matches within a group are combined with AND. Groups retain their'
+			. PHP_EOL . Indent::_(1) . ' * authored order; the shared rule evaluates filtered values before'
+			. PHP_EOL . Indent::_(1) . ' * Joomla checks required fields. Browser exemption lists are ignored.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @var    array'
+			. PHP_EOL . Indent::_(1) . ' * @since  6.2.1'
+			. PHP_EOL . Indent::_(1) . ' */'
 			. PHP_EOL . Indent::_(1) . 'protected $conditionalRequirements = '
 			. $this->export($groups, 1) . ';';
 	}
@@ -137,8 +133,7 @@ final class ValidationFix
 			$this->conditionalrule->get()
 		);
 
-		return PHP_EOL . PHP_EOL
-			. $this->indentTemplate($this->joomlaPowers($this->modelMethods()));
+		return PHP_EOL . PHP_EOL . $this->modelMethods();
 	}
 
 	/**
@@ -153,144 +148,95 @@ final class ValidationFix
 	 */
 	private function modelMethods(): string
 	{
-		return <<<'PHP'
-	/**
-	 * Validate conditional requirements through Joomla's native form lifecycle.
-	 *
-	 * @param   Form    $form   The original form to validate.
-	 * @param   array   $data   Submitted data, before native filtering.
-	 * @param   string  $group  The optional field group to validate.
-	 *
-	 * @return  array|false  Filtered valid data, or false when validation fails.
-	 *
-	 * @since   6.2.1
-	 */
-	public function validate($form, $data, $group = null)
-	{
-		$rule = __VALIDATION_FORM_HELPER__::loadRuleType('conditionalrequired');
-		if (!$rule)
-		{
-			$this->setError('The conditional validation rule could not be loaded.');
-			return false;
-		}
-
-		try
-		{
-			$prepared = $rule->prepare(
-				$form,
-				$this->conditionalRequirements,
-				\Closure::fromCallable([$this, 'resolveConditionalData']),
-				$group
-			);
-			if (!$prepared)
-			{
-				$this->setError($rule->getError());
-				return false;
-			}
-
-			$result = $rule->complete(
-				parent::validate($form, $rule->filterInternalInput($data), $group)
-			);
-			if ($rule->getError() !== null)
-			{
-				$this->setError($rule->getError());
-			}
-
-			return $result;
-		}
-		finally
-		{
-			$rule->release();
-		}
-	}
-
-	/**
-	 * Load permitted stored selector values after native input filtering.
-	 *
-	 * PATCH omission and protected selectors can require the stored record.
-	 * Keeping this lookup here preserves model-specific getItem() behavior.
-	 *
-	 * @param   array   $data   Filtered input received by the native rule.
-	 * @param   Form    $form   The form after native validation plugins have run.
-	 * @param   string  $group  The optional field group being validated.
-	 *
-	 * @return  array|false  Stored values and PATCH mode, or false for a missing record.
-	 *
-	 * @since   6.2.1
-	 */
-	protected function resolveConditionalData(array $data, $form, $group = null)
-	{
-		$application = __VALIDATION_FACTORY__::getApplication();
-		$context = [
-			'stored' => [],
-			'patch' => $application->isClient('api')
-				&& $application->getInput()->getMethod() === 'PATCH',
-		];
-		$recordId = (int) ($data['id'] ?? $this->getState($this->getName() . '.id', 0));
-		if ($recordId > 0)
-		{
-			$stored = $this->getItem($recordId);
-			if ($stored === false || $stored === null)
-			{
-				return false;
-			}
-
-			$stored = new __VALIDATION_REGISTRY__($stored);
-			$context['stored'] = $group ? (array) $stored->get($group, []) : $stored->toArray();
-		}
-
-		return $context;
-	}
-PHP;
-	}
-
-	/**
-	 * Insert deferred Joomla Power keys into static generated templates.
-	 *
-	 * Split keys prevent JCB self-compilation from resolving references belonging
-	 * to the later generated model. Definition values never pass through here.
-	 *
-	 * @param   string  $code  The static generated-code template.
-	 *
-	 * @return  string  The template containing deferred Joomla Power keys.
-	 *
-	 * @since   6.2.0
-	 */
-	protected function joomlaPowers(string $code): string
-	{
-		return strtr($code, [
-			'__VALIDATION_FORM_HELPER__' => 'Joomla__' . '_571422c4_0340_49f8_b846_5729c7af6ed7___Power',
-			'__VALIDATION_REGISTRY__' => 'Joomla__' . '_a87c432d_b5b4_428e_b7ff_14b51664c624___Power',
-			'__VALIDATION_FACTORY__' => 'Joomla__' . '_39403062_84fb_46e0_bac4_0023f766e827___Power',
-		]);
-	}
-
-	/**
-	 * Apply the configured indentation to a static model template.
-	 *
-	 * Definition values are exported separately and never pass through this
-	 * formatter, so their literal whitespace cannot be changed here.
-	 *
-	 * @param   string  $code  Static PHP with tab-indented source lines.
-	 *
-	 * @return  string  The model methods using the configured indentation.
-	 *
-	 * @since   6.2.1
-	 */
-	private function indentTemplate(string $code): string
-	{
-		$lines = explode(PHP_EOL, $code);
-		foreach ($lines as &$line)
-		{
-			$level = strspn($line, "\t");
-			if ($level > 0)
-			{
-				$line = Indent::_($level) . substr($line, $level);
-			}
-		}
-		unset($line);
-
-		return implode(PHP_EOL, $lines);
+		return Indent::_(1) . '/**'
+			. PHP_EOL . Indent::_(1) . ' * Validate conditional requirements through Joomla\'s native form lifecycle.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @param   Form    $form   The original form to validate.'
+			. PHP_EOL . Indent::_(1) . ' * @param   array   $data   Submitted data, before native filtering.'
+			. PHP_EOL . Indent::_(1) . ' * @param   string  $group  The optional field group to validate.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @return  array|false  Filtered valid data, or false when validation fails.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @since   6.2.1'
+			. PHP_EOL . Indent::_(1) . ' */'
+			. PHP_EOL . Indent::_(1) . 'public function validate($form, $data, $group = null)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . '//' . Line::_(__LINE__, __CLASS__) . ' Keep conditional requirements inside the native model validation lifecycle.'
+			. PHP_EOL . Indent::_(2) . '$rule = Joomla__' . '_571422c4_0340_49f8_b846_5729c7af6ed7___Power::loadRuleType(\'conditionalrequired\');'
+			. PHP_EOL . Indent::_(2) . 'if (!$rule)'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . '$this->setError(\'The conditional validation rule could not be loaded.\');'
+			. PHP_EOL . Indent::_(3) . 'return false;'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(2) . 'try'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . '$prepared = $rule->prepare('
+			. PHP_EOL . Indent::_(4) . '$form,'
+			. PHP_EOL . Indent::_(4) . '$this->conditionalRequirements,'
+			. PHP_EOL . Indent::_(4) . '\\Closure::fromCallable([$this, \'resolveConditionalData\']),'
+			. PHP_EOL . Indent::_(4) . '$group'
+			. PHP_EOL . Indent::_(3) . ');'
+			. PHP_EOL . Indent::_(3) . 'if (!$prepared)'
+			. PHP_EOL . Indent::_(3) . '{'
+			. PHP_EOL . Indent::_(4) . '$this->setError($rule->getError());'
+			. PHP_EOL . Indent::_(4) . 'return false;'
+			. PHP_EOL . Indent::_(3) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(3) . '$result = $rule->complete('
+			. PHP_EOL . Indent::_(4) . 'parent::validate($form, $rule->filterInternalInput($data), $group)'
+			. PHP_EOL . Indent::_(3) . ');'
+			. PHP_EOL . Indent::_(3) . 'if ($rule->getError() !== null)'
+			. PHP_EOL . Indent::_(3) . '{'
+			. PHP_EOL . Indent::_(4) . '$this->setError($rule->getError());'
+			. PHP_EOL . Indent::_(3) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(3) . 'return $result;'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL . Indent::_(2) . 'finally'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . '$rule->release();'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL . Indent::_(1) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(1) . '/**'
+			. PHP_EOL . Indent::_(1) . ' * Load permitted stored selector values after native input filtering.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * PATCH omission and protected selectors can require the stored record.'
+			. PHP_EOL . Indent::_(1) . ' * Keeping this lookup here preserves model-specific getItem() behavior.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @param   array   $data   Filtered input received by the native rule.'
+			. PHP_EOL . Indent::_(1) . ' * @param   Form    $form   The form after native validation plugins have run.'
+			. PHP_EOL . Indent::_(1) . ' * @param   string  $group  The optional field group being validated.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @return  array|false  Stored values and PATCH mode, or false for a missing record.'
+			. PHP_EOL . Indent::_(1) . ' *'
+			. PHP_EOL . Indent::_(1) . ' * @since   6.2.1'
+			. PHP_EOL . Indent::_(1) . ' */'
+			. PHP_EOL . Indent::_(1) . 'protected function resolveConditionalData(array $data, $form, $group = null)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . '//' . Line::_(__LINE__, __CLASS__) . ' Resolve stored selectors only after native validation plugins and filtering.'
+			. PHP_EOL . Indent::_(2) . '$application = Joomla__' . '_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication();'
+			. PHP_EOL . Indent::_(2) . '$context = ['
+			. PHP_EOL . Indent::_(3) . '\'stored\' => [],'
+			. PHP_EOL . Indent::_(3) . '\'patch\' => $application->isClient(\'api\')'
+			. PHP_EOL . Indent::_(4) . '&& $application->getInput()->getMethod() === \'PATCH\','
+			. PHP_EOL . Indent::_(2) . '];'
+			. PHP_EOL . Indent::_(2) . '$recordId = (int) ($data[\'id\'] ?? $this->getState($this->getName() . \'.id\', 0));'
+			. PHP_EOL . Indent::_(2) . 'if ($recordId > 0)'
+			. PHP_EOL . Indent::_(2) . '{'
+			. PHP_EOL . Indent::_(3) . '$stored = $this->getItem($recordId);'
+			. PHP_EOL . Indent::_(3) . 'if ($stored === false || $stored === null)'
+			. PHP_EOL . Indent::_(3) . '{'
+			. PHP_EOL . Indent::_(4) . 'return false;'
+			. PHP_EOL . Indent::_(3) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(3) . '$stored = new Joomla__' . '_a87c432d_b5b4_428e_b7ff_14b51664c624___Power($stored);'
+			. PHP_EOL . Indent::_(3) . '$context[\'stored\'] = $group ? (array) $stored->get($group, []) : $stored->toArray();'
+			. PHP_EOL . Indent::_(2) . '}'
+			. PHP_EOL
+			. PHP_EOL . Indent::_(2) . 'return $context;'
+			. PHP_EOL . Indent::_(1) . '}';
 	}
 
 	/**

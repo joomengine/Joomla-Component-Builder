@@ -65,7 +65,7 @@ final class CheckInNow implements CheckInNowInterface
 		$checkin .= PHP_EOL . Indent::_(3) . "//" . Line::_(__LINE__,__CLASS__) . " Get a db connection.";
 		$checkin .= PHP_EOL . Indent::_(3) . "\$db = \$this->getDatabase();";
 		$checkin .= PHP_EOL . Indent::_(3) . "//" . Line::_(__Line__, __Class__) . " Reset query.";
-		$checkin .= PHP_EOL . Indent::_(3) . "\$query = \$db->getQuery(true);";
+		$checkin .= PHP_EOL . Indent::_(3) . "\$query = \$db->createQuery();";
 		$checkin .= PHP_EOL . Indent::_(3) . "\$query->select('*');";
 		$checkin .= PHP_EOL . Indent::_(3) . "\$query->from(\$db->quoteName('#__" . $component . "_" . $view . "'));";
 		$checkin .= PHP_EOL . Indent::_(3) . "//" . Line::_(__Line__, __Class__) . " Only select items that are checked out.";
@@ -73,14 +73,15 @@ final class CheckInNow implements CheckInNowInterface
 		$checkin .= PHP_EOL . Indent::_(3) . "\$query->where(\$db->quoteName('checked_out') . ' >= 0');";
 
 		$checkin .= PHP_EOL . Indent::_(3) . "//" . Line::_(__Line__, __Class__) . " Query only to see if we have a rows";
-		$checkin .= PHP_EOL . Indent::_(3) . "\$db->setQuery(\$query, 0, 1);";
+		$checkin .= PHP_EOL . Indent::_(3) . "\$query->setLimit(1);";
+		$checkin .= PHP_EOL . Indent::_(3) . "\$db->setQuery(\$query);";
 		$checkin .= PHP_EOL . Indent::_(3) . "\$db->execute();";
 		$checkin .= PHP_EOL . Indent::_(3) . "if (\$db->getNumRows())";
 		$checkin .= PHP_EOL . Indent::_(3) . "{";
 		$checkin .= PHP_EOL . Indent::_(4) . "//" . Line::_(__Line__, __Class__) . " Get target date in the past.";
 		$checkin .= PHP_EOL . Indent::_(4) . "\$date = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getDate()->modify(\$time)->toSql();";
 		$checkin .= PHP_EOL . Indent::_(4) . "//" . Line::_(__Line__, __Class__) . " Reset query.";
-		$checkin .= PHP_EOL . Indent::_(4) . "\$query = \$db->getQuery(true);";
+		$checkin .= PHP_EOL . Indent::_(4) . "\$query = \$db->createQuery();";
 		$checkin .= PHP_EOL . PHP_EOL . Indent::_(4) . "//" . Line::_(__LINE__,__CLASS__) . " Fields to update.";
 		$checkin .= PHP_EOL . Indent::_(4) . "\$fields = [";
 

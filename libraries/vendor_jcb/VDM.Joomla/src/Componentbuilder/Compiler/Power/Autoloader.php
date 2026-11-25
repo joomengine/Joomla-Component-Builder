@@ -269,7 +269,7 @@ class Autoloader
 				$counter++;
 			}
 			$autoload_method[] = Indent::_(1) . '];';
-			$autoload_method[] = Indent::_(1) . '// Start the search and load if found';
+			$autoload_method[] = Indent::_(1) . '//' . Line::_(__LINE__, __CLASS__) . ' Start the search and load if found';
 			$autoload_method[] = Indent::_(1) . '$found = false;';
 			$autoload_method[] = Indent::_(1) . '$found_base_dir = "";';
 			$autoload_method[] = Indent::_(1) . '$found_len = 0;';
@@ -465,7 +465,7 @@ class Autoloader
 				$counter++;
 			}
 			$autoload_method[] = Indent::_(1) . '];';
-			$autoload_method[] = Indent::_(1) . '// Start the search and load if found';
+			$autoload_method[] = Indent::_(1) . '//' . Line::_(__LINE__, __CLASS__) . ' Start the search and load if found';
 			$autoload_method[] = Indent::_(1) . '$found = false;';
 			$autoload_method[] = Indent::_(1) . '$found_base_dir = "";';
 			$autoload_method[] = Indent::_(1) . '$found_len = 0;';

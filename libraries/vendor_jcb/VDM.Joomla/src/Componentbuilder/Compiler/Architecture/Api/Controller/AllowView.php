@@ -146,7 +146,7 @@ final class AllowView
 	/**
 	 * Materialize the complete shared item authorization block.
 	 *
-	 * Preserve the original template bytes for views without generated API
+	 * Preserve the edit guard for views without generated API
 	 * resources. API-enabled views distinguish read permission from editing.
 	 *
 	 * @param   string  $nameSingleCode  The single code name of the view.
@@ -159,18 +159,17 @@ final class AllowView
 	{
 		if (!$apiEnabled)
 		{
-			// The leading spaces on the two application lines are existing template bytes.
-			return PHP_EOL . Indent::_(3) . '// check edit access permissions'
+			return PHP_EOL . Indent::_(3) . '//' . Line::_(__LINE__, __CLASS__) . ' check edit access permissions'
 				. PHP_EOL . Indent::_(3) . 'if (!empty($item->id) && !$this->allowEdit((array) $item))'
 				. PHP_EOL . Indent::_(3) . '{'
-				. PHP_EOL . ' ' . Indent::_(4) . '$app = Factory::getApplication();'
-				. PHP_EOL . '  ' . Indent::_(4) . "\$app->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'error');"
+				. PHP_EOL . Indent::_(4) . '$app = Factory::getApplication();'
+				. PHP_EOL . Indent::_(4) . "\$app->enqueueMessage(Text::_('JERROR_ALERTNOAUTHOR'), 'error');"
 				. PHP_EOL . Indent::_(4) . "\$app->redirect('index.php?option=com_" . $this->component . "');"
 				. PHP_EOL . Indent::_(4) . 'return false;'
 				. PHP_EOL . Indent::_(3) . '}';
 		}
 
-		return PHP_EOL . Indent::_(3) . '// API reads use read permissions; administrator editing keeps its edit guard.'
+		return PHP_EOL . Indent::_(3) . '//' . Line::_(__LINE__, __CLASS__) . ' API reads use read permissions; administrator editing keeps its edit guard.'
 			. PHP_EOL . Indent::_(3) . 'if (!empty($item->id))'
 			. PHP_EOL . Indent::_(3) . '{'
 			. PHP_EOL . Indent::_(4) . '$app = Factory::getApplication();'

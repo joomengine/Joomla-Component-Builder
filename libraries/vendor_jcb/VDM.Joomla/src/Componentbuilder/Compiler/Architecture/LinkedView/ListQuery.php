@@ -146,6 +146,14 @@ class ListQuery implements ListQueryInterface
 	protected ViewsDefaultOrdering $viewsdefaultordering;
 
 	/**
+	 * Fresh-query method emitted by this target renderer.
+	 *
+	 * @var   string
+	 * @since 6.2.0
+	 */
+	protected string $queryMethod = 'getQuery(true)';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Config                       $config                       The Config Class.
@@ -235,7 +243,7 @@ class ListQuery implements ListQueryInterface
 		$query .= PHP_EOL . Indent::_(2) . "//" . Line::_(__Line__, __Class__)
 			. " Create a new query object.";
 		$query .= $this->getDatabaseObject();
-		$query .= PHP_EOL . Indent::_(2) . "\$query = \$db->getQuery(true);";
+		$query .= PHP_EOL . Indent::_(2) . "\$query = \$db->{$this->queryMethod};";
 		$query .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
 				__LINE__,__CLASS__
 			) . " Select some fields";

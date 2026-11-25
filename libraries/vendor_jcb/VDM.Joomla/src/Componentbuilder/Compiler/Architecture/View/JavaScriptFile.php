@@ -29,11 +29,11 @@ use VDM\Joomla\Utilities\StringHelper;
  * View JavaScript File Class.
  * 
  * Writes the script file of a view into the component being built, and gives
- * back the statement the view runs to include it.
+ * back the target-specific fragment that includes it in the view.
  * 
  * @since  6.1.7
  */
-final class JavaScriptFile
+class JavaScriptFile
 {
 	/**
 	 * The Config Class.
@@ -122,12 +122,12 @@ final class JavaScriptFile
 	}
 
 	/**
-	 * Write the script file of a view and give back the statement that includes it.
+	 * Write the script file and give back its target-specific document fragment.
 	 *
 	 * @param   array   $view    The view being built.
 	 * @param   string  $TARGET  The upper case build target of the view.
 	 *
-	 * @return  string  The statement, or nothing when the view has no script file.
+	 * @return  string  The fragment, or nothing when the view has no script file.
 	 *
 	 * @since   6.1.7
 	 */
@@ -148,17 +148,7 @@ final class JavaScriptFile
 				Placefix::_h('VERSION')                          => $view['settings']->version);
 			$this->structure->build($target, 'javascript_file', false, $config);
 			// set path
-			if ('site' === $this->config->build_target)
-			{
-				$path = '/components/com_' . $this->config->component_code_name
-					. '/assets/js/' . $view['settings']->code . '.js';
-			}
-			else
-			{
-				$path = '/administrator/components/com_'
-					. $this->config->component_code_name . '/assets/js/'
-					. $view['settings']->code . '.js';
-			}
+			$path = $this->getPath($view['settings']->code);
 			// add script to file
 			$this->contentmulti->set($view['settings']->code . '|' . $TARGET
 				. '_JAVASCRIPT_FILE', $this->placeholder->update_(
@@ -166,13 +156,65 @@ final class JavaScriptFile
 			));
 
 			// add script to view
-			return PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
-					__LINE__,__CLASS__
-				) . " Add View JavaScript File" . PHP_EOL . Indent::_(2)
-				. $this->includehelper->get($path);
+			return $this->render($path);
 		}
 
 		return '';
+	}
+
+	/**
+	 * Render the legacy include without changing file creation.
+	 *
+	 * @param   string  $path  The installed asset path.
+	 *
+	 * @return  string  The include statement.
+	 * @since   6.2.0
+	 */
+	protected function render(string $path): string
+	{
+		return PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
+				__LINE__, __CLASS__
+			) . " Add View JavaScript File" . PHP_EOL
+			. $this->includehelper->getViewScript($path, 2);
+	}
+
+	/**
+	 * Resolve the public script path for this view.
+	 *
+	 * @param   string  $name  The view code name.
+	 *
+	 * @return  string  The installed asset path.
+	 * @since   6.2.0
+	 */
+	protected function getPath(string $name): string
+	{
+		if ('site' === $this->config->build_target)
+		{
+			return '/components/com_' . $this->config->component_code_name
+				. '/assets/js/' . $name . '.js';
+		}
+		else
+		{
+			return '/administrator/components/com_'
+				. $this->config->component_code_name . '/assets/js/'
+				. $name . '.js';
+		}
+	}
+
+	/**
+	 * Build the optional file and retain the legacy include position.
+	 *
+	 * @param   array   $view    The current view definition.
+	 * @param   string  $TARGET  The upper-case build target.
+	 *
+	 * @return  void
+	 * @since   6.2.1
+	 */
+	public function set(array &$view, string $TARGET): void
+	{
+		$this->contentmulti->add($view['settings']->code . '|' . $TARGET . '_LIBRARIES_LOADER',
+			$this->get($view, $TARGET), false
+		);
 	}
 }
 

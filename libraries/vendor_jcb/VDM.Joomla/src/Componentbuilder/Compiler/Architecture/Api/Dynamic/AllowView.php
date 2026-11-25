@@ -50,9 +50,9 @@ class AllowView
 	 *
 	 * The check runs before the model, so a refusal is a 403 and never the
 	 * redirect the model would answer with. A site view asks for its
-	 * site.<code>.access permission when its link sets access; a custom
-	 * admin view asks for core.manage on the component, and for its
-	 * <code>.access permission when its link sets access.
+	 * site.<code>.access permission when configured. A custom admin view
+	 * retains its <code>.access permission. On Joomla versions before the
+	 * component API gate, it also requires core.manage.
 	 *
 	 * @param   array  $resource  The resource, as the resources map names it.
 	 *
@@ -80,8 +80,9 @@ class AllowView
 		if (!$site)
 		{
 			$body .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__)
-				. " The administrator area asks for core.manage.";
-			$body .= PHP_EOL . Indent::_(2) . "if (!\$user->authorise('core.manage', '{$component}'))";
+				. " Joomla 5.4.11 and 6.2.1 introduced the active route and the core.api dispatcher check.";
+			$body .= PHP_EOL . Indent::_(2) . "if (!method_exists(\\Joomla\\CMS\\Application\\ApiApplication::class, 'getActiveRoute')";
+			$body .= PHP_EOL . Indent::_(3) . "&& !\$user->authorise('core.manage', '{$component}'))";
 			$body .= PHP_EOL . Indent::_(2) . "{";
 			$body .= PHP_EOL . Indent::_(3) . "return false;";
 			$body .= PHP_EOL . Indent::_(2) . "}";

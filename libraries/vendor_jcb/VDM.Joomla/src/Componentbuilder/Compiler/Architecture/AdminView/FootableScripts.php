@@ -141,14 +141,26 @@ class FootableScripts implements FootableScriptsInterface
 			. "/footable-v2/js/footable.paginate.js', ['version' => 'auto']);";
 		if ($init)
 		{
-			$foo .= PHP_EOL . PHP_EOL . Indent::_(2)
-				. '$footable = "jQuery(document).ready(function() { jQuery(function () { jQuery('
-				. "'.footable'" . ').footable(); }); jQuery('
-				. "'.nav-tabs'" . ').on(' . "'click'" . ', ' . "'li'"
-				. ', function() { setTimeout(tableFix, 10); }); }); function tableFix() { jQuery('
-				. "'.footable'" . ').trigger(' . "'footable_resize'"
-				. '); }";';
+			$javascript = 'jQuery(document).ready(function() {';
+			$javascript .= PHP_EOL . Indent::_(1) . 'jQuery(function () {';
+			$javascript .= PHP_EOL . Indent::_(2) . "jQuery('.footable').footable();";
+			$javascript .= PHP_EOL . Indent::_(1) . '});';
+			$javascript .= PHP_EOL . Indent::_(1) . "jQuery('.nav-tabs').on('click', 'li', function() {";
+			$javascript .= PHP_EOL . Indent::_(2) . 'setTimeout(tableFix, 10);';
+			$javascript .= PHP_EOL . Indent::_(1) . '});';
+			$javascript .= PHP_EOL . Indent::_(0) . '});';
+			$javascript .= PHP_EOL . Indent::_(0) . 'function tableFix() {';
+			$javascript .= PHP_EOL . Indent::_(1) . "jQuery('.footable').trigger('footable_resize');";
+			$javascript .= PHP_EOL . Indent::_(0) . '}';
+			$lines = explode(PHP_EOL, $javascript);
+			$foo .= PHP_EOL . PHP_EOL . Indent::_(2) . '$footable = ' . var_export(array_shift($lines), true);
 
+			foreach ($lines as $line)
+			{
+				$foo .= PHP_EOL . Indent::_(3) . '. PHP_EOL . ' . var_export($line, true);
+			}
+
+			$foo .= ';';
 			$foo .= $this->getInlineScript();
 		}
 
@@ -185,10 +197,20 @@ class FootableScripts implements FootableScriptsInterface
 			. "/footable-v3/js/footable.min.js', ['version' => 'auto']);";
 		if ($init)
 		{
-			$foo .= PHP_EOL . PHP_EOL . Indent::_(2)
-				. '$footable = "jQuery(document).ready(function() { jQuery(function () { jQuery('
-				. "'.footable'" . ').footable();});});";';
+			$javascript = 'jQuery(document).ready(function() {';
+			$javascript .= PHP_EOL . Indent::_(1) . 'jQuery(function () {';
+			$javascript .= PHP_EOL . Indent::_(2) . "jQuery('.footable').footable();";
+			$javascript .= PHP_EOL . Indent::_(1) . '});';
+			$javascript .= PHP_EOL . Indent::_(0) . '});';
+			$lines = explode(PHP_EOL, $javascript);
+			$foo .= PHP_EOL . PHP_EOL . Indent::_(2) . '$footable = ' . var_export(array_shift($lines), true);
 
+			foreach ($lines as $line)
+			{
+				$foo .= PHP_EOL . Indent::_(3) . '. PHP_EOL . ' . var_export($line, true);
+			}
+
+			$foo .= ';';
 			$foo .= $this->getInlineScript();
 		}
 
