@@ -207,6 +207,6 @@
 		<maintainer>Llewellyn van der Merwe</maintainer>
 		<maintainerurl>https://dev.vdm.io</maintainerurl>
 		<targetplatform name="joomla" version="6\.[01234]"/>
-		<sha512>f3781cbb4e9e190df38c3fe7fa80ba69bf6f9dbafb158e0426dd4604f2f1ba794450679005a38d0f9f1dad0696e2f22b8b086b2d7d08a0f99bb4fd3b0f7ed5d8</sha512>
+		<sha512>28c7ba30081e78a804e2911147ae3c47cbd751a71d6c11e820f5a6b16e998fdc1eb02799cfe4af42e8c1ffceea0cbc0fa744c0a8992cdedef5e79f3ca683fbce</sha512>
 	</update>
 </updates>
