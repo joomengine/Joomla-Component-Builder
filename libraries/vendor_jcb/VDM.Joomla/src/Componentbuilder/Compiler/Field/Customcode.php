@@ -96,6 +96,8 @@ class Customcode
 					$convert__,
 					true
 				);
+				$this->reportScriptPlacement($id, $field, 'javascript_view_footer', $singleViewName);
+
 				if (!isset($field->javascript_view_footer_decoded))
 				{
 					$field->javascript_view_footer_decoded
@@ -178,6 +180,8 @@ class Customcode
 					$convert__,
 					true
 				);
+				$this->reportScriptPlacement($id, $field, 'javascript_views_footer', $listViewName);
+
 				if (!isset($field->javascript_views_footer_decoded))
 				{
 					$field->javascript_views_footer_decoded = true;
@@ -226,6 +230,21 @@ class Customcode
 			// add this only once to list view.
 			$this->views[$listViewName][$id] = true;
 		}
+	}
+
+	/**
+	 * Report placement changes after the authored footer has been decoded.
+	 *
+	 * @param   int     $id        Field identifier.
+	 * @param   object  $field     Field definition carrying the decoded source.
+	 * @param   string  $scripter  Original footer source field.
+	 * @param   string  $target    View or extension collection key.
+	 *
+	 * @return  void
+	 * @since   6.2.0
+	 */
+	protected function reportScriptPlacement(int $id, object $field, string $scripter, string $target): void
+	{
 	}
 }
 

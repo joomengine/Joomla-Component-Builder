@@ -132,6 +132,14 @@ class ItemsMethod implements ItemsMethodInterface
 	protected EximportView $eximportview;
 
 	/**
+	 * Fresh-query method emitted by this target renderer.
+	 *
+	 * @var   string
+	 * @since 6.2.0
+	 */
+	protected string $queryMethod = 'getQuery(true)';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param Config                $config                 The Config Class.
@@ -232,7 +240,7 @@ class ItemsMethod implements ItemsMethodInterface
 				. " Create a new query object.";
 			$query .= $this->getDatabaseObject(3);
 			$query .= PHP_EOL . Indent::_(3)
-				. "\$query = \$db->getQuery(true);";
+				. "\$query = \$db->{$this->queryMethod};";
 			$query .= PHP_EOL . PHP_EOL . Indent::_(3) . "//" . Line::_(
 					__LINE__,__CLASS__
 				) . " Select some fields";

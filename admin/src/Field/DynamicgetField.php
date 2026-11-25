@@ -56,7 +56,7 @@ class DynamicgetField extends ListField
 			$button_code_name = $this->getAttribute('name');
 			// get the input from url
 			$app = Factory::getApplication();
-			$jinput = method_exists($app, 'getInput') ? $app->getInput() : $app->input;
+			$jinput = $app->getInput();
 			// get the view name & id
 			$values = $jinput->getArray(array(
 				'id' => 'int',
@@ -103,7 +103,9 @@ class DynamicgetField extends ListField
 				$script[] = "
 					document.addEventListener('DOMContentLoaded', function() {
 						let  ".$button_code_name."Field = document.getElementById('jform_".$button_code_name."');
-						if (!".$button_code_name."Field) { return; }
+						if (!".$button_code_name."Field) {
+							return;
+						}
 						".$button_code_name."Field.addEventListener('change', function(e) {
 							e.preventDefault();
 							let ".$button_code_name."Value = this.value;
@@ -135,7 +137,7 @@ class DynamicgetField extends ListField
 			{
 				// Load the needed script.
 				$document = Factory::getApplication()->getDocument();
-				$document->addScriptDeclaration(implode(' ',$script));
+				$document->getWebAssetManager()->addInlineScript(implode(' ', $script), [], [], ['core']);
 				// return the button attached to input field.
 				return '<div class="input-group">' .$html . implode('',$button).'</div>';
 			}

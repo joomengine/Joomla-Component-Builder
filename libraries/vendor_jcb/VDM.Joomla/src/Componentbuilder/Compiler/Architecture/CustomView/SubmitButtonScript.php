@@ -24,7 +24,7 @@ use VDM\Joomla\Utilities\StringHelper;
  * 
  * @since 6.1.7
  */
-final class SubmitButtonScript
+class SubmitButtonScript
 {
 	/**
 	 * Build the submit button script of a custom view.
@@ -46,7 +46,6 @@ final class SubmitButtonScript
 				) === false)
 			{
 				$script   = [];
-				$script[] = PHP_EOL . "<script type=\"text/javascript\">";
 				$script[] = Indent::_(1)
 					. "Joomla.submitbutton = function(task) {";
 				$script[] = Indent::_(2) . "if (task === '"
@@ -60,13 +59,27 @@ final class SubmitButtonScript
 				$script[] = Indent::_(3) . "form.submit();";
 				$script[] = Indent::_(2) . "}";
 				$script[] = Indent::_(1) . "}";
-				$script[] = "</script>";
 
-				return implode(PHP_EOL, $script);
+				return $this->renderScript(implode(PHP_EOL, $script), $view['settings']->code);
 			}
 		}
 
 		return '';
+	}
+
+	/**
+	 * Wrap the generated handler for the target view template.
+	 *
+	 * @param   string  $script  The submit handler source.
+	 * @param   string  $name    The custom view code name.
+	 *
+	 * @return  string  The generated template fragment.
+	 * @since   6.2.0
+	 */
+	protected function renderScript(string $script, string $name): string
+	{
+		return PHP_EOL . '<script type="text/javascript">' . PHP_EOL
+			. $script . PHP_EOL . '</script>';
 	}
 }
 

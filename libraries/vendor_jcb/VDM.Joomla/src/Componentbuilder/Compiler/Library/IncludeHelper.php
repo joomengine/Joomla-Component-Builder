@@ -12,12 +12,15 @@
 namespace VDM\Joomla\Componentbuilder\Compiler\Library;
 
 
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
+
+
 /**
  * Library Include Helper
  * 
  * @since 5.1.2
  */
-final class IncludeHelper
+class IncludeHelper
 {
 	/**
 	 * Get the Library Include string for a given path.
@@ -42,6 +45,21 @@ final class IncludeHelper
 			'php'  => str_starts_with($path, 'http') ? '' : sprintf('require_once("%s");', $path),
 			default => '',
 		};
+	}
+
+	/**
+	 * Emit a view script at the surrounding method's indentation.
+	 *
+	 * @param   string  $path       The script path.
+	 * @param   int     $indent     The surrounding indentation level.
+	 * @param   bool    $reuseWa    Whether the template has already assigned $wa.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	public function getViewScript(string $path, int $indent, bool $reuseWa = false): string
+	{
+		return Indent::_($indent) . $this->get($path);
 	}
 }
 

@@ -15,6 +15,7 @@ namespace VDM\Joomla\Componentbuilder\Compiler\Architecture\Field;
 use VDM\Joomla\Componentbuilder\Compiler\Field\Groups as FieldGroups;
 use VDM\Joomla\Componentbuilder\Compiler\Builder\ValidationFix;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 use VDM\Joomla\Utilities\ArrayHelper;
 
 
@@ -169,13 +170,13 @@ final class TargetControlsScript
 	{
 		if ($required)
 		{
-			return PHP_EOL . Indent::_(2) . "// Add required attributes to " . $name . "."
+			return PHP_EOL . Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " Add required attributes to " . $name . "."
 				. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').prop('required', true);"
 				. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').attr('aria-required', true);"
 				. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').addClass('required');";
 		}
 
-		return PHP_EOL . Indent::_(2) . "// Remove required attributes from " . $name . "."
+		return PHP_EOL . Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " Remove required attributes from " . $name . "."
 			. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').removeAttr('required');"
 			. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').removeAttr('aria-required');"
 			. PHP_EOL . Indent::_(2) . "jQuery('#jform_" . $name . "').removeClass('required');";

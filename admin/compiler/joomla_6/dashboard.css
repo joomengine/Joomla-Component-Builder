@@ -1,0 +1,206 @@
+###BOM###
+
+/* Dashboard icon grid */
+
+.dashboard-icons {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 1.25rem;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.dashboard-icon-item {
+	min-width: 0;
+}
+
+.dashboard-icon-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 1rem;
+	height: 100%;
+	min-height: 220px;
+	padding: 1.5rem 1.25rem;
+	border: 1px solid var(--border-color, #dfe3e7);
+	border-radius: 0.75rem;
+	background: var(--body-bg, #fff);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	color: var(--body-color, #1f2d3d);
+	text-align: center;
+	text-decoration: none;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-icon-link:hover,
+.dashboard-icon-link:focus,
+.dashboard-icon-link:focus-visible {
+	color: var(--link-color, #0d6efd);
+	text-decoration: none;
+	border-color: var(--link-color, #0d6efd);
+	box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+	transform: translateY(-2px);
+	outline: none;
+}
+
+.dashboard-icon-image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 110px;
+}
+
+.dashboard-icon-image img {
+	display: block;
+	max-width: 96px;
+	max-height: 96px;
+	width: auto;
+	height: auto;
+	margin: 0 auto;
+	object-fit: contain;
+}
+
+.dashboard-icon-title {
+	display: block;
+	width: 100%;
+	font-size: 1.05rem;
+	font-weight: 500;
+	line-height: 1.4;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+
+/* Optional info blocks if still used elsewhere */
+.dashboard-info {
+	display: block;
+	padding: 1rem 1.25rem;
+	border: 1px solid var(--border-color, #dfe3e7);
+	border-radius: 0.75rem;
+	background: var(--body-bg, #fff);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	color: var(--body-color, #1f2d3d);
+	text-align: center;
+}
+
+.dashboard-info span {
+	display: block;
+	text-align: center;
+}
+
+.dashboard-info img {
+	display: block;
+	margin: 0 auto 0.75rem;
+	max-width: 100%;
+	height: auto;
+}
+
+/* Legacy blocks modernized slightly, if still used */
+.dashboard-block {
+	margin-bottom: 1.5rem;
+	border: 1px solid var(--border-color, #dfe3e7);
+	border-radius: 0.75rem;
+	background: var(--body-bg, #fff);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+}
+
+.dashboard-block .dashboard-block-head {
+	display: flex;
+	align-items: center;
+	min-height: 3rem;
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--border-color, #dfe3e7);
+	background: var(--secondary-bg, #f8f9fa);
+	position: relative;
+}
+
+.dashboard-block .dashboard-block-head h5 {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+.dashboard-block .dashboard-block-content {
+	padding: 1rem;
+	background: var(--body-bg, #fff);
+}
+
+.dashboard-block .dashboard-block-box {
+	background: transparent;
+	border-top: 1px solid var(--border-color, #dfe3e7);
+	box-shadow: none;
+}
+
+.dashboard-block-table,
+.dashboard-table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+.dashboard-block-table th,
+.dashboard-block-table td,
+.dashboard-table th,
+.dashboard-table td {
+	padding: 0.65rem 0.75rem;
+	border-top: 1px solid var(--border-color, #e5e7eb);
+	text-align: left;
+	vertical-align: middle;
+}
+
+.dashboard-badge {
+	display: inline-block;
+	padding: 0.2rem 0.6rem;
+	border-radius: 999px;
+	background-color: #6c757d;
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+/* Responsive refinements */
+@media (max-width: 991.98px) {
+	.dashboard-icons {
+		grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+		gap: 1rem;
+	}
+
+	.dashboard-icon-link {
+		min-height: 200px;
+		padding: 1.25rem 1rem;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.dashboard-icons {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.875rem;
+	}
+
+	.dashboard-icon-link {
+		min-height: 180px;
+		padding: 1rem 0.875rem;
+		border-radius: 0.625rem;
+	}
+
+	.dashboard-icon-image {
+		min-height: 84px;
+	}
+
+	.dashboard-icon-image img {
+		max-width: 72px;
+		max-height: 72px;
+	}
+
+	.dashboard-icon-title {
+		font-size: 0.95rem;
+		line-height: 1.3;
+	}
+}

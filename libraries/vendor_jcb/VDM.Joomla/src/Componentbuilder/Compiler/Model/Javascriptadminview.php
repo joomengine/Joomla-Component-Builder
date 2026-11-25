@@ -119,9 +119,26 @@ class Javascriptadminview
 						= true;
 				}
 
+				$this->reportScriptPlacement($item, $scripter);
+
 				unset($item->{$scripter});
 			}
 		}
+	}
+
+	/**
+	 * Report target-specific placement changes after decoding the enabled script.
+	 *
+	 * Shared targets retain their existing placement without a diagnostic.
+	 *
+	 * @param   object  $item      The view containing the decoded script.
+	 * @param   string  $scripter  The original JavaScript field name.
+	 *
+	 * @return  void
+	 * @since   6.2.0
+	 */
+	protected function reportScriptPlacement(object $item, string $scripter): void
+	{
 	}
 }
 

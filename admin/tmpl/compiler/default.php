@@ -36,18 +36,21 @@ $noticeboardOptions = ['vdm', 'pro'];
 
 ?>
 <?php if ($this->canDo->get('compiler.access')): ?>
-<script type="text/javascript">
-	Joomla.submitbutton = function(task) {
-		if (task === 'compiler.back') {
-			parent.history.back();
-			return false;
-		} else {
-			var form = document.getElementById('adminForm');
-			form.task.value = task;
-			form.submit();
-		}
-	}
-</script>
+<?php
+$jcbSubmitScript = '	Joomla.submitbutton = function(task) {'
+	. PHP_EOL . '		if (task === \'compiler.back\') {'
+	. PHP_EOL . '			parent.history.back();'
+	. PHP_EOL . '			return false;'
+	. PHP_EOL . '		} else {'
+	. PHP_EOL . '			var form = document.getElementById(\'adminForm\');'
+	. PHP_EOL . '			form.task.value = task;'
+	. PHP_EOL . '			form.submit();'
+	. PHP_EOL . '		}'
+	. PHP_EOL . '	}';
+$this->getDocument()->getWebAssetManager()->addInlineScript(
+	$jcbSubmitScript, ['name' => 'com_componentbuilder.compiler.submit'], [], ['core']
+);
+?>
 
 <script type="text/javascript">
 /**

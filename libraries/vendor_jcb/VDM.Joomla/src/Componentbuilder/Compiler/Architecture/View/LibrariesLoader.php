@@ -40,6 +40,14 @@ use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\View\LibrariesL
 class LibrariesLoader implements LibrariesLoaderInterface
 {
 	/**
+	 * Separation before the header checker statements.
+	 *
+	 * @var    string
+	 * @since  6.2.0
+	 */
+	protected const HEADER_SEPARATOR = '';
+
+	/**
 	 * The Config Class.
 	 *
 	 * @var   Config
@@ -135,9 +143,9 @@ class LibrariesLoader implements LibrariesLoaderInterface
 				) . " Only load jQuery if needed. (default is true)";
 			$setter .= PHP_EOL . Indent::_(2) . "if (\$this->params->get('add_jquery_framework', 1) == 1)";
 			$setter .= PHP_EOL . Indent::_(2) . "{";
-			$setter .= PHP_EOL . Indent::_(3) . "Html::_('jquery.framework');";
+			$setter .= PHP_EOL . Indent::_(3) . $this->jquery();
 			$setter .= PHP_EOL . Indent::_(2) . "}";
-			$setter .= PHP_EOL . Indent::_(2) . "//" . Line::_(__Line__, __Class__)
+			$setter .= static::HEADER_SEPARATOR . PHP_EOL . Indent::_(2) . "//" . Line::_(__Line__, __Class__)
 				. " Load the header checker class.";
 
 			$setter .= $this->headerChecker();
@@ -178,6 +186,17 @@ class LibrariesLoader implements LibrariesLoaderInterface
 		}
 
 		return $setter;
+	}
+
+	/**
+	 * Build the jQuery activation statement.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function jquery(): string
+	{
+		return "Html::_('jquery.framework');";
 	}
 
 	/**

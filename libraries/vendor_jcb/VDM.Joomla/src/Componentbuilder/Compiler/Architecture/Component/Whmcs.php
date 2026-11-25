@@ -113,7 +113,7 @@ final class Whmcs
 				$encrypt[] = PHP_EOL . Indent::_(1)
 					. "public function __construct(\$Vk5smi0wjnjb)";
 				$encrypt[] = Indent::_(1) . "{";
-				$encrypt[] = Indent::_(2) . "// get the session";
+				$encrypt[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " get the session";
 				$encrypt[] = Indent::_(2)
 					. "\$session = Joomla__" . "_39403062_84fb_46e0_bac4_0023f766e827___Power::getSession();";
 				$encrypt[] = Indent::_(2)
@@ -225,7 +225,11 @@ final class Whmcs
 				$encrypt[] = Indent::_(4) . "'dir' => \$V343jp03dxco,";
 				$encrypt[] = Indent::_(3) . ");";
 				$encrypt[] = Indent::_(3)
-					. "if (\$Visqfrd1caus) \$V1u0c4dl3ehp['check_token'] = \$Visqfrd1caus;";
+					. "if (\$Visqfrd1caus)";
+				$encrypt[] = Indent::_(3) . "{";
+				$encrypt[] = Indent::_(4)
+					. "\$V1u0c4dl3ehp['check_token'] = \$Visqfrd1caus;";
+				$encrypt[] = Indent::_(3) . "}";
 				$encrypt[] = Indent::_(3) . "\$Vdsjeyjmpq2o = '';";
 				$encrypt[] = Indent::_(3)
 					. "foreach (\$V1u0c4dl3ehp AS \$V2sgyscukmgi=>\$V1u00zkzmb1d) {";

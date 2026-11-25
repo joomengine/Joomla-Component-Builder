@@ -148,10 +148,10 @@ class BatchMove implements BatchMoveInterface
 			. " Set some needed variables.";
 		$batchmove[] = $this->getUserObject();
 		$batchmove[] = Indent::_(3)
-			. "\$this->table		= \$this->getTable();";
+			. "\$this->table" . Indent::_(2) . "= \$this->getTable();";
 		$batchmove[] = Indent::_(3)
-			. "\$this->tableClassName	= get_class(\$this->table);";
-		$batchmove[] = Indent::_(3) . "\$this->canDo		= " . Selection::permittedActionsToken() . "::get('" . $nameSingleCode . "');";
+			. "\$this->tableClassName" . Indent::_(1) . "= get_class(\$this->table);";
+		$batchmove[] = Indent::_(3) . "\$this->canDo" . Indent::_(2) . "= " . Selection::permittedActionsToken() . "::get('" . $nameSingleCode . "');";
 		$batchmove[] = Indent::_(2) . "}";
 
 		$batchmove[] = PHP_EOL . Indent::_(2) . "if (!\$this->canDo->get('"
@@ -305,7 +305,7 @@ class BatchMove implements BatchMoveInterface
 	protected function getUserObject(): string
 	{
 		return Indent::_(3)
-			. "\$this->user		= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
+			. "\$this->user" . Indent::_(2) . "= Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
 	}
 }
 

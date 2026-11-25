@@ -32,6 +32,7 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\Input\Input;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Toolbar\Toolbar;
+use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
 \defined('_JEXEC') or die;
@@ -127,6 +128,7 @@ class HtmlView extends BaseHtmlView
 
 		// Load module values
 		$model = $this->getModel();
+		$model->setUseExceptions(true);
 		$this->styles = $model->getStyles() ?? [];
 		$this->scripts = $model->getScripts() ?? [];
 		// Initialise variables.
@@ -148,12 +150,6 @@ class HtmlView extends BaseHtmlView
 		{
 			// add the tool bar
 			$this->addToolBar();
-		}
-
-		// Check for errors.
-		if (count($errors = $model->getErrors()))
-		{
-			throw new \Exception(implode(PHP_EOL, $errors), 500);
 		}
 
 		// Set the html view document stuff
@@ -455,11 +451,11 @@ class HtmlView extends BaseHtmlView
 		// add title to the page
 		ToolbarHelper::title(Text::_('COM_COMPONENTBUILDER_EXTRUSION'), 'shuffle');
 		// add cpanel button
-		ToolbarHelper::custom('extrusion.dashboard', 'grid-2', '', 'COM_COMPONENTBUILDER_DASH', false);
+		$this->getDocument()->getToolbar()->standardButton('grid-2', 'COM_COMPONENTBUILDER_DASH', 'extrusion.dashboard')->listCheck(false);
 		if ($this->canDo->get('extrusion.health_check'))
 		{
 			// add Health Check button.
-			ToolbarHelper::custom('extrusion.healthCheck', 'health custom-button-healthcheck', '', 'COM_COMPONENTBUILDER_HEALTH_CHECK', false);
+			$this->getDocument()->getToolbar()->standardButton('health custom-button-healthcheck', 'COM_COMPONENTBUILDER_HEALTH_CHECK', 'extrusion.healthCheck')->listCheck(false);
 		}
 		// set help url for this view if found
 		$this->help_url = ComponentbuilderHelper::getHelpUrl('extrusion');
@@ -483,28 +479,88 @@ class HtmlView extends BaseHtmlView
 	 */
 	protected function _prepareDocument(): void
 	{
+		$wa = $this->getDocument()->getWebAssetManager();
+		$root = Uri::root();
+
+		$jcbStyleDependencies = [];
+		$jcbScriptDependencies = ['core'];
 
 		// Only load jQuery if needed. (default is true)
 		if ($this->params->get('add_jquery_framework', 1) == 1)
 		{
-			Html::_('jquery.framework');
+			$wa->useScript('jquery')->useScript('jquery-noconflict');
+
+			$jcbScriptDependencies[] = 'jquery';
+			$jcbScriptDependencies[] = 'jquery-noconflict';
 		}
+
 		// Load the header checker class.
 		// Initialize the header checker.
 		$HeaderCheck = new HeaderCheck();
 
-		// Add View JavaScript File
-		Html::_('script', 'administrator/components/com_componentbuilder/assets/js/extrusion.js', ['version' => 'auto']);
-		// add styles
+		// Add styles
 		foreach ($this->styles as $style)
 		{
-			Html::_('stylesheet', $style, ['version' => 'auto']);
+			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
+			$assetName = 'jcb.style.' . hash('sha256', $style);
+
+			if (!$wa->assetExists('style', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
+					? $style : $root . $style;
+
+				$wa->registerStyle(
+					$assetName,
+					$assetUri,
+					['version' => 'auto'],
+					[],
+					$jcbStyleDependencies
+				);
+			}
+
+			$wa->useStyle($assetName);
+
+			if (!in_array($assetName, $jcbStyleDependencies, true))
+			{
+				$jcbStyleDependencies[] = $assetName;
+			}
 		}
-		// add scripts
-		foreach ($this->scripts as $script)
+
+		$viewScripts = [
+			// Add View JavaScript File
+			'media/com_componentbuilder/js/admin/extrusion.js',
+
+			// Add scripts
+			...$this->scripts,
+		];
+
+		foreach ($viewScripts as $script)
 		{
-			Html::_('script', $script, ['version' => 'auto']);
+			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
+			$assetName = 'jcb.script.' . hash('sha256', $script);
+
+			if (!$wa->assetExists('script', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
+					? $script : $root . $script;
+
+				$wa->registerScript(
+					$assetName,
+					$assetUri,
+					['version' => 'auto'],
+					[],
+					$jcbScriptDependencies
+				);
+			}
+
+			$wa->useScript($assetName);
+
+			if (!in_array($assetName, $jcbScriptDependencies, true))
+			{
+				$jcbScriptDependencies[] = $assetName;
+			}
 		}
+
 	}
 
 

@@ -95,8 +95,19 @@ class HeaderCheck
 			return true;
 		}
 
+		$assetType = $type === 'scripts' ? 'script' : 'style';
+
+		foreach ($this->document->getWebAssetManager()->getAssets($assetType) as $asset)
+		{
+			if (stripos($asset->getUri(false), $scriptName) !== false
+				|| stripos($asset->getName(), $scriptName) !== false)
+			{
+				return true;
+			}
+		}
+
 		$head_data = $this->document->getHeadData();
-		foreach (array_keys($head_data[$type]) as $script)
+		foreach (array_keys($head_data[$type] ?? []) as $script)
 		{
 			if (stristr($script, $scriptName))
 			{

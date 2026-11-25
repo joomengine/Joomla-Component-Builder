@@ -80,7 +80,7 @@ class HelpController extends BaseController
 	protected function getHelpDocumentText($id)
 	{
 		$db       = Factory::getContainer()->get(DatabaseInterface::class);
-		$query    = $db->getQuery(true);
+		$query    = $db->createQuery();
 		$query->select(array('a.title','a.content'));
 		$query->from('#__componentbuilder_help_document AS a');
 		$query->where('a.id = '.(int) $id);

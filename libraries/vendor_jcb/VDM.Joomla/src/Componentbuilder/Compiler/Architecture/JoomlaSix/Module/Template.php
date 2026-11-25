@@ -19,6 +19,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Builder\TemplateData;
 use VDM\Joomla\Componentbuilder\Compiler\Placeholder;
 use VDM\Joomla\Componentbuilder\Compiler\Builder\ContentOne;
 use VDM\Joomla\Componentbuilder\Compiler\Builder\ContentMulti;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
 use VDM\Joomla\Utilities\StringHelper;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Module\TemplateInterface;
 
@@ -123,40 +124,71 @@ final class Template implements TemplateInterface
 	 */
 	public function default(object $module, string $key): string
 	{
-		// add any css from the fields
-		$default = $this->dispenser->get(
-			'css_views',
-			$key,
-			PHP_EOL . '<style>',
-			'',
-			true,
-			null,
-			PHP_EOL . '</style>' . PHP_EOL
-		);
-
-		// now add the body
+		$css = (string) $this->dispenser->get('css_views', $key, '', '', true, null, '');
+		$default = $this->inlineAsset($module, 'style', $css);
 		$body = trim((string) ($module->default ?? ''));
-		if (!empty($body))
+
+		if ($body !== '')
 		{
 			$default .= PHP_EOL . $body . PHP_EOL;
 		}
 
-		// add any JavaScript from the fields
-		$default .= $this->dispenser->get(
-			'views_footer',
-			$key,
-			PHP_EOL . '<script type="text/javascript">',
-			'',
-			true,
-			null,
-			PHP_EOL . '</script>' . PHP_EOL
-		);
+		$javascript = (string) $this->dispenser->get('views_footer', $key, '', '', true, null, '');
+
+		if ($javascript !== '')
+		{
+			$default .= PHP_EOL . '<script type="text/javascript">'
+				. $javascript . PHP_EOL . '</script>' . PHP_EOL;
+		}
 
 		// return the default content for the model default area
 		return $this->placeholder->update(
 			$default,
 			$this->contentone->allActive()
 		);
+	}
+
+	/**
+	 * Capture a field asset, including embedded PHP, without writing a raw tag.
+	 *
+	 * @param   object  $module   The compiler module definition.
+	 * @param   string  $type     Asset type.
+	 * @param   string  $content  Asset source.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function inlineAsset(object $module, string $type, string $content): string
+	{
+		if ($content === '')
+		{
+			return '';
+		}
+
+		$name = var_export($module->folder_name . '.fields.' . $type . '.', true);
+		$method = ucfirst($type);
+		$dependencies = $type === 'script' ? "['core', 'jquery']" : '[]';
+
+		return PHP_EOL . Indent::_(0) . '<?php'
+			. PHP_EOL . Indent::_(0) . '$jcbModuleBufferLevel = ob_get_level();'
+			. PHP_EOL . Indent::_(0) . 'ob_start();'
+			. PHP_EOL . Indent::_(0) . 'try'
+			. PHP_EOL . Indent::_(0) . '{'
+			. PHP_EOL . Indent::_(1) . '?>'
+			. PHP_EOL . $content
+			. PHP_EOL . Indent::_(0) . '<?php'
+			. PHP_EOL . Indent::_(1) . '$jcbModuleAsset = ob_get_contents();'
+			. PHP_EOL . Indent::_(0) . '}'
+			. PHP_EOL . Indent::_(0) . 'finally'
+			. PHP_EOL . Indent::_(0) . '{'
+			. PHP_EOL . Indent::_(1) . 'while (ob_get_level() > $jcbModuleBufferLevel)'
+			. PHP_EOL . Indent::_(1) . '{'
+			. PHP_EOL . Indent::_(2) . 'ob_end_clean();'
+			. PHP_EOL . Indent::_(1) . '}'
+			. PHP_EOL . Indent::_(0) . '}'
+			. PHP_EOL . Indent::_(0) . '$jcbModuleAssets = Joomla__' . '_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getDocument()->getWebAssetManager();'
+			. PHP_EOL . Indent::_(0) . "\$jcbModuleAssets->addInline{$method}(\$jcbModuleAsset, ['name' => {$name} . hash('sha256', \$jcbModuleAsset)], [], {$dependencies});"
+			. PHP_EOL . Indent::_(0) . '?>';
 	}
 
 	/**

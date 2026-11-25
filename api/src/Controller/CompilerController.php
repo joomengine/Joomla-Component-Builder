@@ -154,8 +154,9 @@ class CompilerController extends ApiController
 		// Get the calling user.
 		$user = Factory::getApplication()->getIdentity();
 
-		// The administrator area asks for core.manage.
-		if (!$user->authorise('core.manage', 'com_componentbuilder'))
+		// Joomla 5.4.11 and 6.2.1 introduced the active route and the core.api dispatcher check.
+		if (!method_exists(\Joomla\CMS\Application\ApiApplication::class, 'getActiveRoute')
+			&& !$user->authorise('core.manage', 'com_componentbuilder'))
 		{
 			return false;
 		}

@@ -273,11 +273,14 @@ final class PrepareDocument
 		);
 
 		// set a JavaScript file if needed
-		$this->contentmulti->add($view['settings']->code . '|' . $TARGET . '_LIBRARIES_LOADER',
-			$this->javascript->get($view, $TARGET), false
-		);
-		// fix just incase we missed it somewhere
-		$this->config->lang_target = $tmp;
+		try
+		{
+			$this->javascript->set($view, $TARGET);
+		}
+		finally
+		{
+			$this->config->lang_target = $tmp;
+		}
 	}
 }
 

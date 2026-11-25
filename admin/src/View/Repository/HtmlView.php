@@ -195,6 +195,7 @@ class HtmlView extends BaseHtmlView
 	{
 		// Load module values
 		$model = $this->getModel();
+		$model->setUseExceptions(true);
 		$this->form ??= $model->getForm();
 		$this->item = $model->getItem();
 		$this->styles = $model->getStyles();
@@ -219,11 +220,6 @@ class HtmlView extends BaseHtmlView
 			$this->addModalToolbar();
 		}
 
-		// Check for errors.
-		if (count($errors = $this->get('Errors')))
-		{
-			throw new \Exception(implode("\n", $errors), 500);
-		}
 
 		// Set the html view document stuff
 		$this->_prepareDocument();
@@ -310,7 +306,7 @@ class HtmlView extends BaseHtmlView
 				{
 					ToolbarHelper::apply('repository.apply', 'JTOOLBAR_APPLY');
 					ToolbarHelper::save('repository.save', 'JTOOLBAR_SAVE');
-					ToolbarHelper::custom('repository.save2new', 'save-new.png', 'save-new_f2.png', 'JTOOLBAR_SAVE_AND_NEW', false);
+					ToolbarHelper::save2new('repository.save2new', 'JTOOLBAR_SAVE_AND_NEW');
 				};
 				ToolbarHelper::cancel('repository.cancel', 'JTOOLBAR_CANCEL');
 			}
@@ -325,7 +321,7 @@ class HtmlView extends BaseHtmlView
 					// if we can return to make a new one.
 					if ($this->canDo->get('repository.create'))
 					{
-						ToolbarHelper::custom('repository.save2new', 'save-new.png', 'save-new_f2.png', 'JTOOLBAR_SAVE_AND_NEW', false);
+						ToolbarHelper::save2new('repository.save2new', 'JTOOLBAR_SAVE_AND_NEW');
 					}
 				}
 				$canVersion = ($this->canDo->get('core.version') && $this->canDo->get('repository.version'));
@@ -335,17 +331,17 @@ class HtmlView extends BaseHtmlView
 				}
 				if ($this->canDo->get('repository.create'))
 				{
-					ToolbarHelper::custom('repository.save2copy', 'save-copy.png', 'save-copy_f2.png', 'JTOOLBAR_SAVE_AS_COPY', false);
+					ToolbarHelper::save2copy('repository.save2copy', 'JTOOLBAR_SAVE_AS_COPY');
 				}
 				if ($this->canDo->get('repository.reset'))
 				{
 					// add Reset button.
-					ToolbarHelper::custom('repository.resetPowers', 'joomla custom-button-resetpowers', '', 'COM_COMPONENTBUILDER_RESET', false);
+					$this->getDocument()->getToolbar()->standardButton('joomla custom-button-resetpowers', 'COM_COMPONENTBUILDER_RESET', 'repository.resetPowers')->listCheck(false);
 				}
 				if ($this->canDo->get('repository.push'))
 				{
 					// add Push button.
-					ToolbarHelper::custom('repository.pushPowers', 'share custom-button-pushpowers', '', 'COM_COMPONENTBUILDER_PUSH', false);
+					$this->getDocument()->getToolbar()->standardButton('share custom-button-pushpowers', 'COM_COMPONENTBUILDER_PUSH', 'repository.pushPowers')->listCheck(false);
 				}
 				ToolbarHelper::cancel('repository.cancel', 'JTOOLBAR_CLOSE');
 			}
@@ -408,7 +404,7 @@ class HtmlView extends BaseHtmlView
 				{
 					ToolbarHelper::apply('repository.apply', 'JTOOLBAR_APPLY');
 					ToolbarHelper::save('repository.save', 'JTOOLBAR_SAVE');
-					ToolbarHelper::custom('repository.save2new', 'save-new.png', 'save-new_f2.png', 'JTOOLBAR_SAVE_AND_NEW', false);
+					ToolbarHelper::save2new('repository.save2new', 'JTOOLBAR_SAVE_AND_NEW');
 				};
 				ToolbarHelper::cancel('repository.cancel', 'JTOOLBAR_CANCEL');
 			}
@@ -423,12 +419,12 @@ class HtmlView extends BaseHtmlView
 				if ($this->canDo->get('repository.reset'))
 				{
 					// add Reset button.
-					ToolbarHelper::custom('repository.resetPowers', 'joomla custom-button-resetpowers', '', 'COM_COMPONENTBUILDER_RESET', false);
+					$this->getDocument()->getToolbar()->standardButton('joomla custom-button-resetpowers', 'COM_COMPONENTBUILDER_RESET', 'repository.resetPowers')->listCheck(false);
 				}
 				if ($this->canDo->get('repository.push'))
 				{
 					// add Push button.
-					ToolbarHelper::custom('repository.pushPowers', 'share custom-button-pushpowers', '', 'COM_COMPONENTBUILDER_PUSH', false);
+					$this->getDocument()->getToolbar()->standardButton('share custom-button-pushpowers', 'COM_COMPONENTBUILDER_PUSH', 'repository.pushPowers')->listCheck(false);
 				}
 				ToolbarHelper::cancel('repository.cancel', 'JTOOLBAR_CLOSE');
 			}
@@ -443,18 +439,38 @@ class HtmlView extends BaseHtmlView
 	 */
 	protected function _prepareDocument(): void
 	{
-		// Load jQuery
-		Html::_('jquery.framework');
+		$this->getDocument()->getWebAssetManager()->useScript('jquery')->useScript('jquery-noconflict');
 		$isNew = ($this->item->id < 1);
+		$wa = $this->getDocument()->getWebAssetManager();
 		// add styles
+		$jcbStyleDependencies = $jcbStyleDependencies ?? [];
 		foreach ($this->styles as $style)
 		{
-			Html::_('stylesheet', $style, ['version' => 'auto']);
+			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
+			$assetName = 'jcb.style.' . hash('sha256', $style);
+			if (!$wa->assetExists('style', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
+					? $style : Uri::root() . $style;
+				$wa->registerStyle($assetName, $assetUri, ['version' => 'auto'], [], $jcbStyleDependencies);
+			}
+			$wa->useStyle($assetName);
+			$jcbStyleDependencies = array_values(array_unique([...$jcbStyleDependencies, $assetName]));
 		}
 		// add scripts
+		$jcbScriptDependencies = $jcbScriptDependencies ?? ['core'];
 		foreach ($this->scripts as $script)
 		{
-			Html::_('script', $script, ['version' => 'auto']);
+			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
+			$assetName = 'jcb.script.' . hash('sha256', $script);
+			if (!$wa->assetExists('script', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
+					? $script : Uri::root() . $script;
+				$wa->registerScript($assetName, $assetUri, ['version' => 'auto'], [], $jcbScriptDependencies);
+			}
+			$wa->useScript($assetName);
+			$jcbScriptDependencies = array_values(array_unique([...$jcbScriptDependencies, $assetName]));
 		}
 	}
 

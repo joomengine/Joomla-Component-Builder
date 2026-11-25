@@ -28,6 +28,7 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\Input\Input;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Toolbar\Toolbar;
+use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
 \defined('_JEXEC') or die; 
@@ -123,6 +124,7 @@ class HtmlView extends BaseHtmlView
 
 		// Load module values
 		$model = $this->getModel();
+		$model->setUseExceptions(true);
 		$this->styles = $model->getStyles();
 		$this->scripts = $model->getScripts();
 		// Initialise variables.
@@ -133,12 +135,6 @@ class HtmlView extends BaseHtmlView
 		{
 			// add the tool bar
 			$this->addToolBar();
-		}
-
-		// Check for errors.
-		if (count($errors = $model->getErrors()))
-		{
-			throw new \Exception(implode(PHP_EOL, $errors), 500);
 		}
 
 		// Set the html view document stuff
@@ -176,7 +172,7 @@ class HtmlView extends BaseHtmlView
 		// add title to the page
 		ToolbarHelper::title($title, 'puzzle');
 		// add cpanel button
-		ToolbarHelper::custom('pull_selection.dashboard', 'grid-2', '', 'COM_COMPONENTBUILDER_DASH', false);
+		$this->getDocument()->getToolbar()->standardButton('grid-2', 'COM_COMPONENTBUILDER_DASH', 'pull_selection.dashboard')->listCheck(false);
 		// set help url for this view if found
 		$this->help_url = ComponentbuilderHelper::getHelpUrl('pull_selection');
 		if (StringHelper::check($this->help_url))
@@ -199,24 +195,54 @@ class HtmlView extends BaseHtmlView
 	 */
 	protected function _prepareDocument(): void
 	{
+		$wa = $this->getDocument()->getWebAssetManager();
+		$root = Uri::root();
+
+		$jcbStyleDependencies = [];
+		$jcbScriptDependencies = ['core'];
 
 		// Only load jQuery if needed. (default is true)
 		if ($this->params->get('add_jquery_framework', 1) == 1)
 		{
-			Html::_('jquery.framework');
+			$wa->useScript('jquery')->useScript('jquery-noconflict');
+
+			$jcbScriptDependencies[] = 'jquery';
+			$jcbScriptDependencies[] = 'jquery-noconflict';
 		}
+
 		// Load the header checker class.
 		// Initialize the header checker.
 		$HeaderCheck = new HeaderCheck();
 
 		// always load these files.
-		Html::_('stylesheet', 'media/com_componentbuilder/datatable-bootstrap5/css/datatables.min.css', ['version' => 'auto']);
-		Html::_('script', 'media/com_componentbuilder/datatable-bootstrap5/js/pdfmake.min.js', ['version' => 'auto']);
-		Html::_('script', 'media/com_componentbuilder/datatable-bootstrap5/js/vfs_fonts.js', ['version' => 'auto']);
-		Html::_('script', 'media/com_componentbuilder/datatable-bootstrap5/js/datatables.min.js', ['version' => 'auto']);
-
-		// Add View JavaScript File
-		Html::_('script', 'administrator/components/com_componentbuilder/assets/js/pull_selection.js', ['version' => 'auto']);
+		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
+if (!$jcbAssetManager->assetExists('style', 'jcb.style.a9622e4a3af730668368d2c19e86c1658b0fbf3d0e289f8baa614a36c81029f5'))
+{
+	$jcbAssetManager->registerStyle('jcb.style.a9622e4a3af730668368d2c19e86c1658b0fbf3d0e289f8baa614a36c81029f5', Uri::root() . 'media/com_componentbuilder/datatable-bootstrap5/css/datatables.min.css', ['version' => 'auto'], [], $jcbStyleDependencies ?? []);
+}
+$jcbAssetManager->useStyle('jcb.style.a9622e4a3af730668368d2c19e86c1658b0fbf3d0e289f8baa614a36c81029f5');
+$jcbStyleDependencies = array_values(array_unique(array_merge($jcbStyleDependencies ?? [], ['jcb.style.a9622e4a3af730668368d2c19e86c1658b0fbf3d0e289f8baa614a36c81029f5'])));
+		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
+if (!$jcbAssetManager->assetExists('script', 'jcb.script.2b27c98692bdb1a3b25cd45faf86e51ed7086b2d30172ce2c4a8fd91b83e7df4'))
+{
+	$jcbAssetManager->registerScript('jcb.script.2b27c98692bdb1a3b25cd45faf86e51ed7086b2d30172ce2c4a8fd91b83e7df4', Uri::root() . 'media/com_componentbuilder/datatable-bootstrap5/js/pdfmake.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
+}
+$jcbAssetManager->useScript('jcb.script.2b27c98692bdb1a3b25cd45faf86e51ed7086b2d30172ce2c4a8fd91b83e7df4');
+$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.2b27c98692bdb1a3b25cd45faf86e51ed7086b2d30172ce2c4a8fd91b83e7df4'])));
+		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
+if (!$jcbAssetManager->assetExists('script', 'jcb.script.98542e2bdc8c49143e9a620f4d4d335ed8290da399ea0f14576672d858ae13ef'))
+{
+	$jcbAssetManager->registerScript('jcb.script.98542e2bdc8c49143e9a620f4d4d335ed8290da399ea0f14576672d858ae13ef', Uri::root() . 'media/com_componentbuilder/datatable-bootstrap5/js/vfs_fonts.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
+}
+$jcbAssetManager->useScript('jcb.script.98542e2bdc8c49143e9a620f4d4d335ed8290da399ea0f14576672d858ae13ef');
+$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.98542e2bdc8c49143e9a620f4d4d335ed8290da399ea0f14576672d858ae13ef'])));
+		$jcbAssetManager = Factory::getApplication()->getDocument()->getWebAssetManager();
+if (!$jcbAssetManager->assetExists('script', 'jcb.script.e929ceac1025b3b0d4ece44a86310dbd892f3cc57dffdac75e70c62541ec73f4'))
+{
+	$jcbAssetManager->registerScript('jcb.script.e929ceac1025b3b0d4ece44a86310dbd892f3cc57dffdac75e70c62541ec73f4', Uri::root() . 'media/com_componentbuilder/datatable-bootstrap5/js/datatables.min.js', ['version' => 'auto'], [], $jcbScriptDependencies ?? []);
+}
+$jcbAssetManager->useScript('jcb.script.e929ceac1025b3b0d4ece44a86310dbd892f3cc57dffdac75e70c62541ec73f4');
+$jcbScriptDependencies = array_values(array_unique(array_merge($jcbScriptDependencies ?? [], ['jcb.script.e929ceac1025b3b0d4ece44a86310dbd892f3cc57dffdac75e70c62541ec73f4'])));
 				// set some language strings for the JS class: [PullManager]
 				Text::script("COM_COMPONENTBUILDER_MISSING_REPOSITORY_OR_AREA_DATA");
 				Text::script("COM_COMPONENTBUILDER_FAILED_TO_RETRIEVE_REPOSITORY_INDEX");
@@ -227,16 +253,70 @@ class HtmlView extends BaseHtmlView
 				Text::script('COM_COMPONENTBUILDER_THESE_ITEMS_WERE_ALREADY_PRESENT_LOCALLY_AND_WERE_NOT_PULLED'); // ?
 				Text::script('COM_COMPONENTBUILDER_THESE_ITEMS_COULD_NOT_BE_FOUND_IN_THE_REMOTE_REPOSITORY_AND_WERE_NOT_PULLED');
 				Text::script('COM_COMPONENTBUILDER_THESE_ITEMS_WERE_SUCCESSFULLY_PULLED');
-		// add styles
+
+		// Add styles
 		foreach ($this->styles as $style)
 		{
-			Html::_('stylesheet', $style, ['version' => 'auto']);
+			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
+			$assetName = 'jcb.style.' . hash('sha256', $style);
+
+			if (!$wa->assetExists('style', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
+					? $style : $root . $style;
+
+				$wa->registerStyle(
+					$assetName,
+					$assetUri,
+					['version' => 'auto'],
+					[],
+					$jcbStyleDependencies
+				);
+			}
+
+			$wa->useStyle($assetName);
+
+			if (!in_array($assetName, $jcbStyleDependencies, true))
+			{
+				$jcbStyleDependencies[] = $assetName;
+			}
 		}
-		// add scripts
-		foreach ($this->scripts as $script)
+
+		$viewScripts = [
+			// Add View JavaScript File
+			'media/com_componentbuilder/js/admin/pull_selection.js',
+
+			// Add scripts
+			...$this->scripts,
+		];
+
+		foreach ($viewScripts as $script)
 		{
-			Html::_('script', $script, ['version' => 'auto']);
+			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
+			$assetName = 'jcb.script.' . hash('sha256', $script);
+
+			if (!$wa->assetExists('script', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
+					? $script : $root . $script;
+
+				$wa->registerScript(
+					$assetName,
+					$assetUri,
+					['version' => 'auto'],
+					[],
+					$jcbScriptDependencies
+				);
+			}
+
+			$wa->useScript($assetName);
+
+			if (!in_array($assetName, $jcbScriptDependencies, true))
+			{
+				$jcbScriptDependencies[] = $assetName;
+			}
 		}
+
 	}
 
 

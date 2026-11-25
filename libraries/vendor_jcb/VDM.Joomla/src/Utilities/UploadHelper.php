@@ -171,7 +171,7 @@ abstract class UploadHelper
 		else
 		{
 			// get the Joomla config class
-			$config = Factory::getConfig();
+			$config = $app->getConfig();
 			// set the path
 			$userfile['path'] = $config->get('tmp_path');
 		}

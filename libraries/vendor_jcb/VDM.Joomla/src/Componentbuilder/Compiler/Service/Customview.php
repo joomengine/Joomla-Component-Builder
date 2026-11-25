@@ -20,8 +20,11 @@ use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\Selection as DynamicgetSelec
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\Methods;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\GetItems;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\GetItem;
+use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\JoomlaSix\GetItem as J6GetItem;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\ListQuery;
+use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\JoomlaSix\ListQuery as J6ListQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\CustomGetMethods;
+use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\JoomlaSix\CustomGetMethods as J6CustomGetMethods;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\Queries;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\QueryFilter;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\QueryWhere;
@@ -43,6 +46,14 @@ use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\FieldonContentPrepare;
  */
 class Customview implements ServiceProviderInterface
 {
+	/**
+	 * Compile target selected for this build scope.
+	 *
+	 * @var   int
+	 * @since 6.2.0
+	 */
+	protected int $targetVersion;
+
 	/**
 	 * Registers the service provider with a DI container.
 	 *
@@ -71,11 +82,26 @@ class Customview implements ServiceProviderInterface
 		$container->alias(GetItem::class, 'Dynamicget.GetItem')
 			->share('Dynamicget.GetItem', [$this, 'getGetItem'], true);
 
+		$container->share('Dynamicget.Shared.GetItem', [$this, 'getSharedGetItem'], true);
+
+		$container->alias(J6GetItem::class, 'Dynamicget.J6.GetItem')
+			->share('Dynamicget.J6.GetItem', [$this, 'getJ6GetItem'], true);
+
 		$container->alias(ListQuery::class, 'Dynamicget.ListQuery')
 			->share('Dynamicget.ListQuery', [$this, 'getListQuery'], true);
 
+		$container->share('Dynamicget.Shared.ListQuery', [$this, 'getSharedListQuery'], true);
+
+		$container->alias(J6ListQuery::class, 'Dynamicget.J6.ListQuery')
+			->share('Dynamicget.J6.ListQuery', [$this, 'getJ6ListQuery'], true);
+
 		$container->alias(CustomGetMethods::class, 'Dynamicget.CustomGetMethods')
 			->share('Dynamicget.CustomGetMethods', [$this, 'getCustomGetMethods'], true);
+
+		$container->share('Dynamicget.Shared.CustomGetMethods', [$this, 'getSharedCustomGetMethods'], true);
+
+		$container->alias(J6CustomGetMethods::class, 'Dynamicget.J6.CustomGetMethods')
+			->share('Dynamicget.J6.CustomGetMethods', [$this, 'getJ6CustomGetMethods'], true);
 
 		$container->alias(Queries::class, 'Dynamicget.Queries')
 			->share('Dynamicget.Queries', [$this, 'getQueries'], true);
@@ -245,7 +271,64 @@ class Customview implements ServiceProviderInterface
 	 */
 	public function getGetItem(Container $container): GetItem
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Dynamicget.J6.GetItem');
+		}
+
+		return $container->get('Dynamicget.Shared.GetItem');
+	}
+
+	/**
+	 * Build the GetItem renderer for shared targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  GetItem
+	 * @since   6.2.0
+	 */
+	public function getSharedGetItem(Container $container): GetItem
+	{
 		return new GetItem(
+			$container->get('Config'),
+			$container->get('Compiler.Builder.Site.Decrypt'),
+			$container->get('Placeholder'),
+			$container->get('Language'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Site.Field.Data'),
+			$container->get('Compiler.Builder.Site.Field.Decode.Filter'),
+			$container->get('Compiler.Builder.Model.Expert.Field.Initiator'),
+			$container->get('Compiler.Builder.Event.Dispatcher'),
+			$container->get('Dynamicget.DecodeColumn'),
+			$container->get('Dynamicget.FilterColumn'),
+			$container->get('Dynamicget.FieldonContentPrepare'),
+			$container->get('Dynamicget.UikitLoader'),
+			$container->get('Dynamicget.Globals'),
+			$container->get('Dynamicget.CustomJoin'),
+			$container->get('Dynamicget.Queries'),
+			$container->get('Dynamicget.QueryFilter'),
+			$container->get('Dynamicget.QueryWhere'),
+			$container->get('Dynamicget.QueryOrder'),
+			$container->get('Dynamicget.QueryGroup')
+		);
+	}
+
+	/**
+	 * Build the GetItem renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6GetItem
+	 * @since   6.2.0
+	 */
+	public function getJ6GetItem(Container $container): J6GetItem
+	{
+		return new J6GetItem(
 			$container->get('Config'),
 			$container->get('Compiler.Builder.Site.Decrypt'),
 			$container->get('Placeholder'),
@@ -279,7 +362,51 @@ class Customview implements ServiceProviderInterface
 	 */
 	public function getListQuery(Container $container): ListQuery
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Dynamicget.J6.ListQuery');
+		}
+
+		return $container->get('Dynamicget.Shared.ListQuery');
+	}
+
+	/**
+	 * Build the ListQuery renderer for shared targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  ListQuery
+	 * @since   6.2.0
+	 */
+	public function getSharedListQuery(Container $container): ListQuery
+	{
 		return new ListQuery(
+			$container->get('Config'),
+			$container->get('Customcode.Dispenser'),
+			$container->get('Dynamicget.Queries'),
+			$container->get('Dynamicget.QueryFilter'),
+			$container->get('Dynamicget.QueryWhere'),
+			$container->get('Dynamicget.QueryOrder'),
+			$container->get('Dynamicget.QueryGroup')
+		);
+	}
+
+	/**
+	 * Build the ListQuery renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ListQuery
+	 * @since   6.2.0
+	 */
+	public function getJ6ListQuery(Container $container): J6ListQuery
+	{
+		return new J6ListQuery(
 			$container->get('Config'),
 			$container->get('Customcode.Dispenser'),
 			$container->get('Dynamicget.Queries'),
@@ -300,7 +427,63 @@ class Customview implements ServiceProviderInterface
 	 */
 	public function getCustomGetMethods(Container $container): CustomGetMethods
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Dynamicget.J6.CustomGetMethods');
+		}
+
+		return $container->get('Dynamicget.Shared.CustomGetMethods');
+	}
+
+	/**
+	 * Build the CustomGetMethods renderer for shared targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  CustomGetMethods
+	 * @since   6.2.0
+	 */
+	public function getSharedCustomGetMethods(Container $container): CustomGetMethods
+	{
 		return new CustomGetMethods(
+			$container->get('Config'),
+			$container->get('Placeholder'),
+			$container->get('Dynamicget.FieldonContentPrepare'),
+			$container->get('Dynamicget.JoinStructure'),
+			$container->get('Dynamicget.DecodeColumn'),
+			$container->get('Dynamicget.FilterColumn'),
+			$container->get('Dynamicget.UikitLoader'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Site.Decrypt'),
+			$container->get('Compiler.Builder.Model.Expert.Field.Initiator'),
+			$container->get('Compiler.Builder.Site.Field.Data'),
+			$container->get('Compiler.Builder.Site.Field.Decode.Filter'),
+			$container->get('Compiler.Builder.Other.Join'),
+			$container->get('Compiler.Builder.Other.Query'),
+			$container->get('Compiler.Builder.Other.Filter'),
+			$container->get('Compiler.Builder.Other.Where'),
+			$container->get('Compiler.Builder.Other.Order'),
+			$container->get('Compiler.Builder.Other.Group'),
+			$container->get('Compiler.Builder.Event.Dispatcher')
+		);
+	}
+
+	/**
+	 * Build the CustomGetMethods renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6CustomGetMethods
+	 * @since   6.2.0
+	 */
+	public function getJ6CustomGetMethods(Container $container): J6CustomGetMethods
+	{
+		return new J6CustomGetMethods(
 			$container->get('Config'),
 			$container->get('Placeholder'),
 			$container->get('Dynamicget.FieldonContentPrepare'),

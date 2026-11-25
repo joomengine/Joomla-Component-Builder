@@ -118,7 +118,7 @@ final class GenerateNewTitle
 				. " * @param   string/array   \$title        The title.";
 			$newFunction[] = Indent::_(1) . " *";
 			$newFunction[] = Indent::_(1)
-				. " * @return	array/string  Contains the modified title/s and/or alias.";
+				. " * @return" . Indent::_(1) . "array/string  Contains the modified title/s and/or alias.";
 			$newFunction[] = Indent::_(1) . " *";
 			$newFunction[] = Indent::_(1) . " */";
 			$newFunction[] = Indent::_(1)
@@ -184,7 +184,7 @@ final class GenerateNewTitle
 				. " * @param   string   \$title   The title.";
 			$newFunction[] = Indent::_(1) . " *";
 			$newFunction[] = Indent::_(1)
-				. " * @return	array  Contains the modified title and alias.";
+				. " * @return" . Indent::_(1) . "array  Contains the modified title and alias.";
 			$newFunction[] = Indent::_(1) . " *";
 			$newFunction[] = Indent::_(1) . " */";
 			$newFunction[] = Indent::_(1)

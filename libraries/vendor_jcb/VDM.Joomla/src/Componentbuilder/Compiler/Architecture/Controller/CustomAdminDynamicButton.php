@@ -119,8 +119,7 @@ class CustomAdminDynamicButton implements CustomAdminDynamicButtonInterface
 				$method[] = Indent::_(2) . "{";
 				$method[] = Indent::_(3) . "//" . Line::_(__Line__, __Class__)
 					. " Get the input";
-				$method[] = Indent::_(3)
-					. "\$input = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->input;";
+				$method[] = $this->getInputObject();
 				$method[] = Indent::_(3)
 					. "\$pks = \$input->post->get('cid', array(), 'array');";
 				$method[] = Indent::_(3) . "//" . Line::_(__Line__, __Class__)
@@ -171,6 +170,17 @@ class CustomAdminDynamicButton implements CustomAdminDynamicButtonInterface
 	protected function currentUser(): string
 	{
 		return Indent::_(2) . "\$user = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
+	}
+
+	/**
+	 * Put the controller request input in scope for the generated method.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function getInputObject(): string
+	{
+		return Indent::_(3) . '$input = Joomla__' . '_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->input;';
 	}
 }
 

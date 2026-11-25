@@ -15,6 +15,7 @@ use Joomla\CMS\HTML\HTMLHelper as Html;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
 use VDM\Component\Componentbuilder\Administrator\Helper\ComponentbuilderHelper;
+use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
 
 // No direct access to this file
@@ -22,8 +23,8 @@ defined('_JEXEC') or die;
 
 if ($this->saveOrder)
 {
-	$saveOrderingUrl = 'index.php?option=com_componentbuilder&task=components_routers.saveOrderAjax&tmpl=component';
-	Html::_('sortablelist.sortable', 'component_routerList', 'adminForm', strtolower($this->listDirn), $saveOrderingUrl);
+	$saveOrderingUrl = 'index.php?option=com_componentbuilder&task=components_routers.saveOrderAjax&tmpl=component&' . Session::getFormToken() . '=1';
+	$this->getDocument()->getWebAssetManager()->usePreset('dragula')->useScript('joomla.draggable');
 }
 ?>
 <form action="<?php echo Route::_('index.php?option=com_componentbuilder&view=components_routers'); ?>" method="post" name="adminForm" id="adminForm">
@@ -42,7 +43,7 @@ if ($this->saveOrder)
 	<table class="table table-striped" id="component_routerList">
 		<thead><?php echo $this->loadTemplate('head');?></thead>
 		<tfoot><?php echo $this->loadTemplate('foot');?></tfoot>
-		<tbody><?php echo $this->loadTemplate('body');?></tbody>
+		<tbody<?php if ($this->saveOrder && isset($saveOrderingUrl)): ?> class="js-draggable" data-url="<?php echo htmlspecialchars($saveOrderingUrl, ENT_QUOTES, 'UTF-8'); ?>" data-direction="<?php echo htmlspecialchars(strtolower($this->listDirn), ENT_QUOTES, 'UTF-8'); ?>"<?php endif; ?>><?php echo $this->loadTemplate('body'); ?></tbody>
 	</table>
 	<input type="hidden" name="boxchecked" value="0" />
 	</div>

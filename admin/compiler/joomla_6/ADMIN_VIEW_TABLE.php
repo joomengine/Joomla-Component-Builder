@@ -1,0 +1,367 @@
+<?php
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    4th September 2022
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+// No direct access to this JCB template file (EVER)
+defined('_JCB_TEMPLATE') or die;
+?>
+###BOM###
+namespace ###NAMESPACEPREFIX###\Component\###ComponentNamespace###\Administrator\Table;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\Table\Asset;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\String\PunycodeHelper;
+use Joomla\CMS\Access\Access as AccessRules;
+use Joomla\CMS\Access\Rules;
+use Joomla\CMS\Tag\TaggableTableInterface;
+use Joomla\CMS\Tag\TaggableTableTrait;
+use Joomla\CMS\User\CurrentUserInterface;
+use Joomla\CMS\User\CurrentUserTrait;
+use Joomla\CMS\Versioning\VersionableTableInterface;
+use Joomla\CMS\Application\ApplicationHelper;
+use Joomla\Registry\Registry;
+use Joomla\Database\DatabaseDriver;
+use Joomla\Event\DispatcherInterface;
+use Joomla\String\StringHelper;
+use Joomla\Utilities\ArrayHelper;
+use ###NAMESPACEPREFIX###\Component\###ComponentNamespace###\Administrator\Helper\###Component###Helper;
+
+// No direct access to this file
+\defined('_JEXEC') or die;
+
+/**
+ * ###Views### Table class
+ *
+ * @since  1.6
+ */
+class ###View###Table extends Table implements VersionableTableInterface, TaggableTableInterface, CurrentUserInterface
+{
+	use TaggableTableTrait;
+	use CurrentUserTrait;
+
+	/**
+	 * Constructor
+	 *
+	 * @param   DatabaseDriver        $db          Database connector object
+	 * @param   ?DispatcherInterface  $dispatcher  Event dispatcher for this table
+	 *
+	 * @param object Database connector object
+	 * @since  4.0
+	 */
+	function __construct(DatabaseDriver $db, ?DispatcherInterface $dispatcher = null)
+	{
+		// The type alias generally is the internal component name with the
+		//   content type. Ex.: com_content.article
+		$this->typeAlias = 'com_###component###.###view###';
+
+		// Ensure the params and metadata in json encoded in the bind method
+		$this->_jsonEncode = ['params', 'metadata'];
+
+		// Indicates that columns fully support the NULL value in the database
+		$this->_supportNullValue = true;
+
+		parent::__construct('#__###component###_###view###', 'id', $db, $dispatcher);###LICENSE_LOCKED_CHECK###
+	}
+
+	/**
+	 * Method to bind an associative array or object to the Table instance.This
+	 * method only binds properties that are publicly accessible and optionally
+	 * takes an array of properties to ignore when binding.
+	 *
+	 * @param   array|object  $src     An associative array or object to bind to the Table instance.
+	 * @param   array|string  $ignore  An optional array or space separated list of properties to ignore while binding.
+	 *
+	 * @return  boolean  True on success.
+	 *
+	 * @since   1.7.0
+	 * @throws  \InvalidArgumentException
+	 */
+	public function bind($array, $ignore = '')
+	{
+		// Bind the rules.
+		if (isset($array['rules']) && is_array($array['rules']))
+		{
+			$rules = new AccessRules($array['rules']);
+			$this->setRules($rules);
+		}
+
+		return parent::bind($array, $ignore);
+	}
+
+	/**
+	 * Overload the store method for the ###View### table.
+	 *
+	 * @param   boolean    Toggle whether null values should be updated.
+	 *
+	 * @return  boolean  True on success, false on failure.
+	 * @since   1.6
+	 */
+	public function store($updateNulls = true)
+	{
+		$date   = Joomla___39403062_84fb_46e0_bac4_0023f766e827___Power::getDate()->toSql(false, $this->getDatabase());
+		$userId = $this->getCurrentUser()->id;
+
+		if ($this->id)
+		{
+			// Existing item
+			$this->modified       = $date;
+			$this->modified_by    = $userId;
+		}
+		else
+		{
+			// New ###view###. A ###view### created and created_by field can be set by the user,
+			// so we don't touch either of these if they are set.
+			if (!(int) $this->created)
+			{
+				$this->created = $date;
+			}
+			if (empty($this->created_by))
+			{
+				$this->created_by = $userId;
+			}
+		}
+
+		if (isset($this->alias))
+		{
+			// Verify that the alias is unique
+			$table = new self($this->getDatabase(), $this->getDispatcher());
+
+			if ($table->load(['alias' => $this->alias###JTABLEALIASCATEGORY###]) && ($table->id != $this->id || $this->id == 0))
+			{
+				$message = $table->published === -2
+					? Joomla___ba6326ef_cb79_4348_80f4_ab086082e3c5___Power::_('COM_###COMPONENT###_###VIEW###_ERROR_UNIQUE_ALIAS_TRASHED')
+					: Joomla___ba6326ef_cb79_4348_80f4_ab086082e3c5___Power::_('COM_###COMPONENT###_###VIEW###_ERROR_UNIQUE_ALIAS');
+
+				throw new \RuntimeException($message);
+			}
+		}
+
+		if (isset($this->url))
+		{
+			// Convert IDN urls to punycode
+			$this->url = PunycodeHelper::urlToPunycode($this->url);
+		}
+
+		if (isset($this->website))
+		{
+			// Convert IDN urls to punycode
+			$this->website = PunycodeHelper::urlToPunycode($this->website);
+		}
+
+		return parent::store($updateNulls);
+	}
+
+	/**
+	 * Overloaded check method to ensure data integrity.
+	 *
+	 * @return  boolean  True on success.
+	 *
+	 * @see     \Joomla\CMS\Table\Table::check
+	 * @since   1.5
+	 */
+	public function check()
+	{
+		parent::check();
+
+		if (isset($this->alias))
+		{
+			// Generate a valid alias
+			$this->generateAlias();
+
+			$table = new self($this->getDatabase(), $this->getDispatcher());
+
+			while ($table->load(['alias' => $this->alias]) && ($table->id != $this->id || $this->id == 0))
+			{
+				$this->alias = StringHelper::increment($this->alias, 'dash');
+			}
+		}
+
+		/*
+		 * Clean up keywords -- eliminate extra spaces between phrases
+		 * and cr (\r) and lf (\n) characters from string.
+		 * Only process if not empty.
+		  */
+		if (!empty($this->metakey))
+		{
+			// Array of characters to remove.
+			$bad_characters = array("\n", "\r", "\"", "<", ">");
+
+			// Remove bad characters.
+			$after_clean = StringHelper::str_ireplace($bad_characters, "", $this->metakey);
+
+			// Create array using commas as delimiter.
+			$keys = explode(',', $after_clean);
+			$clean_keys = [];
+
+			foreach ($keys as $key)
+			{
+				// Ignore blank keywords.
+				if (trim($key))
+				{
+					$clean_keys[] = trim($key);
+				}
+			}
+
+			// Put array back together delimited by ", "
+			$this->metakey = implode(", ", $clean_keys);
+		}
+
+		// Clean up description -- eliminate quotes and <> brackets
+		if (!empty($this->metadesc))
+		{
+			// Only process if not empty
+			$bad_characters = array("\"", "<", ">");
+			$this->metadesc = StringHelper::str_ireplace($bad_characters, "", $this->metadesc);
+		}
+
+		// If we don't have any access rules set at this point just use an empty AccessRules class
+		if (!$this->getRules())
+		{
+			$rules = $this->getDefaultAssetValues('com_###component###.###view###.'.$this->id);
+			$this->setRules($rules);
+		}
+
+		// Set ordering
+		if ($this->published < 0)
+		{
+			// Set ordering to 0 if state is archived or trashed
+			$this->ordering = 0;
+		}
+
+		return true;
+	}###LICENSE_LOCKED_SET_BOOL###
+
+	/**
+	 * Gets the default asset values for a component.
+	 *
+	 * @param   string  $component  The component asset name to search for
+	 * @param   bool    $try        The retry flag
+	 *
+	 * @return  Rules  The AccessRules object for the asset
+	 * @since   2.5.0
+	 */
+	protected function getDefaultAssetValues(string $component, bool $try = true)
+	{
+		// Need to find the asset id by the name of the component.
+		$db = $this->getDatabase();
+		$query = $db->createQuery()
+			->select($db->quoteName('id'))
+			->from($db->quoteName('#__assets'))
+			->where($db->quoteName('name') . ' = ' . $db->quote($component));
+		$db->setQuery($query);
+		$db->execute();
+		if ($db->loadRowList())
+		{
+			// asset already set so use saved rules
+			$assetId = (int) $db->loadResult();
+			return AccessRules::getAssetRules($assetId); // (TODO) instead of keeping inherited Allowed it becomes Allowed.
+		}
+		// try again
+		elseif ($try)
+		{
+			$try = explode('.', $component);
+			$result =  $this->getDefaultAssetValues($try[0], false);
+			if ($result instanceof Rules)
+			{
+				if (isset($try[1]))
+				{
+					$_result = (string) $result;
+					$_result = json_decode($_result);
+					foreach ($_result as $name => &$rule)
+					{
+						$v = explode('.', $name);
+						if ($try[1] !== $v[0])
+						{
+							// remove since it is not part of this view
+							unset($_result->$name);
+						}
+						else
+						{
+							// clear the value since we inherit
+							$rule = [];
+						}
+					}
+					// check if there are any view values remaining
+					if (count( (array) $_result))
+					{
+						$_result = json_encode($_result);
+						$_result = array($_result);
+						// Instantiate and return the AccessRules object for the asset rules.
+						$rules = new Rules;
+						$rules->mergeCollection($_result);
+
+						return $rules;
+					}
+				}
+				return $result;
+			}
+		}
+		return AccessRules::getAssetRules(0);
+	}
+
+	/**
+	 * Get the type alias for the history table
+	 *
+	 * The type alias generally is the internal component name with the
+	 * content type. Ex.: com_content.article
+	 *
+	 * @return  string  The alias as described above
+	 *
+	 * @since   3.10.0
+	 */
+	public function getTypeAlias()
+	{
+		return $this->typeAlias;
+	}
+
+	/**
+	 * Method to compute the default name of the asset.
+	 * The default name is in the form table_name.id
+	 * where id is the value of the primary key of the table.
+	 *
+	 * @return  string
+	 *
+	 * @since   1.7.0
+	 */
+	protected function _getAssetName()
+	{
+		$k = $this->_tbl_key;
+
+		return $this->getTypeAlias() . '.' . (int) $this->$k;
+	}
+
+	/**
+	 * Method to get the parent asset under which to register this one.
+	 *
+	 * By default, all assets are registered to the ROOT node with ID, which will default to 1 if none exists.
+	 * An extended class can define a table and ID to lookup.  If the asset does not exist it will be created.
+	 *
+	 * @param   ?Table    $table  A Table object for the asset parent.
+	 * @param   ?integer  $id     Id to look up
+	 *
+	 * @return  integer
+	 *
+	 * @since   1.7.0
+	 */
+	protected function _getAssetParentId(?Table $table = null, $id = null)
+	{
+		/** @var Asset $assets */
+		$assets = new Asset($this->getDatabase(), $this->getDispatcher());
+		$rootId = $assets->getRootId();
+
+		// load the ###component### asset
+		$assets->loadByName('com_###component###');
+
+		return $assets->id ?? $rootId ?? 1;
+	}
+###GENERATENEWALIAS###
+}

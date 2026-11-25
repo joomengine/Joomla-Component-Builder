@@ -96,9 +96,9 @@ class LayoutModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'administrator/components/com_componentbuilder/assets/css/admin.css',
-		'administrator/components/com_componentbuilder/assets/css/layout.css'
- 	];
+		'media/com_componentbuilder/css/admin/admin.css',
+		'media/com_componentbuilder/css/admin/layout.css'
+	];
 
 	/**
 	 * The scripts array.
@@ -107,9 +107,9 @@ class LayoutModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'administrator/components/com_componentbuilder/assets/js/admin.js',
-		'media/com_componentbuilder/js/layout.js'
- 	];
+		'media/com_componentbuilder/js/admin/admin.js',
+		'media/com_componentbuilder/js/admin/layout.js'
+	];
 
 	/**
 	 * @var     string    The prefix to use with controller messages.
@@ -658,7 +658,7 @@ class LayoutModel extends AdminModel
 
 		if (empty($table->id))
 		{
-			$table->created = $date->toSql();
+			$table->created = $date->toSql(false, $this->getDatabase());
 			// set the user
 			if ($table->created_by == 0 || empty($table->created_by))
 			{
@@ -668,7 +668,7 @@ class LayoutModel extends AdminModel
 			if (empty($table->ordering))
 			{
 				$db = $this->getDatabase();
-				$query = $db->getQuery(true)
+				$query = $db->createQuery()
 					->select('MAX(ordering)')
 					->from($db->quoteName('#__componentbuilder_layout'));
 				$db->setQuery($query);
@@ -679,7 +679,7 @@ class LayoutModel extends AdminModel
 		}
 		else
 		{
-			$table->modified = $date->toSql();
+			$table->modified = $date->toSql(false, $this->getDatabase());
 			$table->modified_by = $user->id;
 		}
 
@@ -872,9 +872,7 @@ class LayoutModel extends AdminModel
 
 			if (!$jcbPatchTable->load($jcbPatchId))
 			{
-				$this->setError(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'));
-
-				return false;
+				throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'), 404);
 			}
 
 			foreach ($jcbPatchTable->getFields() as $jcbPatchField)
@@ -1014,7 +1012,7 @@ class LayoutModel extends AdminModel
 		{
 			if ($data['alias'] == null || empty($data['alias']))
 			{
-				if (Factory::getConfig()->get('unicodeslugs') == 1)
+				if (Factory::getApplication()->get('unicodeslugs') == 1)
 				{
 					$data['alias'] = OutputFilter::stringURLUnicodeSlug($data['name']);
 				}

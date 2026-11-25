@@ -287,10 +287,10 @@ final class InputButton implements InputButtonInterface
 				. "function \".\$button_code_name.\"Button(value) {";
 			$addButton[] = Indent::_(6)
 				. "if (value > 0) {"; // TODO not ideal since value may not be an (int)
-			$addButton[] = Indent::_(7) . "// hide the create button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " hide the create button";
 			$addButton[] = Indent::_(7)
 				. "jQuery('#\".\$button_code_name.\"Create').hide();";
-			$addButton[] = Indent::_(7) . "// show edit button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " show edit button";
 			$addButton[] = Indent::_(7)
 				. "jQuery('#\".\$button_code_name.\"Edit').show();";
 			$addButton[] = Indent::_(7) . "var url = 'index.php?option="
@@ -300,10 +300,10 @@ final class InputButton implements InputButtonInterface
 			$addButton[] = Indent::_(7)
 				. "jQuery('#\".\$button_code_name.\"Edit').attr('href', url);";
 			$addButton[] = Indent::_(6) . "} else {";
-			$addButton[] = Indent::_(7) . "// show the create button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " show the create button";
 			$addButton[] = Indent::_(7)
 				. "jQuery('#\".\$button_code_name.\"Create').show();";
-			$addButton[] = Indent::_(7) . "// hide edit button";
+			$addButton[] = Indent::_(7) . "//" . Line::_(__LINE__, __CLASS__) . " hide edit button";
 			$addButton[] = Indent::_(7)
 				. "jQuery('#\".\$button_code_name.\"Edit').hide();";
 			$addButton[] = Indent::_(6) . "}";

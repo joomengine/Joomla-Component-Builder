@@ -24,9 +24,7 @@ use Joomla\CMS\User\CurrentUserTrait;
 use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\Registry\Registry;
-use Joomla\Database\DatabaseInterface;
 use Joomla\Database\DatabaseDriver;
-use Joomla\Database\Exception\DatabaseNotFoundException;
 use Joomla\Event\DispatcherInterface;
 use Joomla\String\StringHelper;
 use Joomla\Utilities\ArrayHelper;
@@ -104,7 +102,7 @@ class Component_site_viewsTable extends Table implements VersionableTableInterfa
 	 */
 	public function store($updateNulls = true)
 	{
-		$date   = Factory::getDate()->toSql();
+		$date   = Factory::getDate()->toSql(false, $this->getDatabase());
 		$userId = $this->getCurrentUser()->id;
 
 		if ($this->id)
@@ -134,14 +132,11 @@ class Component_site_viewsTable extends Table implements VersionableTableInterfa
 
 			if ($table->load(['alias' => $this->alias]) && ($table->id != $this->id || $this->id == 0))
 			{
-				$this->setError(Text::_('COM_COMPONENTBUILDER_COMPONENT_SITE_VIEWS_ERROR_UNIQUE_ALIAS'));
+				$message = $table->published === -2
+					? Text::_('COM_COMPONENTBUILDER_COMPONENT_SITE_VIEWS_ERROR_UNIQUE_ALIAS_TRASHED')
+					: Text::_('COM_COMPONENTBUILDER_COMPONENT_SITE_VIEWS_ERROR_UNIQUE_ALIAS');
 
-				if ($table->published === -2)
-				{
-					$this->setError(Text::_('COM_COMPONENTBUILDER_COMPONENT_SITE_VIEWS_ERROR_UNIQUE_ALIAS_TRASHED'));
-				}
-
-				return false;
+				throw new \RuntimeException($message);
 			}
 		}
 
@@ -170,12 +165,7 @@ class Component_site_viewsTable extends Table implements VersionableTableInterfa
 	 */
 	public function check()
 	{
-		try {
-				parent::check();
-		} catch (\Exception $e) {
-				$this->setError($e->getMessage());
-				return false;
-		}
+		parent::check();
 
 		if (isset($this->alias))
 		{
@@ -258,7 +248,7 @@ class Component_site_viewsTable extends Table implements VersionableTableInterfa
 	{
 		// Need to find the asset id by the name of the component.
 		$db = $this->getDatabase();
-		$query = $db->getQuery(true)
+		$query = $db->createQuery()
 			->select($db->quoteName('id'))
 			->from($db->quoteName('#__assets'))
 			->where($db->quoteName('name') . ' = ' . $db->quote($component));
@@ -369,72 +359,6 @@ class Component_site_viewsTable extends Table implements VersionableTableInterfa
 		return $assets->id ?? $rootId ?? 1;
 	}
 
-	/**
-	 * Retrieve the database connection in a version-safe and cached manner.
-	 *
-	 * Compatible with Joomla 4 -> 7:
-	 * - If the parent class implements getDatabase() (DatabaseAwareTrait), that is used.
-	 * - Otherwise it falls back to getDbo() for legacy versions.
-	 * - The detected instance is cached to avoid repeated reflection or lookups.
-	 *
-	 * @return  DatabaseInterface
-	 *
-	 * @throws  DatabaseNotFoundException  If the database connection cannot be determined.
-	 * @since   5.1.4
-	 */
-	protected function getDatabase(): DatabaseInterface
-	{
-		static $cache = null;
-
-		// Return cached connection if available
-		if ($cache instanceof DatabaseInterface)
-		{
-			return $cache;
-		}
-
-		// --- Step 1: Use parent::getDatabase() if available (J7+ or DatabaseAwareTrait) ---
-		$parent = get_parent_class($this);
-
-		if ($parent && method_exists($parent, 'getDatabase'))
-		{
-			try
-			{
-				$db = parent::getDatabase();
-
-				if ($db instanceof DatabaseInterface)
-				{
-					$cache = $db;
-					return $cache;
-				}
-			}
-			catch (\Throwable)
-			{
-				// Continue to next fallback
-			}
-		}
-
-		// --- Step 2: Fallback to getDbo() (J3-J6 style) ---
-		if (method_exists($this, 'getDbo'))
-		{
-			try
-			{
-				$db = $this->getDbo();
-
-				if ($db instanceof DatabaseInterface)
-				{
-					$cache = $db;
-					return $cache;
-				}
-			}
-			catch (\Throwable)
-			{
-				// Continue to next fallback
-			}
-		}
-
-		// --- Step 3: No valid database found ---
-		throw new DatabaseNotFoundException('Database not set in ' . static::class);
-	}
 
 	/**
 	 * This view does not actually have an alias

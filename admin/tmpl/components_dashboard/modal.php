@@ -55,7 +55,7 @@ $wa->useScript('core')
 	<table class="table table-striped" id="component_dashboardList">
 		<thead><?php echo $this->loadTemplate('head');?></thead>
 		<tfoot><?php echo $this->loadTemplate('foot');?></tfoot>
-		<tbody><?php echo $this->loadTemplate('body');?></tbody>
+		<tbody<?php if ($this->saveOrder && isset($saveOrderingUrl)): ?> class="js-draggable" data-url="<?php echo htmlspecialchars($saveOrderingUrl, ENT_QUOTES, 'UTF-8'); ?>" data-direction="<?php echo htmlspecialchars(strtolower($this->listDirn), ENT_QUOTES, 'UTF-8'); ?>"<?php endif; ?>><?php echo $this->loadTemplate('body'); ?></tbody>
 	</table>
 	<input type="hidden" name="boxchecked" value="0" />
 	</div>

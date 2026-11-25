@@ -39,18 +39,21 @@ $search_value = $this->form->getField('search_value');
 
 ?>
 <?php if ($this->canDo->get('search.access')): ?>
-<script type="text/javascript">
-	Joomla.submitbutton = function(task) {
-		if (task === 'search.back') {
-			parent.history.back();
-			return false;
-		} else {
-			var form = document.getElementById('adminForm');
-			form.task.value = task;
-			form.submit();
-		}
-	}
-</script>
+<?php
+$jcbSubmitScript = '	Joomla.submitbutton = function(task) {'
+	. PHP_EOL . '		if (task === \'search.back\') {'
+	. PHP_EOL . '			parent.history.back();'
+	. PHP_EOL . '			return false;'
+	. PHP_EOL . '		} else {'
+	. PHP_EOL . '			var form = document.getElementById(\'adminForm\');'
+	. PHP_EOL . '			form.task.value = task;'
+	. PHP_EOL . '			form.submit();'
+	. PHP_EOL . '		}'
+	. PHP_EOL . '	}';
+$this->getDocument()->getWebAssetManager()->addInlineScript(
+	$jcbSubmitScript, ['name' => 'com_componentbuilder.search.submit'], [], ['core']
+);
+?>
 <?php $urlId = (isset($this->item->id)) ? '&id='. (int) $this->item->id : ''; ?>
 
 <div class="main-card p-md-3">

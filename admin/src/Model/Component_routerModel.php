@@ -82,9 +82,9 @@ class Component_routerModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'administrator/components/com_componentbuilder/assets/css/admin.css',
-		'administrator/components/com_componentbuilder/assets/css/component_router.css'
- 	];
+		'media/com_componentbuilder/css/admin/admin.css',
+		'media/com_componentbuilder/css/admin/component_router.css'
+	];
 
 	/**
 	 * The scripts array.
@@ -93,9 +93,9 @@ class Component_routerModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'administrator/components/com_componentbuilder/assets/js/admin.js',
-		'media/com_componentbuilder/js/component_router.js'
- 	];
+		'media/com_componentbuilder/js/admin/admin.js',
+		'media/com_componentbuilder/js/admin/component_router.js'
+	];
 
 	/**
 	 * @var     string    The prefix to use with controller messages.
@@ -648,7 +648,7 @@ class Component_routerModel extends AdminModel
 
 		if (empty($table->id))
 		{
-			$table->created = $date->toSql();
+			$table->created = $date->toSql(false, $this->getDatabase());
 			// set the user
 			if ($table->created_by == 0 || empty($table->created_by))
 			{
@@ -658,7 +658,7 @@ class Component_routerModel extends AdminModel
 			if (empty($table->ordering))
 			{
 				$db = $this->getDatabase();
-				$query = $db->getQuery(true)
+				$query = $db->createQuery()
 					->select('MAX(ordering)')
 					->from($db->quoteName('#__componentbuilder_component_router'));
 				$db->setQuery($query);
@@ -669,7 +669,7 @@ class Component_routerModel extends AdminModel
 		}
 		else
 		{
-			$table->modified = $date->toSql();
+			$table->modified = $date->toSql(false, $this->getDatabase());
 			$table->modified_by = $user->id;
 		}
 
@@ -822,9 +822,7 @@ class Component_routerModel extends AdminModel
 
 			if (!$jcbPatchTable->load($jcbPatchId))
 			{
-				$this->setError(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'));
-
-				return false;
+				throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'), 404);
 			}
 
 			foreach ($jcbPatchTable->getFields() as $jcbPatchField)

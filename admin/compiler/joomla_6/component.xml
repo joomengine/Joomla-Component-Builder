@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="###XMLVERSION###" method="upgrade">
+	<name>COM_###COMPONENT###</name>
+	<creationDate>###BUILDDATE###</creationDate>
+	<author>###AUTHOR###</author>
+	<authorEmail>###AUTHOREMAIL###</authorEmail>
+	<authorUrl>###AUTHORWEBSITE###</authorUrl>
+	<copyright>###COPYRIGHT###</copyright>
+	<license>###LICENSE###</license>
+	<version>###ACTUALVERSION###</version>
+	<description><![CDATA[
+		<h1>###Component_name### (v.###ACTUALVERSION###)</h1>
+		<div style="clear: both;"></div>
+		<p>###DESCRIPTION###</p>
+		<p>Created by <a href="###AUTHORWEBSITE###" target="_blank">###AUTHOR###</a><br /><small>Development started ###CREATIONDATE###</small></p>
+	]]></description>
+	<namespace path="src">###NAMESPACEPREFIX###\Component\###ComponentNamespace###</namespace>
+
+	<!-- Runs on install -->
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+		</sql>
+	</install>
+
+	<!-- Runs on uninstall -->
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+		</sql>
+	</uninstall>
+
+	<!-- Runs on install/uninstall/update -->
+	<scriptfile>###Component###InstallerScript.php</scriptfile>
+
+	<media destination="com_###component###" folder="media">
+		<filename>index.html</filename>###EXSTRA_MEDIA_FILES###
+		<folder>js</folder>
+		<folder>css</folder>
+		<folder>images</folder>###EXSTRA_MEDIA_FOLDERS###
+	</media>
+
+	<!-- Update Schema -->
+	<update>
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql/</schemapath>
+		</schemas>
+	</update>
+
+	<files folder="site">
+		<filename>index.html</filename>###EXSTRA_SITE_FILES###
+		<folder>assets</folder>
+		<folder>forms</folder>
+		<folder>layouts</folder>
+		<folder>src</folder>
+		<folder>tmpl</folder>###EXSTRA_SITE_FOLDERS###
+	</files>
+
+	<languages folder="site">
+		###SITE_LANGUAGES###
+	</languages>
+
+	<administration>
+		<menu>COM_###COMPONENT###_MENU</menu>
+		<submenu>
+			<!-- Instead of link you can specify individual link attributes -->###MAINMENUS###
+		</submenu>
+		<files folder="admin">
+			<filename>access.xml</filename>
+			<filename>config.xml</filename>
+			<filename>index.html</filename>###EXSTRA_ADMIN_FILES###
+			<folder>assets</folder>
+			<folder>forms</folder>
+			<folder>layouts</folder>
+			<folder>presets</folder>
+			<folder>services</folder>
+			<folder>sql</folder>
+			<folder>src</folder>
+			<folder>tmpl</folder>###EXSTRA_ADMIN_FOLDERS###
+		</files>
+
+		<languages folder="admin">
+			###ADMIN_LANGUAGES###
+		</languages>
+
+	</administration>###API_FILES######UPDATESERVER######CHANGELOGSERVER###
+</extension>

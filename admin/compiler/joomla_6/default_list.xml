@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<metadata>
+	<layout title="COM_###COMPONENT###_MENU_###VIEWS###_TITLE">
+		<message>COM_###COMPONENT###_MENU_###VIEWS###_DESC</message>
+	</layout>
+</metadata>

@@ -47,7 +47,7 @@ class ComponentsroutersfiltermodeconstructorafterparentField extends ListField
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 
 		// Create a new query object.
-		$query = $db->getQuery(true);
+		$query = $db->createQuery();
 
 		// Select the text.
 		$query->select($db->quoteName('mode_constructor_after_parent'));

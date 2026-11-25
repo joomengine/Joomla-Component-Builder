@@ -18,8 +18,10 @@ use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\CustomQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\FieldRelation;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\FilterQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\AliasTitleFix;
+use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Model\AliasTitleFix as J6ModelAliasTitleFix;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Model\ItemSaveInterface as ModelItemSave;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\ItemSave as SharedModelItemSave;
+use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Model\ItemSave as J6ModelItemSave;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Model\ItemSave as J3ModelItemSave;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\RecordKeyFix as ModelRecordKeyFix;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Model\BatchCopyInterface as ModelBatchCopy;
@@ -34,9 +36,11 @@ use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Model\GetForm 
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Model\ItemsMethodInterface as ModelItemsMethod;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\ItemsMethod as SharedModelItemsMethod;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Model\ItemsMethod as J3ModelItemsMethod;
+use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Model\ItemsMethod as J6ModelItemsMethod;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Model\ListQueryInterface as ModelListQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\ListQuery as SharedModelListQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Model\ListQuery as J3ModelListQuery;
+use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Model\ListQuery as J6ModelListQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\SearchQuery;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Model\ItemsStringFixInterface as ModelItemsStringFix;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Model\ItemsStringFix as SharedModelItemsStringFix;
@@ -137,11 +141,17 @@ class ArchitectureModel implements ServiceProviderInterface
 		$container->alias(J3ModelListQuery::class, 'Architecture.Model.J3.ListQuery')
 			->share('Architecture.Model.J3.ListQuery', [$this, 'getJ3ModelListQuery'], true);
 
+		$container->alias(J6ModelListQuery::class, 'Architecture.Model.J6.ListQuery')
+			->share('Architecture.Model.J6.ListQuery', [$this, 'getJ6ModelListQuery'], true);
+
 		$container->alias(ModelItemSave::class, 'Architecture.Model.ItemSave')
 			->share('Architecture.Model.ItemSave', [$this, 'getModelItemSave'], true);
 
 		$container->alias(SharedModelItemSave::class, 'Architecture.Model.Shared.ItemSave')
 			->share('Architecture.Model.Shared.ItemSave', [$this, 'getSharedModelItemSave'], true);
+
+		$container->alias(J6ModelItemSave::class, 'Architecture.Model.J6.ItemSave')
+			->share('Architecture.Model.J6.ItemSave', [$this, 'getJ6ModelItemSave'], true);
 
 		$container->alias(J3ModelItemSave::class, 'Architecture.Model.J3.ItemSave')
 			->share('Architecture.Model.J3.ItemSave', [$this, 'getJ3ModelItemSave'], true);
@@ -151,6 +161,11 @@ class ArchitectureModel implements ServiceProviderInterface
 
 		$container->alias(AliasTitleFix::class, 'Architecture.Model.AliasTitleFix')
 			->share('Architecture.Model.AliasTitleFix', [$this, 'getModelAliasTitleFix'], true);
+
+		$container->share('Architecture.Model.Shared.AliasTitleFix', [$this, 'getSharedModelAliasTitleFix'], true);
+
+		$container->alias(J6ModelAliasTitleFix::class, 'Architecture.Model.J6.AliasTitleFix')
+			->share('Architecture.Model.J6.AliasTitleFix', [$this, 'getJ6ModelAliasTitleFix'], true);
 
 		$container->alias(ModelBatchCopy::class, 'Architecture.Model.BatchCopy')
 			->share('Architecture.Model.BatchCopy', [$this, 'getModelBatchCopy'], true);
@@ -187,6 +202,9 @@ class ArchitectureModel implements ServiceProviderInterface
 
 		$container->alias(J3ModelItemsMethod::class, 'Architecture.Model.J3.ItemsMethod')
 			->share('Architecture.Model.J3.ItemsMethod', [$this, 'getJ3ModelItemsMethod'], true);
+
+		$container->alias(J6ModelItemsMethod::class, 'Architecture.Model.J6.ItemsMethod')
+			->share('Architecture.Model.J6.ItemsMethod', [$this, 'getJ6ModelItemsMethod'], true);
 
 		$container->alias(J3ModelAllowEdit::class, 'Architecture.Model.J3.AllowEdit')
 			->share('Architecture.Model.J3.AllowEdit', [$this, 'getJ3ModelAllowEdit'], true);
@@ -479,6 +497,11 @@ class ArchitectureModel implements ServiceProviderInterface
 			return $container->get('Architecture.Model.J3.ListQuery');
 		}
 
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Architecture.Model.J6.ListQuery');
+		}
+
 		return $container->get('Architecture.Model.Shared.ListQuery');
 	}
 
@@ -532,6 +555,32 @@ class ArchitectureModel implements ServiceProviderInterface
 		);
 	}
 
+
+	/**
+	 * Get The ListQuery Class for Joomla 6.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ModelListQuery
+	 * @since   6.2.0
+	 */
+	public function getJ6ModelListQuery(Container $container): J6ModelListQuery
+	{
+		return new J6ModelListQuery(
+			$container->get('Config'),
+			$container->get('Customcode.Dispenser'),
+			$container->get('Field.Database.Name'),
+			$container->get('Architecture.Model.CustomQuery'),
+			$container->get('Architecture.Model.SearchQuery'),
+			$container->get('Architecture.Model.FilterQuery'),
+			$container->get('Compiler.Builder.Access.Switch'),
+			$container->get('Compiler.Builder.Category'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Field.Names'),
+			$container->get('Compiler.Builder.Views.Default.Ordering')
+		);
+	}
+
 	/**
 	 * Get The ItemsMethod Class.
 	 *
@@ -551,6 +600,11 @@ class ArchitectureModel implements ServiceProviderInterface
 		if ((int) $this->targetVersion === 3)
 		{
 			return $container->get('Architecture.Model.J3.ItemsMethod');
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Architecture.Model.J6.ItemsMethod');
 		}
 
 		return $container->get('Architecture.Model.Shared.ItemsMethod');
@@ -606,6 +660,32 @@ class ArchitectureModel implements ServiceProviderInterface
 		);
 	}
 
+
+	/**
+	 * Get The ItemsMethod Class for Joomla 6.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ModelItemsMethod
+	 * @since   6.2.0
+	 */
+	public function getJ6ModelItemsMethod(Container $container): J6ModelItemsMethod
+	{
+		return new J6ModelItemsMethod(
+			$container->get('Config'),
+			$container->get('Customcode.Dispenser'),
+			$container->get('Placeholder'),
+			$container->get('Field.Database.Name'),
+			$container->get('Architecture.Model.CustomQuery'),
+			$container->get('Architecture.Model.ItemsStringFix'),
+			$container->get('Architecture.Model.SelectionTranslation'),
+			$container->get('Compiler.Builder.Access.Switch'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Views.Default.Ordering'),
+			$container->get('Compiler.Builder.Eximport.View')
+		);
+	}
+
 	/**
 	 * Get The ItemSave Class.
 	 *
@@ -627,6 +707,11 @@ class ArchitectureModel implements ServiceProviderInterface
 			return $container->get('Architecture.Model.J3.ItemSave');
 		}
 
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Architecture.Model.J6.ItemSave');
+		}
+
 		return $container->get('Architecture.Model.Shared.ItemSave');
 	}
 
@@ -641,6 +726,34 @@ class ArchitectureModel implements ServiceProviderInterface
 	public function getSharedModelItemSave(Container $container): SharedModelItemSave
 	{
 		return new SharedModelItemSave(
+			$container->get('Config'),
+			$container->get('Placeholder'),
+			$container->get('Customcode.Dispenser'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Base.Six.Four'),
+			$container->get('Compiler.Builder.Json.Item'),
+			$container->get('Compiler.Builder.Json.String'),
+			$container->get('Compiler.Builder.Permission.Fields'),
+			$container->get('Compiler.Builder.Model.Basic.Field'),
+			$container->get('Compiler.Builder.Model.Medium.Field'),
+			$container->get('Compiler.Builder.Model.Whmcs.Field'),
+			$container->get('Compiler.Builder.Model.Expert.Field'),
+			$container->get('Compiler.Builder.Model.Expert.Field.Initiator'),
+			$container->get('Architecture.Model.RecordKeyFix')
+		);
+	}
+
+	/**
+	 * Build the Joomla 6 Model ItemSave renderer.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ModelItemSave
+	 * @since   6.2.0
+	 */
+	public function getJ6ModelItemSave(Container $container): J6ModelItemSave
+	{
+		return new J6ModelItemSave(
 			$container->get('Config'),
 			$container->get('Placeholder'),
 			$container->get('Customcode.Dispenser'),
@@ -714,7 +827,49 @@ class ArchitectureModel implements ServiceProviderInterface
 	 */
 	public function getModelAliasTitleFix(Container $container): AliasTitleFix
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Architecture.Model.J6.AliasTitleFix');
+		}
+
+		return $container->get('Architecture.Model.Shared.AliasTitleFix');
+	}
+
+	/**
+	 * Get the title and alias fix shared by Joomla 3, 4, and 5.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  AliasTitleFix
+	 * @since   6.2.0
+	 */
+	public function getSharedModelAliasTitleFix(Container $container): AliasTitleFix
+	{
 		return new AliasTitleFix(
+			$container->get('Compiler.Builder.Alias'),
+			$container->get('Compiler.Builder.Title'),
+			$container->get('Compiler.Builder.Custom.Alias'),
+			$container->get('Compiler.Builder.Category.Code'),
+			$container->get('Compiler.Builder.Content.One')
+		);
+	}
+
+	/**
+	 * Get the title and alias fix for Joomla 6.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ModelAliasTitleFix
+	 * @since   6.2.0
+	 */
+	public function getJ6ModelAliasTitleFix(Container $container): J6ModelAliasTitleFix
+	{
+		return new J6ModelAliasTitleFix(
 			$container->get('Compiler.Builder.Alias'),
 			$container->get('Compiler.Builder.Title'),
 			$container->get('Compiler.Builder.Custom.Alias'),

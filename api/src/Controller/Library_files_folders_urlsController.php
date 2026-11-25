@@ -106,9 +106,51 @@ class Library_files_folders_urlsController extends ApiController
 	public function edit()
 	{
 		// resolve the record by its id or by any unique key of the table
-		$this->input->set('id', $this->getRecordId());
+		$id = $this->getRecordId();
+		$this->input->set('id', $id);
 
-		return parent::edit();
+		if ($id < 1 || $this->input->getMethod() !== 'PATCH')
+		{
+			return parent::edit();
+		}
+
+		$model = $this->getModel();
+
+		if (!$model)
+		{
+			throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
+		}
+
+		$table = $model->getTable();
+		$key = $table->getKeyName();
+
+		if (!$this->allowEdit([$key => $id], $key))
+		{
+			throw new NotAllowed('JLIB_APPLICATION_ERROR_CREATE_RECORD_NOT_PERMITTED', 403);
+		}
+
+		if (!$table->load($id))
+		{
+			throw new ResourceNotFound(Text::_('JLIB_APPLICATION_ERROR_RECORD'), 404);
+		}
+
+		if ($table->hasField('checked_out') && !$model->checkout($id))
+		{
+			// A concurrent deletion can also cause checkout to return false.
+			if (!$table->load($id))
+			{
+				throw new ResourceNotFound(Text::_('JLIB_APPLICATION_ERROR_RECORD'), 404);
+			}
+
+			throw new \Joomla\CMS\MVC\Controller\Exception\CheckinCheckout(
+				Text::sprintf('JLIB_APPLICATION_ERROR_CHECKOUT_FAILED', $model->getError())
+			);
+		}
+
+		$this->save($id);
+		$this->displayItem($id);
+
+		return $this;
 	}
 
 	/**
@@ -117,7 +159,7 @@ class Library_files_folders_urlsController extends ApiController
 	 * @param   array  $data  Submitted values plus Joomla's raw stored-column merge.
 	 *
 	 * @return  array
-	 * @throws  \RuntimeException  When the existing record cannot be loaded.
+	 * @throws  ResourceNotFound  When the existing record cannot be loaded.
 	 * @since   6.2.0
 	 */
 	protected function preprocessSaveData(array $data): array
@@ -146,7 +188,7 @@ class Library_files_folders_urlsController extends ApiController
 
 		if (!is_object($item))
 		{
-			throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'), 500);
+			throw new ResourceNotFound(Text::_('JLIB_APPLICATION_ERROR_RECORD'), 404);
 		}
 
 		// getItem owns the inverse of each generated or expert storage transformation.
@@ -202,6 +244,7 @@ class Library_files_folders_urlsController extends ApiController
 
 		$id = (int) $id;
 		$model = $this->getModel();
+		$model->setUseExceptions(true);
 		$table = $model->getTable();
 
 		if ($id < 1 || !$table->load($id))
@@ -217,23 +260,16 @@ class Library_files_folders_urlsController extends ApiController
 
 			if ($session->get('http_status_code_404', false))
 			{
-				$session->clear('http_status_code_404');
+				$session->remove('http_status_code_404');
 
 				throw new ResourceNotFound(Text::_('JLIB_APPLICATION_ERROR_RECORD'), 404);
 			}
 
 			if ($session->get('http_status_code_409', false))
 			{
-				$session->clear('http_status_code_409');
+				$session->remove('http_status_code_409');
 
 				throw new \RuntimeException('Resource not in state that can be deleted, must be trashed before it can be deleted', 409);
-			}
-
-			$error = $model->getError();
-
-			if ($error)
-			{
-				throw new \RuntimeException($error, 500);
 			}
 
 			throw new NotAllowed(Text::_('JLIB_APPLICATION_ERROR_DELETE_NOT_PERMITTED'), 403);

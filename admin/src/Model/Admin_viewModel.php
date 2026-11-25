@@ -215,9 +215,9 @@ class Admin_viewModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'administrator/components/com_componentbuilder/assets/css/admin.css',
-		'administrator/components/com_componentbuilder/assets/css/admin_view.css'
- 	];
+		'media/com_componentbuilder/css/admin/admin.css',
+		'media/com_componentbuilder/css/admin/admin_view.css'
+	];
 
 	/**
 	 * The scripts array.
@@ -226,9 +226,9 @@ class Admin_viewModel extends AdminModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'administrator/components/com_componentbuilder/assets/js/admin.js',
-		'media/com_componentbuilder/js/admin_view.js'
- 	];
+		'media/com_componentbuilder/js/admin/admin.js',
+		'media/com_componentbuilder/js/admin/admin_view.js'
+	];
 
 	/**
 	 * @var     string    The prefix to use with controller messages.
@@ -1069,7 +1069,7 @@ class Admin_viewModel extends AdminModel
 
 		if (empty($table->id))
 		{
-			$table->created = $date->toSql();
+			$table->created = $date->toSql(false, $this->getDatabase());
 			// set the user
 			if ($table->created_by == 0 || empty($table->created_by))
 			{
@@ -1079,7 +1079,7 @@ class Admin_viewModel extends AdminModel
 			if (empty($table->ordering))
 			{
 				$db = $this->getDatabase();
-				$query = $db->getQuery(true)
+				$query = $db->createQuery()
 					->select('MAX(ordering)')
 					->from($db->quoteName('#__componentbuilder_admin_view'));
 				$db->setQuery($query);
@@ -1090,7 +1090,7 @@ class Admin_viewModel extends AdminModel
 		}
 		else
 		{
-			$table->modified = $date->toSql();
+			$table->modified = $date->toSql(false, $this->getDatabase());
 			$table->modified_by = $user->id;
 		}
 
@@ -1136,6 +1136,7 @@ class Admin_viewModel extends AdminModel
 	 */
 	public function validate($form, $data, $group = null)
 	{
+		// Keep conditional requirements inside the native model validation lifecycle.
 		$rule = FormHelper::loadRuleType('conditionalrequired');
 		if (!$rule)
 		{
@@ -1189,6 +1190,7 @@ class Admin_viewModel extends AdminModel
 	 */
 	protected function resolveConditionalData(array $data, $form, $group = null)
 	{
+		// Resolve stored selectors only after native validation plugins and filtering.
 		$application = Factory::getApplication();
 		$context = [
 			'stored' => [],
@@ -1591,9 +1593,7 @@ class Admin_viewModel extends AdminModel
 
 			if (!$jcbPatchTable->load($jcbPatchId))
 			{
-				$this->setError(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'));
-
-				return false;
+				throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_RECORD_LOAD'), 404);
 			}
 
 			foreach ($jcbPatchTable->getFields() as $jcbPatchField)

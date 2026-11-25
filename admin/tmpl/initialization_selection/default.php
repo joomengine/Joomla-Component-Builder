@@ -26,18 +26,21 @@ defined('_JEXEC') or die;
 
 ?>
 <?php if ($this->canDo->get('initialization_selection.access')): ?>
-<script type="text/javascript">
-	Joomla.submitbutton = function(task) {
-		if (task === 'initialization_selection.back') {
-			parent.history.back();
-			return false;
-		} else {
-			var form = document.getElementById('adminForm');
-			form.task.value = task;
-			form.submit();
-		}
-	}
-</script>
+<?php
+$jcbSubmitScript = '	Joomla.submitbutton = function(task) {'
+	. PHP_EOL . '		if (task === \'initialization_selection.back\') {'
+	. PHP_EOL . '			parent.history.back();'
+	. PHP_EOL . '			return false;'
+	. PHP_EOL . '		} else {'
+	. PHP_EOL . '			var form = document.getElementById(\'adminForm\');'
+	. PHP_EOL . '			form.task.value = task;'
+	. PHP_EOL . '			form.submit();'
+	. PHP_EOL . '		}'
+	. PHP_EOL . '	}';
+$this->getDocument()->getWebAssetManager()->addInlineScript(
+	$jcbSubmitScript, ['name' => 'com_componentbuilder.initialization_selection.submit'], [], ['core']
+);
+?>
 <?php $urlId = (isset($this->item->id)) ? '&id='. (int) $this->item->id : ''; ?>
 <form action="<?php echo Route::_('index.php?option=com_componentbuilder&view=initialization_selection' . $urlId); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" enctype="multipart/form-data">
 

@@ -173,6 +173,7 @@ class HtmlView extends BaseHtmlView
 	{
 		// Load module values
 		$model = $this->getModel();
+		$model->setUseExceptions(true);
 		$this->items = $model->getItems();
 		$this->pagination = $model->getPagination();
 		$this->state = $model->getState();
@@ -212,11 +213,6 @@ class HtmlView extends BaseHtmlView
 			$this->addToolbar();
 		}
 
-		// Check for errors.
-		if (count($errors = $this->get('Errors')))
-		{
-			throw new \Exception(implode("\n", $errors), 500);
-		}
 
 		// Set the html view document stuff
 		$this->_prepareDocument();
@@ -286,32 +282,32 @@ class HtmlView extends BaseHtmlView
 		if ($this->user->authorise('joomla_component.clear_tmp', 'com_componentbuilder'))
 		{
 			// add Clear tmp button.
-			ToolbarHelper::custom('joomla_components.clearTmp', 'purge custom-button-cleartmp', '', 'COM_COMPONENTBUILDER_CLEAR_TMP', false);
+			$this->getDocument()->getToolbar()->standardButton('purge custom-button-cleartmp', 'COM_COMPONENTBUILDER_CLEAR_TMP', 'joomla_components.clearTmp')->listCheck(false);
 		}
 		if ($this->user->authorise('joomla_component.health_check', 'com_componentbuilder'))
 		{
 			// add Health Check button.
-			ToolbarHelper::custom('joomla_components.healthCheck', 'health custom-button-healthcheck', '', 'COM_COMPONENTBUILDER_HEALTH_CHECK', false);
+			$this->getDocument()->getToolbar()->standardButton('health custom-button-healthcheck', 'COM_COMPONENTBUILDER_HEALTH_CHECK', 'joomla_components.healthCheck')->listCheck(false);
 		}
 		if ($this->user->authorise('joomla_component.init', 'com_componentbuilder'))
 		{
 			// add Init button.
-			ToolbarHelper::custom('joomla_components.initPowers', 'health custom-button-initpowers', '', 'COM_COMPONENTBUILDER_INIT', false);
+			$this->getDocument()->getToolbar()->standardButton('health custom-button-initpowers', 'COM_COMPONENTBUILDER_INIT', 'joomla_components.initPowers')->listCheck(false);
 		}
 		if ($this->user->authorise('joomla_component.reset', 'com_componentbuilder'))
 		{
 			// add Reset button.
-			ToolbarHelper::custom('joomla_components.resetPowers', 'joomla custom-button-resetpowers', '', 'COM_COMPONENTBUILDER_RESET', false);
+			$this->getDocument()->getToolbar()->standardButton('joomla custom-button-resetpowers', 'COM_COMPONENTBUILDER_RESET', 'joomla_components.resetPowers')->listCheck(false);
 		}
 		if ($this->user->authorise('joomla_component.push', 'com_componentbuilder'))
 		{
 			// add Push button.
-			ToolbarHelper::custom('joomla_components.pushPowers', 'share custom-button-pushpowers', '', 'COM_COMPONENTBUILDER_PUSH', false);
+			$this->getDocument()->getToolbar()->standardButton('share custom-button-pushpowers', 'COM_COMPONENTBUILDER_PUSH', 'joomla_components.pushPowers')->listCheck(false);
 		}
 		if ($this->user->authorise('joomla_component.pull', 'com_componentbuilder'))
 		{
 			// add Pull button.
-			ToolbarHelper::custom('joomla_components.pullPowers', 'undo custom-button-pullpowers', '', 'COM_COMPONENTBUILDER_PULL', false);
+			$this->getDocument()->getToolbar()->standardButton('undo custom-button-pullpowers', 'COM_COMPONENTBUILDER_PULL', 'joomla_components.pullPowers')->listCheck(false);
 		}
 
 		// set help url for this view if found
@@ -336,17 +332,37 @@ class HtmlView extends BaseHtmlView
 	 */
 	protected function _prepareDocument(): void
 	{
-		// Load jQuery
-		Html::_('jquery.framework');
+		$this->getDocument()->getWebAssetManager()->useScript('jquery')->useScript('jquery-noconflict');
+		$wa = $this->getDocument()->getWebAssetManager();
 		// add styles
+		$jcbStyleDependencies = $jcbStyleDependencies ?? [];
 		foreach ($this->styles as $style)
 		{
-			Html::_('stylesheet', $style, ['version' => 'auto']);
+			$style = str_starts_with($style, '//') ? $style : ltrim($style, '/');
+			$assetName = 'jcb.style.' . hash('sha256', $style);
+			if (!$wa->assetExists('style', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $style)
+					? $style : Uri::root() . $style;
+				$wa->registerStyle($assetName, $assetUri, ['version' => 'auto'], [], $jcbStyleDependencies);
+			}
+			$wa->useStyle($assetName);
+			$jcbStyleDependencies = array_values(array_unique([...$jcbStyleDependencies, $assetName]));
 		}
 		// add scripts
+		$jcbScriptDependencies = $jcbScriptDependencies ?? ['core'];
 		foreach ($this->scripts as $script)
 		{
-			Html::_('script', $script, ['version' => 'auto']);
+			$script = str_starts_with($script, '//') ? $script : ltrim($script, '/');
+			$assetName = 'jcb.script.' . hash('sha256', $script);
+			if (!$wa->assetExists('script', $assetName))
+			{
+				$assetUri = preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $script)
+					? $script : Uri::root() . $script;
+				$wa->registerScript($assetName, $assetUri, ['version' => 'auto'], [], $jcbScriptDependencies);
+			}
+			$wa->useScript($assetName);
+			$jcbScriptDependencies = array_values(array_unique([...$jcbScriptDependencies, $assetName]));
 		}
 	}
 

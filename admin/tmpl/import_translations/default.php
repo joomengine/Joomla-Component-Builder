@@ -28,18 +28,21 @@ $this->app->getInput()->set('hidemainmenu', false);
 
 ?>
 <?php if ($this->canDo->get('import_translations.access')): ?>
-<script type="text/javascript">
-	Joomla.submitbutton = function(task) {
-		if (task === 'import_translations.back') {
-			parent.history.back();
-			return false;
-		} else {
-			var form = document.getElementById('adminForm');
-			form.task.value = task;
-			form.submit();
-		}
-	}
-</script>
+<?php
+$jcbSubmitScript = '	Joomla.submitbutton = function(task) {'
+	. PHP_EOL . '		if (task === \'import_translations.back\') {'
+	. PHP_EOL . '			parent.history.back();'
+	. PHP_EOL . '			return false;'
+	. PHP_EOL . '		} else {'
+	. PHP_EOL . '			var form = document.getElementById(\'adminForm\');'
+	. PHP_EOL . '			form.task.value = task;'
+	. PHP_EOL . '			form.submit();'
+	. PHP_EOL . '		}'
+	. PHP_EOL . '	}';
+$this->getDocument()->getWebAssetManager()->addInlineScript(
+	$jcbSubmitScript, ['name' => 'com_componentbuilder.import_translations.submit'], [], ['core']
+);
+?>
 <?php $urlId = (isset($this->item->id)) ? '&id='. (int) $this->item->id : ''; ?>
 <form action="<?php echo Route::_('index.php?option=com_componentbuilder&view=import_translations' . $urlId); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" enctype="multipart/form-data">
 

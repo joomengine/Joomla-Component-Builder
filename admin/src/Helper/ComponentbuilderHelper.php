@@ -1474,7 +1474,6 @@ abstract class ComponentbuilderHelper
 		return self::$tabSpacerBucket[$nr];
 	}
 
-
 	/**
 	 * Local in-memory cache of session values for faster access.
 	 *
@@ -2322,7 +2321,6 @@ abstract class ComponentbuilderHelper
 		}
 		return $url;
 	}
-
 
 	/**
 	 * get Dynamic Scripts
@@ -3215,7 +3213,6 @@ abstract class ComponentbuilderHelper
 		return $string;
 	}
 
-
 	/**
 	* Get the file path or url
 	* 
@@ -3259,7 +3256,6 @@ abstract class ComponentbuilderHelper
 		// sanitize the path
 		return '/' . trim( $folderPath, '/' ) . '/';
 	}
-
 
 	/**
 	* the Crypt objects
@@ -3794,7 +3790,6 @@ abstract class ComponentbuilderHelper
 
 		return  true;
 	}
-
 
 	/**
 	 * the locker
@@ -4988,7 +4983,6 @@ abstract class ComponentbuilderHelper
 		return false;
 	}
 
-
 	/**
 	 * Making class or function name safe
 	 *
@@ -5774,9 +5768,9 @@ abstract class ComponentbuilderHelper
 	public static function getHelpUrl(string $view)
 	{
 		$user	= Factory::getApplication()->getIdentity();
-		$groups = $user->get('groups');
+		$groups = $user->groups;
 		$db	= Factory::getContainer()->get(DatabaseInterface::class);
-		$query	= $db->getQuery(true);
+		$query	= $db->createQuery();
 		$query->select(array('a.id','a.groups','a.target','a.type','a.article','a.url'));
 		$query->from('#__componentbuilder_help_document AS a');
 		$query->where('a.admin_view = '.$db->quote($view));
@@ -6030,7 +6024,7 @@ abstract class ComponentbuilderHelper
 			$type = 'item';
 		}
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		$query = $db->getQuery(true);
+		$query = $db->createQuery();
 		$query->select(array('a.published'));
 		$query->from('#__componentbuilder_'.$type.' AS a');
 		$query->where('a.id = '. (int) $id);
@@ -6048,7 +6042,7 @@ abstract class ComponentbuilderHelper
 	public static function getGroupName($id)
 	{
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		$query = $db->getQuery(true);
+		$query = $db->createQuery();
 		$query->select(array('a.title'));
 		$query->from('#__usergroups AS a');
 		$query->where('a.id = '. (int) $id);
@@ -6107,7 +6101,15 @@ abstract class ComponentbuilderHelper
 		}
 
 		// Get the model through the MVCFactory
-		return Factory::getApplication()->bootComponent('com_' . $component)->getMVCFactory()->createModel($type, $prefix, $config);
+		$app = Factory::getApplication();
+		$model = $app->bootComponent('com_' . $component)->getMVCFactory()->createModel($type, $prefix, $config);
+
+		if ($model instanceof \Joomla\CMS\User\CurrentUserInterface)
+		{
+			$model->setCurrentUser($app->getIdentity() ?? new \Joomla\CMS\User\User());
+		}
+
+		return $model;
 	}
 
 	/**
@@ -6139,37 +6141,31 @@ abstract class ComponentbuilderHelper
 	 */
 	public static function setAsset($id, $table, $inherit = true)
 	{
-		$parent = Table::getInstance('Asset');
-		$parent->loadByName('com_componentbuilder');
+		$db = Factory::getContainer()->get(DatabaseInterface::class);
 
-		$parentId = $parent->id;
-		$name     = 'com_componentbuilder.'.$table.'.'.$id;
-		$title    = '';
-
-		$asset = Table::getInstance('Asset');
-		$asset->loadByName($name);
-
-		// Check for an error.
-		$error = $asset->getError();
-
-		if ($error)
+		try
 		{
-			return false;
-		}
-		else
-		{
+			$parent = new \Joomla\CMS\Table\Asset($db);
+			$parent->setUseExceptions(true);
+			$parent->loadByName('com_componentbuilder');
+
+			$parentId = $parent->id;
+			$name = 'com_componentbuilder.' . $table . '.' . $id;
+			$asset = new \Joomla\CMS\Table\Asset($db);
+			$asset->setUseExceptions(true);
+			$asset->loadByName($name);
+
 			// Specify how a new or moved node asset is inserted into the tree.
 			if ($asset->parent_id != $parentId)
 			{
 				$asset->setLocation($parentId, 'last-child');
 			}
 
-			// Prepare the asset to be stored.
 			$asset->parent_id = $parentId;
-			$asset->name      = $name;
-			$asset->title     = $title;
-			// get the default asset rules
+			$asset->name = $name;
+			$asset->title = '';
 			$rules = self::getDefaultAssetRules('com_componentbuilder', $table, $inherit);
+
 			if ($rules instanceof AccessRules)
 			{
 				$asset->rules = (string) $rules;
@@ -6177,23 +6173,22 @@ abstract class ComponentbuilderHelper
 
 			if (!$asset->check() || !$asset->store())
 			{
-				Factory::getApplication()->enqueueMessage($asset->getError(), 'warning');
-				return false;
+				throw new \RuntimeException(Text::sprintf('JLIB_DATABASE_ERROR_STORE_FAILED', $name));
 			}
-			else
-			{
-				// Create an asset_id or heal one that is corrupted.
-				$object = new \StdClass();
 
-				// Must be a valid primary key value.
-				$object->id = $id;
-				$object->asset_id = (int) $asset->id;
+			// Create an asset_id or heal one that is corrupted.
+			$object = new \stdClass();
+			$object->id = $id;
+			$object->asset_id = (int) $asset->id;
 
-				// Update their asset_id to link to the asset table.
-				return Factory::getDbo()->updateObject('#__componentbuilder_'.$table, $object, 'id');
-			}
+			return $db->updateObject('#__componentbuilder_' . $table, $object, 'id');
 		}
-		return false;
+		catch (\Exception $e)
+		{
+			Factory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
+
+			return false;
+		}
 	}
 
 	/**
@@ -6208,7 +6203,7 @@ abstract class ComponentbuilderHelper
 		{
 			// Need to find the asset id by the name of the component.
 			$db = Factory::getContainer()->get(DatabaseInterface::class);
-			$query = $db->getQuery(true)
+			$query = $db->createQuery()
 				->select($db->quoteName('id'))
 				->from($db->quoteName('#__assets'))
 				->where($db->quoteName('name') . ' = ' . $db->quote($component));

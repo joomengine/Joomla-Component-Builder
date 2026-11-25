@@ -53,9 +53,9 @@ class Dynamic_getsModel extends ListModel
 	 * @since  4.3
 	 */
 	protected array $styles = [
-		'administrator/components/com_componentbuilder/assets/css/admin.css',
-		'administrator/components/com_componentbuilder/assets/css/dynamic_gets.css'
- 	];
+		'media/com_componentbuilder/css/admin/admin.css',
+		'media/com_componentbuilder/css/admin/dynamic_gets.css'
+	];
 
 	/**
 	 * The scripts array.
@@ -64,8 +64,8 @@ class Dynamic_getsModel extends ListModel
 	 * @since  4.3
 	 */
 	protected array $scripts = [
-		'administrator/components/com_componentbuilder/assets/js/admin.js'
- 	];
+		'media/com_componentbuilder/js/admin/admin.js'
+	];
 
 	/**
 	 * Constructor
@@ -312,7 +312,7 @@ class Dynamic_getsModel extends ListModel
 		$user = $this->getCurrentUser();
 		// Create a new query object.
 		$db = $this->getDatabase();
-		$query = $db->getQuery(true);
+		$query = $db->createQuery();
 
 		// Select some fields
 		$query->select('a.*');
@@ -561,20 +561,21 @@ class Dynamic_getsModel extends ListModel
 			// Get a db connection.
 			$db = $this->getDatabase();
 			// Reset query.
-			$query = $db->getQuery(true);
+			$query = $db->createQuery();
 			$query->select('*');
 			$query->from($db->quoteName('#__componentbuilder_dynamic_get'));
 			// Only select items that are checked out.
 			$query->where($db->quoteName('checked_out') . ' >= 0');
 			// Query only to see if we have a rows
-			$db->setQuery($query, 0, 1);
+			$query->setLimit(1);
+			$db->setQuery($query);
 			$db->execute();
 			if ($db->getNumRows())
 			{
 				// Get target date in the past.
 				$date = Factory::getDate()->modify($time)->toSql();
 				// Reset query.
-				$query = $db->getQuery(true);
+				$query = $db->createQuery();
 
 				// Fields to update.
 				$fields = [

@@ -673,6 +673,11 @@ final class AccessSections
 				'jcb_ce_onAfterBuildAccessSections'
 			);
 
+			if ($this->config->get('add_api') && $this->config->get('joomla_version', 3) >= 5)
+			{
+				$this->addApiPermission();
+			}
+
 			/// now build the section
 			$component = $this->permissioncomponent->build();
 
@@ -705,6 +710,32 @@ final class AccessSections
 		}
 
 		return false;
+	}
+
+	/**
+	 * Add the component API action unless a compiler extension already supplied it.
+	 *
+	 * @return  void
+	 * @since   6.3.0
+	 */
+	private function addApiPermission(): void
+	{
+		$actions = $this->permissioncomponent->toArray();
+
+		if (in_array('core.api', array_column($actions['->HEAD<-'] ?? [], 'name'), true)
+			|| in_array('core.api', array_column($actions, 'name'), true))
+		{
+			return;
+		}
+
+		$description = $this->config->lang_prefix . '_ACCESS_WEB_SERVICES_DESC';
+		$this->language->set('bothadmin', $description, 'Allows users in this group to access this component through web services.');
+		$this->permissioncomponent->add('->HEAD<-', [
+			'name' => 'core.api',
+			'title' => 'JACTION_API',
+			'description' => $description
+		], true);
+		$this->counter->accessSize++;
 	}
 }
 
