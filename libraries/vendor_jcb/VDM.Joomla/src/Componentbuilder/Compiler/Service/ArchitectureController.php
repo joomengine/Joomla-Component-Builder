@@ -32,12 +32,14 @@ use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Controller\All
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Controller\EximportMethodInterface as ControllerEximportMethod;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Controller\EximportMethod as SharedControllerEximportMethod;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Controller\EximportMethod as J3ControllerEximportMethod;
+use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Controller\EximportMethod as J6ControllerEximportMethod;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Controller\AjaxCasesInterface as ControllerAjaxCases;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Controller\AjaxCases as SharedControllerAjaxCases;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Controller\AjaxCases as J3ControllerAjaxCases;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Controller\CustomAdminDynamicButtonInterface as ControllerCustomAdminDynamicButton;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Controller\CustomAdminDynamicButton as SharedControllerCustomAdminDynamicButton;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaThree\Controller\CustomAdminDynamicButton as J3ControllerCustomAdminDynamicButton;
+use VDM\Joomla\Componentbuilder\Compiler\Architecture\JoomlaSix\Controller\CustomAdminDynamicButton as J6ControllerCustomAdminDynamicButton;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Controller\AjaxTasks as ControllerAjaxTasks;
 
 
@@ -120,6 +122,9 @@ class ArchitectureController implements ServiceProviderInterface
 		$container->alias(J3ControllerEximportMethod::class, 'Architecture.Controller.J3.EximportMethod')
 			->share('Architecture.Controller.J3.EximportMethod', [$this, 'getJ3ControllerEximportMethod'], true);
 
+		$container->alias(J6ControllerEximportMethod::class, 'Architecture.Controller.J6.EximportMethod')
+			->share('Architecture.Controller.J6.EximportMethod', [$this, 'getJ6ControllerEximportMethod'], true);
+
 		$container->alias(ControllerAjaxCases::class, 'Architecture.Controller.AjaxCases')
 			->share('Architecture.Controller.AjaxCases', [$this, 'getControllerAjaxCases'], true);
 
@@ -140,6 +145,9 @@ class ArchitectureController implements ServiceProviderInterface
 
 		$container->alias(J3ControllerCustomAdminDynamicButton::class, 'Architecture.Controller.J3.CustomAdminDynamicButton')
 			->share('Architecture.Controller.J3.CustomAdminDynamicButton', [$this, 'getJ3ControllerCustomAdminDynamicButton'], true);
+
+		$container->alias(J6ControllerCustomAdminDynamicButton::class, 'Architecture.Controller.J6.CustomAdminDynamicButton')
+			->share('Architecture.Controller.J6.CustomAdminDynamicButton', [$this, 'getJ6ControllerCustomAdminDynamicButton'], true);
 	}
 
 	/**
@@ -433,6 +441,11 @@ class ArchitectureController implements ServiceProviderInterface
 			return $container->get('Architecture.Controller.J3.EximportMethod');
 		}
 
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Architecture.Controller.J6.EximportMethod');
+		}
+
 		return $container->get('Architecture.Controller.Shared.EximportMethod');
 	}
 
@@ -466,6 +479,25 @@ class ArchitectureController implements ServiceProviderInterface
 	public function getJ3ControllerEximportMethod(Container $container): J3ControllerEximportMethod
 	{
 		return new J3ControllerEximportMethod(
+			$container->get('Config'),
+			$container->get('Language'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Eximport.View'),
+			$container->get('Compiler.Builder.Import.Custom.Scripts')
+		);
+	}
+
+	/**
+	 * Get the EximportMethod renderer for Joomla 6.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ControllerEximportMethod
+	 * @since   6.2.0
+	 */
+	public function getJ6ControllerEximportMethod(Container $container): J6ControllerEximportMethod
+	{
+		return new J6ControllerEximportMethod(
 			$container->get('Config'),
 			$container->get('Language'),
 			$container->get('Compiler.Builder.Content.One'),
@@ -563,6 +595,11 @@ class ArchitectureController implements ServiceProviderInterface
 			return $container->get('Architecture.Controller.J3.CustomAdminDynamicButton');
 		}
 
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Architecture.Controller.J6.CustomAdminDynamicButton');
+		}
+
 		return $container->get('Architecture.Controller.Shared.CustomAdminDynamicButton');
 	}
 
@@ -594,6 +631,23 @@ class ArchitectureController implements ServiceProviderInterface
 	public function getJ3ControllerCustomAdminDynamicButton(Container $container): J3ControllerCustomAdminDynamicButton
 	{
 		return new J3ControllerCustomAdminDynamicButton(
+			$container->get('Config'),
+			$container->get('Language'),
+			$container->get('Compiler.Builder.Dynamic.Buttons')
+		);
+	}
+
+	/**
+	 * Get The Joomla 6 Controller CustomAdminDynamicButton Class.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ControllerCustomAdminDynamicButton
+	 * @since   6.2.0
+	 */
+	public function getJ6ControllerCustomAdminDynamicButton(Container $container): J6ControllerCustomAdminDynamicButton
+	{
+		return new J6ControllerCustomAdminDynamicButton(
 			$container->get('Config'),
 			$container->get('Language'),
 			$container->get('Compiler.Builder.Dynamic.Buttons')

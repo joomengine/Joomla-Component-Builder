@@ -337,7 +337,7 @@ final class SiteRouter
 				$this->contentmulti->set('category' . $otherView . '|Views', ucfirst((string) $otherViews));
 				// set script to global helper file
 				$includeHelper   = [];
-				$includeHelper[] = "\n//" . Line::_(__Line__, __Class__)
+				$includeHelper[] = PHP_EOL . Indent::_(0) . "//" . Line::_(__Line__, __Class__)
 					. "Insure this view category file is loaded.";
 				$includeHelper[] = "\$classname = '" . ucfirst((string) $component)
 					. ucfirst((string) $otherView) . "Categories';";
@@ -351,7 +351,7 @@ final class SiteRouter
 				$includeHelper[] = Indent::_(2) . "include_once \$path;";
 				$includeHelper[] = Indent::_(1) . "}";
 				$includeHelper[] = "}";
-				$this->contentone->add('CATEGORY_CLASS_TREES', implode("\n", $includeHelper));
+				$this->contentone->add('CATEGORY_CLASS_TREES', implode(PHP_EOL, $includeHelper));
 			}
 			// return category view string
 			if ($this->contentone->exists('ROUTER_CATEGORY_VIEWS')

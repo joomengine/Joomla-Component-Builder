@@ -301,7 +301,7 @@ final class CreateUser implements CreateUserInterface
 				. "public static function updateUser(\$new)";
 			$method[] = Indent::_(1) . "{";
 			$method[] = Indent::_(2)
-				. "// load the user component language files if there is an error.";
+				. "//" . Line::_(__LINE__, __CLASS__) . " load the user component language files if there is an error.";
 			$method[] = Indent::_(2) . "\$lang = Factory::getLanguage();";
 			$method[] = Indent::_(2) . "\$extension = 'com_users';";
 			$method[] = Indent::_(2) . "\$base_dir = JPATH_ADMINISTRATOR;";
@@ -309,25 +309,25 @@ final class CreateUser implements CreateUserInterface
 			$method[] = Indent::_(2) . "\$reload = true;";
 			$method[] = Indent::_(2)
 				. "\$lang->load(\$extension, \$base_dir, \$language_tag, \$reload);";
-			$method[] = Indent::_(2) . "// load the user model";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " load the user model";
 			$method[] = Indent::_(2)
 				. "\$model = self::getModel('user', JPATH_ADMINISTRATOR . '/components/com_users', 'Users');";
-			$method[] = Indent::_(2) . "// Check if password was set";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " Check if password was set";
 			$method[] = Indent::_(2)
 				. "if (isset(\$new['password']) && isset(\$new['password2']) && Super_" . "__1f28cb53_60d9_4db1_b517_3c7dc6b429ef___Power::check(\$new['password']) && Super_" . "__1f28cb53_60d9_4db1_b517_3c7dc6b429ef___Power::check(\$new['password2']))";
 			$method[] = Indent::_(2) . "{";
-			$method[] = Indent::_(3) . "// Use the users passwords";
+			$method[] = Indent::_(3) . "//" . Line::_(__LINE__, __CLASS__) . " Use the users passwords";
 			$method[] = Indent::_(3) . "\$password = \$new['password'];";
 			$method[] = Indent::_(3) . "\$password2 = \$new['password2'];";
 			$method[] = Indent::_(2) . "}";
-			$method[] = Indent::_(2) . "// set username";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " set username";
 			$method[] = Indent::_(2)
 				. "if (!isset(\$new['username']) || !Super_" . "__1f28cb53_60d9_4db1_b517_3c7dc6b429ef___Power::check(\$new['username']))";
 			$method[] = Indent::_(2) . "{";
 			$method[] = Indent::_(3)
 				. "\$new['username'] = \$new['email'];";
 			$method[] = Indent::_(2) . "}";
-			$method[] = Indent::_(2) . "// lineup update user data";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " lineup update user data";
 			$method[] = Indent::_(2) . "\$data = array(";
 			$method[] = Indent::_(3) . "'id' => \$new['id'],";
 			$method[] = Indent::_(3) . "'username' => \$new['username'],";
@@ -338,15 +338,15 @@ final class CreateUser implements CreateUserInterface
 			$method[] = Indent::_(3)
 				. "'password2' => \$password2, // Confirm password field";
 			$method[] = Indent::_(3) . "'block' => 0 );";
-			$method[] = Indent::_(2) . "// set groups if found";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " set groups if found";
 			$method[] = Indent::_(2)
 				. "if (isset(\$new['groups']) && Super_" . "__0a59c65c_9daf_4bc9_baf4_e063ff9e6a8a___Power::check(\$new['groups']))";
 			$method[] = Indent::_(2) . "{";
 			$method[] = Indent::_(3) . "\$data['groups'] = \$new['groups'];";
 			$method[] = Indent::_(2) . "}";
-			$method[] = Indent::_(2) . "// register the new user";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " register the new user";
 			$method[] = Indent::_(2) . "\$done = \$model->save(\$data);";
-			$method[] = Indent::_(2) . "// if user is updated";
+			$method[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " if user is updated";
 			$method[] = Indent::_(2) . "if (\$done)";
 			$method[] = Indent::_(2) . "{";
 			$method[] = Indent::_(3) . "return \$new['id'];";

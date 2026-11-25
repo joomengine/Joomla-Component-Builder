@@ -1126,7 +1126,7 @@ abstract class MimeHelper
 		{
 			$finfo = finfo_open(FILEINFO_MIME_TYPE);
 			$mimetype = finfo_file($finfo, $file);
-			finfo_close($finfo);
+			unset($finfo);
 
 			if ($mimetype)
 			{

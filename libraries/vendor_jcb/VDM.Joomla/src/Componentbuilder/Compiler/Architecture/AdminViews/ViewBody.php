@@ -115,28 +115,10 @@ class ViewBody implements ViewBodyInterface
 		// check if the filter type is sidebar (1 = sidebar)
 		if ($this->adminfiltertype->get($nameListCode, 1) == 1)
 		{
-			$body[] = "<script type=\"text/javascript\">";
-			$body[] = Indent::_(1) . "Joomla.orderTable = function()";
-			$body[] = Indent::_(1) . "{";
-			$body[] = Indent::_(2)
-				. "table = document.getElementById(\"sortTable\");";
-			$body[] = Indent::_(2)
-				. "direction = document.getElementById(\"directionTable\");";
-			$body[] = Indent::_(2)
-				. "order = table.options[table.selectedIndex].value;";
-			$body[] = Indent::_(2)
-				. "if (order != '<?php echo \$this->listOrder; ?>')";
-			$body[] = Indent::_(2) . "{";
-			$body[] = Indent::_(3) . "dirn = 'asc';";
-			$body[] = Indent::_(2) . "}";
-			$body[] = Indent::_(2) . "else";
-			$body[] = Indent::_(2) . "{";
-			$body[] = Indent::_(3)
-				. "dirn = direction.options[direction.selectedIndex].value;";
-			$body[] = Indent::_(2) . "}";
-			$body[] = Indent::_(2) . "Joomla.tableOrdering(order, dirn, '');";
-			$body[] = Indent::_(1) . "}";
-			$body[] = "</script>";
+			foreach ($this->getOrderingScript() as $line)
+			{
+				$body[] = $line;
+			}
 		}
 		// Trigger Event: jcb_ce_onSetDefaultViewsBodyTop
 		$this->event->trigger(
@@ -381,6 +363,41 @@ class ViewBody implements ViewBodyInterface
 				. "<tbody><?php echo \$this->loadTemplate('body');?></tbody>",
 			Indent::_(1) . "</table>",
 		];
+	}
+
+	/**
+	 * Build the sidebar ordering script.
+	 *
+	 * @return  array<int, string>  The generated script lines.
+	 * @since   6.2.0
+	 */
+	protected function getOrderingScript(): array
+	{
+		$lines = [];
+		$lines[] = "<script type=\"text/javascript\">";
+		$lines[] = Indent::_(1) . "Joomla.orderTable = function()";
+		$lines[] = Indent::_(1) . "{";
+		$lines[] = Indent::_(2)
+			. "table = document.getElementById(\"sortTable\");";
+		$lines[] = Indent::_(2)
+			. "direction = document.getElementById(\"directionTable\");";
+		$lines[] = Indent::_(2)
+			. "order = table.options[table.selectedIndex].value;";
+		$lines[] = Indent::_(2)
+			. "if (order != '<?php echo \$this->listOrder; ?>')";
+		$lines[] = Indent::_(2) . "{";
+		$lines[] = Indent::_(3) . "dirn = 'asc';";
+		$lines[] = Indent::_(2) . "}";
+		$lines[] = Indent::_(2) . "else";
+		$lines[] = Indent::_(2) . "{";
+		$lines[] = Indent::_(3)
+			. "dirn = direction.options[direction.selectedIndex].value;";
+		$lines[] = Indent::_(2) . "}";
+		$lines[] = Indent::_(2) . "Joomla.tableOrdering(order, dirn, '');";
+		$lines[] = Indent::_(1) . "}";
+		$lines[] = "</script>";
+
+		return $lines;
 	}
 }
 

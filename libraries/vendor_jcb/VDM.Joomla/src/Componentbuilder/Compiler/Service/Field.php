@@ -25,6 +25,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Field\TypeName;
 use VDM\Joomla\Componentbuilder\Compiler\Field\UniqueName;
 use VDM\Joomla\Componentbuilder\Compiler\Field\Rule;
 use VDM\Joomla\Componentbuilder\Compiler\Field\Customcode;
+use VDM\Joomla\Componentbuilder\Compiler\Field\JoomlaSix\Customcode as J6Customcode;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Field\CustomFieldCode;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Field\TargetControlsScript;
 use VDM\Joomla\Componentbuilder\Compiler\Architecture\Field\IfValueScript;
@@ -106,6 +107,11 @@ class Field implements ServiceProviderInterface
 
 		$container->alias(Customcode::class, 'Field.Customcode')
 			->share('Field.Customcode', [$this, 'getCustomcode'], true);
+
+		$container->share('Field.Shared.Customcode', [$this, 'getSharedCustomcode'], true);
+
+		$container->alias(J6Customcode::class, 'Field.J6.Customcode')
+			->share('Field.J6.Customcode', [$this, 'getJ6Customcode'], true);
 
 		$container->alias(CustomFieldCode::class, 'Architecture.Field.CustomFieldCode')
 			->share('Architecture.Field.CustomFieldCode', [$this, 'getCustomFieldCode'], true);
@@ -328,7 +334,40 @@ class Field implements ServiceProviderInterface
 	 */
 	public function getCustomcode(Container $container): Customcode
 	{
-		return new Customcode(
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		$target = (int) $this->targetVersion === 6 ? 'J6' : 'Shared';
+
+		return $container->get('Field.' . $target . '.Customcode');
+	}
+
+	/**
+	 * Get the unchanged field collector for Joomla three through five.
+	 *
+	 * @param   Container  $container  Compiler services.
+	 *
+	 * @return  Customcode
+	 * @since   6.2.0
+	 */
+	public function getSharedCustomcode(Container $container): Customcode
+	{
+		return new Customcode($container->get('Customcode.Dispenser'));
+	}
+
+	/**
+	 * Get the Joomla six field custom-code collector.
+	 *
+	 * @param   Container  $container  Compiler services.
+	 *
+	 * @return  J6Customcode
+	 * @since   6.2.0
+	 */
+	public function getJ6Customcode(Container $container): J6Customcode
+	{
+		return new J6Customcode(
 			$container->get('Customcode.Dispenser')
 		);
 	}

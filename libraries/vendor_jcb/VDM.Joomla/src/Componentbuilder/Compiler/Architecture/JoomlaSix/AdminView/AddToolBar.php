@@ -514,8 +514,8 @@ final class AddToolBar implements AddToolBarInterface
 			. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::save('"
 			. $nameSingleCode . ".save', 'JTOOLBAR_SAVE');";
 		$toolBar .= PHP_EOL . Indent::_(5)
-			. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::custom('"
-			. $nameSingleCode . ".save2new', 'save-new.png', 'save-new_f2.png', 'JTOOLBAR_SAVE_AND_NEW', false);";
+			. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::save2new('"
+			. $nameSingleCode . ".save2new', 'JTOOLBAR_SAVE_AND_NEW');";
 		$toolBar .= PHP_EOL . Indent::_(4) . "};";
 		$toolBar .= PHP_EOL . Indent::_(4)
 			. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::cancel('"
@@ -532,8 +532,8 @@ final class AddToolBar implements AddToolBarInterface
 			. $this->permission->getGlobal($nameSingleCode, 'core.create') . "'))";
 		$toolBar .= PHP_EOL . Indent::_(4) . "{";
 		$toolBar .= PHP_EOL . Indent::_(5)
-			. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::custom('"
-			. $nameSingleCode . ".save2copy', 'save-copy.png', 'save-copy_f2.png', 'JTOOLBAR_SAVE_AS_COPY', false);";
+			. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::save2copy('"
+			. $nameSingleCode . ".save2copy', 'JTOOLBAR_SAVE_AS_COPY');";
 		$toolBar .= PHP_EOL . Indent::_(4) . "}";
 
 		return $toolBar;
@@ -566,9 +566,8 @@ final class AddToolBar implements AddToolBarInterface
 		$toolBar .= PHP_EOL . Indent::_(5) . "if (\$this->canDo->get('"
 			. $this->permission->getGlobal($nameSingleCode, 'core.create') . "'))";
 		$toolBar .= PHP_EOL . Indent::_(5) . "{";
-		$toolBar .= PHP_EOL . Indent::_(6) . "Joomla__"."_0c1a176a_304f_433a_8233_37d01ff87815___Power::custom('"
-			. $nameSingleCode
-			. ".save2new', 'save-new.png', 'save-new_f2.png', 'JTOOLBAR_SAVE_AND_NEW', false);";
+		$toolBar .= PHP_EOL . Indent::_(6) . "Joomla__"."_0c1a176a_304f_433a_8233_37d01ff87815___Power::save2new('"
+			. $nameSingleCode . ".save2new', 'JTOOLBAR_SAVE_AND_NEW');";
 		$toolBar .= PHP_EOL . Indent::_(5) . "}";
 		$toolBar .= PHP_EOL . Indent::_(4) . "}";
 

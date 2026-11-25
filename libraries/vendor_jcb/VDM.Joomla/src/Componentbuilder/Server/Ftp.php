@@ -107,7 +107,6 @@ class Ftp implements Serverinterface
 			// The caller reports a failed transfer without exposing credentials.
 			$this->client = null;
 		}
-
 		return false;
 	}
 
@@ -138,6 +137,7 @@ class Ftp implements Serverinterface
 	 **/
 	private function getClient(): ?FtpClient
 	{
+		// make sure we have a string and it is not default or empty
 		if (!StringHelper::check($this->details->signature ?? null))
 		{
 			return null;
@@ -223,7 +223,8 @@ class Ftp implements Serverinterface
 
 		if (!$client->login($signature['username'], $signature['password']))
 		{
-			// Joomla's client destructor closes the connection, including socket-based FTP.
+			$client->quit();
+
 			return null;
 		}
 

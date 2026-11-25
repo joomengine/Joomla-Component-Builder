@@ -27,6 +27,8 @@ use VDM\Joomla\Componentbuilder\Compiler\Model\Libraries;
 use VDM\Joomla\Componentbuilder\Compiler\Dynamicget\Data as Dynamicget;
 use VDM\Joomla\Componentbuilder\Compiler\Templatelayout\Data as Templatelayout;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Counter;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 use VDM\Joomla\Componentbuilder\Package\Builder\Get as Superpower;
 use VDM\Joomla\Utilities\ArrayHelper;
 use VDM\Joomla\Utilities\String\ClassfunctionHelper;
@@ -703,11 +705,11 @@ final class Data implements ModuleDataInterface
 			}
 			else
 			{
-				$module->mod_code = "// get the module class sfx";
-				$module->mod_code .= PHP_EOL
+				$module->mod_code = Indent::_(0) . "//" . Line::_(__LINE__, __CLASS__) . " get the module class sfx";
+				$module->mod_code .= PHP_EOL . Indent::_(0)
 					. "\$moduleclass_sfx = htmlspecialchars(\$params->get('moduleclass_sfx'), ENT_COMPAT, 'UTF-8');";
-				$module->mod_code .= PHP_EOL . "// load the default Tmpl";
-				$module->mod_code .= PHP_EOL
+				$module->mod_code .= PHP_EOL . Indent::_(0) . "//" . Line::_(__LINE__, __CLASS__) . " load the default Tmpl";
+				$module->mod_code .= PHP_EOL . Indent::_(0)
 					. "require JModuleHelper::getLayoutPath('mod_"
 					. strtolower((string) $module->code_name)
 					. "', \$params->get('layout', 'default'));";

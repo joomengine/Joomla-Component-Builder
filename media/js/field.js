@@ -8,6 +8,19 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+
+/**
+ * Compatibility for custom scripts using the retired required-field helper.
+ *
+ * @param  {string}  name    The legacy field name, ignored.
+ * @param  {number}  status  The legacy required state, ignored.
+ *
+ * @return {void}
+ * @deprecated 6.2.1 Required fields are decided by server-side conditions.
+ */
+function updateFieldRequired(name, status)
+{
+}
 // Original display and required state are captured before conditions run.
 var updateFieldConditionsBaseline = null;
 
@@ -717,12 +730,6 @@ function propertyIsSet(prop, id, targetForm) {
 function getFieldTypeProperties(fieldtype, db) {
 	getCodeFrom_server(fieldtype, 'type', 'type', 'fieldTypeProperties')
 		.then(function (result) {
-			// Ignore a response for a field type the user has since changed.
-			const selectedType = document.getElementById('jform_fieldtype');
-			if (!selectedType || String(selectedType.value) !== String(fieldtype)) {
-				return;
-			}
-
 			// Ensure a valid response with subform data
 			if (!result || !result.subform) {
 				return;
@@ -795,6 +802,7 @@ function getFieldTypeProperties(fieldtype, db) {
 				// Update datatype
 				if (notEmpty(dbData?.datatype)) {
 					setChoicesFieldValue('#jform_datatype', dbData.datatype);
+					updateFieldRequired('datatype', 0);
 				} else {
 					unselectChoicesFieldValue('#jform_datatype');
 				}
@@ -802,37 +810,47 @@ function getFieldTypeProperties(fieldtype, db) {
 				// Update datalenght
 				if (notEmpty(dbData?.datalenght)) {
 					setChoicesFieldValue('#jform_datalenght', dbData.datalenght);
+					updateFieldRequired('datalenght', 0);
 					if (dbData.datalenght === 'Other' && notEmpty(dbData?.datalenght_other)) {
 						setChoicesFieldValue('#jform_datalenght_other', dbData.datalenght_other);
+						updateFieldRequired('datalenght_other', 0);
 					}
 				} else {
 					unselectChoicesFieldValue('#jform_datalenght');
 					unselectChoicesFieldValue('#jform_datalenght_other');
+					updateFieldRequired('datalenght', 1);
+					updateFieldRequired('datalenght_other', 1);
 				}
 
 				// Update datadefault
 				if (notEmpty(dbData?.datadefault)) {
 					setChoicesFieldValue('#jform_datadefault', dbData.datadefault);
+					updateFieldRequired('datadefault', 0);
 					if (dbData.datadefault === 'Other') {
 						setChoicesFieldValue('#jform_datadefault_other', dbData.datadefault_other);
+						updateFieldRequired('datadefault_other', 0);
+					} else {
+						updateFieldRequired('datadefault_other', 1);
 					}
 				} else {
 					unselectChoicesFieldValue('#jform_datadefault');
 					unselectChoicesFieldValue('#jform_datadefault_other');
+					updateFieldRequired('datadefault', 1);
+					updateFieldRequired('datadefault_other', 1);
 				}
 
 				// Update indexes
-				// Zero is a valid default for this selection.
-				if (dbData?.indexes !== undefined && dbData.indexes !== null && dbData.indexes !== '') {
+				if (notEmpty(dbData?.indexes)) {
 					setChoicesFieldValue('#jform_indexes', dbData.indexes);
+					// updateFieldRequired('indexes', 0);
 				} else {
 					// unselectChoicesFieldValue('#jform_indexes');
 				}
 
 				// Update store
-				// Zero is a valid default for this selection.
-				if (dbData?.store !== undefined && dbData.store !== null && dbData.store !== '') {
+				if (notEmpty(dbData?.store)) {
 					setChoicesFieldValue('#jform_store', dbData.store);
+					// updateFieldRequired('store', 0);
 				}  else {
 					// unselectChoicesFieldValue('#jform_store');
 				}
@@ -842,20 +860,24 @@ function getFieldTypeProperties(fieldtype, db) {
 
 				// Reset datalenght
 				// unselectChoicesFieldValue('#jform_datalenght');
+				// updateFieldRequired('datalenght', 1);
 				// unselectChoicesFieldValue('#jform_datalenght_other');
+				// updateFieldRequired('datalenght_other', 1);
 
 				// Reset datadefault
 				// unselectChoicesFieldValue('#jform_datadefault');
+				// updateFieldRequired('datadefault', 1);
 				// unselectChoicesFieldValue('#jform_datadefault_other');
+				// updateFieldRequired('datadefault_other', 1);
 
 				// Reset indexes
 				// unselectChoicesFieldValue('#jform_indexes');
+				// updateFieldRequired('indexes', 1);
 
 				// Reset store
 				// unselectChoicesFieldValue('#jform_store');
+				// updateFieldRequired('store', 1);
 			}
-			// Defaults can change selectors without emitting a change event.
-			updateFieldConditions();
 		})
 		.catch(error => {
 			console.error('[getFieldTypeProperties] Error:', error);
@@ -1102,37 +1124,122 @@ function getFieldPropertyDesc_server(fieldtype, property) {
 }
 
 /**
- * Reset database selections and notices for the selected field type.
+ * Manage database field visibility and validation based on the field type.
  *
- * Visibility and required attributes are owned by generated field conditions.
- * Capturing their baseline before custom mutation also supports early callers.
+ * When the field type is "note" or "spacer", all database settings are hidden
+ * and cleared. Otherwise, the relevant database fields are shown and required.
  *
- * @param  {string} type  The selected field type label, normalized to lowercase.
+ * @param  {string} type  The field type to evaluate.
  *
  * @return {void}
  * @since  3.1.3
- * @since  6.2.1 Reconcile authored resets with server-owned conditions.
  */
 function dbChecker(type) {
-	updateFieldConditions();
-	const noDatabase = type === 'note' || type === 'spacer';
-	if (noDatabase) {
+	if (type === 'note' || type === 'spacer') {
+		// Reset database-related select fields
 		unselectChoicesFieldValue('#jform_datatype');
 		unselectChoicesFieldValue('#jform_datalenght');
 		unselectChoicesFieldValue('#jform_datadefault');
 		unselectChoicesFieldValue('#jform_indexes');
 		unselectChoicesFieldValue('#jform_store');
-	}
 
-	document.querySelectorAll('.note_no_database_settings_needed').forEach(el => {
-		const group = el.closest('.control-group');
-		if (group) group.style.display = noDatabase ? '' : 'none';
-	});
-	document.querySelectorAll('.note_database_settings_needed').forEach(el => {
-		const group = el.closest('.control-group');
-		if (group) group.style.display = noDatabase ? 'none' : '';
-	});
-	updateFieldConditions();
+		// Datatype field group
+		const datatypeLbl = document.querySelector('#jform_datatype-lbl');
+		const datatype = document.querySelector('#jform_datatype');
+		if (datatypeLbl) datatypeLbl.closest('.control-group').style.display = 'none';
+		if (datatype) datatype.closest('.control-group').style.display = 'none';
+		updateFieldRequired('datatype', 1);
+		if (datatype) {
+			datatype.removeAttribute('required');
+			datatype.removeAttribute('aria-required');
+			datatype.classList.remove('required');
+		}
+
+		// Null switch field group
+		const nullLbl = document.querySelector('#jform_null_switch-lbl');
+		const nullSwitch = document.querySelector('#jform_null_switch');
+		if (nullLbl) nullLbl.closest('.control-group').style.display = 'none';
+		if (nullSwitch) nullSwitch.closest('.control-group').style.display = 'none';
+		updateFieldRequired('null_switch', 1);
+		if (nullSwitch) {
+			nullSwitch.removeAttribute('required');
+			nullSwitch.removeAttribute('aria-required');
+			nullSwitch.classList.remove('required');
+		}
+
+		// Store field group
+		const storeLbl = document.querySelector('#jform_store-lbl');
+		const store = document.querySelector('#jform_store');
+		if (storeLbl) storeLbl.closest('.control-group').style.display = 'none';
+		if (store) store.closest('.control-group').style.display = 'none';
+		updateFieldRequired('store', 1);
+		if (store) {
+			store.removeAttribute('required');
+			store.removeAttribute('aria-required');
+			store.classList.remove('required');
+		}
+
+		// Show/hide notices
+		document.querySelectorAll('.note_no_database_settings_needed').forEach(el => {
+			const group = el.closest('.control-group');
+			if (group) group.style.display = '';
+		});
+		document.querySelectorAll('.note_database_settings_needed').forEach(el => {
+			const group = el.closest('.control-group');
+			if (group) group.style.display = 'none';
+		});
+
+	} else {
+		// Datatype field group
+		const datatypeLbl = document.querySelector('#jform_datatype-lbl');
+		const datatype = document.querySelector('#jform_datatype');
+		if (datatypeLbl) datatypeLbl.closest('.control-group').style.display = '';
+		if (datatype) datatype.closest('.control-group').style.display = '';
+		updateFieldRequired('datatype', 0);
+		if (datatype) {
+			datatype.setAttribute('required', 'required');
+			datatype.setAttribute('aria-required', 'true');
+			datatype.classList.add('required');
+		}
+
+		// Null switch field group
+		// const nullLbl = document.querySelector('#jform_null_switch-lbl');
+		// const nullSwitch = document.querySelector('#jform_null_switch');
+		// if (nullLbl) nullLbl.closest('.control-group').style.display = '';
+		// if (nullSwitch) nullSwitch.closest('.control-group').style.display = '';
+		// updateFieldRequired('null_switch', 0);
+		// if (nullSwitch) {
+		//	nullSwitch.setAttribute('required', 'required');
+		//	nullSwitch.setAttribute('aria-required', 'true');
+		//	nullSwitch.classList.add('required');
+		// }
+
+		// Store field group
+		// const storeLbl = document.querySelector('#jform_store-lbl');
+		// const store = document.querySelector('#jform_store');
+		// if (storeLbl) storeLbl.closest('.control-group').style.display = '';
+		// if (store) store.closest('.control-group').style.display = '';
+		// updateFieldRequired('store', 0);
+		// if (store) {
+		//	store.setAttribute('required', 'required');
+		//	store.setAttribute('aria-required', 'true');
+		//	store.classList.add('required');
+		// }
+
+		// Update database-related selects to defaults (0 or empty) if needed
+		// unselectChoicesFieldValue('#jform_indexes');
+		// unselectChoicesFieldValue('#jform_store');
+
+		// Show/hide notices
+		document.querySelectorAll('.note_no_database_settings_needed').forEach(el => {
+			const group = el.closest('.control-group');
+			if (group) group.style.display = 'none';
+		});
+		document.querySelectorAll('.note_database_settings_needed').forEach(el => {
+			const group = el.closest('.control-group');
+			if (group) group.style.display = '';
+		});
+	}
 }
 
 /**

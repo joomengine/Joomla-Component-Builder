@@ -23,6 +23,10 @@ use VDM\Joomla\Componentbuilder\Compiler\Creator\CustomButtonPermissions;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\ConfigFieldsets;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\ConfigFieldsetsCustomfield;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\ConfigFieldsetsEmailHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaThree\ConfigFieldsetsEmailHelper as J3ConfigFieldsetsEmailHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaFour\ConfigFieldsetsEmailHelper as J4ConfigFieldsetsEmailHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaFive\ConfigFieldsetsEmailHelper as J5ConfigFieldsetsEmailHelper;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaSix\ConfigFieldsetsEmailHelper as J6ConfigFieldsetsEmailHelper;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\ConfigFieldsetsEncryption;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\ConfigFieldsetsGlobal;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\ConfigFieldsetsGooglechart;
@@ -37,7 +41,9 @@ use VDM\Joomla\Componentbuilder\Compiler\Creator\Router;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\RouterConstructorDefault;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\RouterConstructorManual;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\RouterMethodsDefault;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaSix\RouterMethodsDefault as J6RouterMethodsDefault;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\RouterMethodsManual;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaSix\RouterMethodsManual as J6RouterMethodsManual;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\FieldsetExtension;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\FieldsetString;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\FieldsetXML;
@@ -49,6 +55,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Creator\FieldAsString;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Creator\Fieldtypeinterface as FieldType;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Creator\Fieldsetinterface as Fieldset;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\Helper;
+use VDM\Joomla\Componentbuilder\Compiler\Creator\JoomlaSix\Helper as J6Helper;
 use VDM\Joomla\Componentbuilder\Compiler\Creator\EmailHelper;
 
 
@@ -59,6 +66,14 @@ use VDM\Joomla\Componentbuilder\Compiler\Creator\EmailHelper;
  */
 class Creator implements ServiceProviderInterface
 {
+	/**
+	 * Compile target selected for this build scope.
+	 *
+	 * @var   int
+	 * @since 6.2.0
+	 */
+	protected int $targetVersion;
+
 	/**
 	 * Registers the service provider with a DI container.
 	 *
@@ -98,6 +113,18 @@ class Creator implements ServiceProviderInterface
 
 		$container->alias(ConfigFieldsetsEmailHelper::class, 'Compiler.Creator.Config.Fieldsets.Email.Helper')
 			->share('Compiler.Creator.Config.Fieldsets.Email.Helper', [$this, 'getConfigFieldsetsEmailHelper'], true);
+
+		$container->alias(J3ConfigFieldsetsEmailHelper::class, 'Compiler.Creator.Config.Fieldsets.J3.Email.Helper')
+			->share('Compiler.Creator.Config.Fieldsets.J3.Email.Helper', [$this, 'getJ3ConfigFieldsetsEmailHelper'], true);
+
+		$container->alias(J4ConfigFieldsetsEmailHelper::class, 'Compiler.Creator.Config.Fieldsets.J4.Email.Helper')
+			->share('Compiler.Creator.Config.Fieldsets.J4.Email.Helper', [$this, 'getJ4ConfigFieldsetsEmailHelper'], true);
+
+		$container->alias(J5ConfigFieldsetsEmailHelper::class, 'Compiler.Creator.Config.Fieldsets.J5.Email.Helper')
+			->share('Compiler.Creator.Config.Fieldsets.J5.Email.Helper', [$this, 'getJ5ConfigFieldsetsEmailHelper'], true);
+
+		$container->alias(J6ConfigFieldsetsEmailHelper::class, 'Compiler.Creator.Config.Fieldsets.J6.Email.Helper')
+			->share('Compiler.Creator.Config.Fieldsets.J6.Email.Helper', [$this, 'getJ6ConfigFieldsetsEmailHelper'], true);
 
 		$container->alias(ConfigFieldsetsEncryption::class, 'Compiler.Creator.Config.Fieldsets.Encryption')
 			->share('Compiler.Creator.Config.Fieldsets.Encryption', [$this, 'getConfigFieldsetsEncryption'], true);
@@ -141,8 +168,18 @@ class Creator implements ServiceProviderInterface
 		$container->alias(RouterMethodsDefault::class, 'Compiler.Creator.Router.Methods.Default')
 			->share('Compiler.Creator.Router.Methods.Default', [$this, 'getRouterMethodsDefault'], true);
 
+		$container->share('Compiler.Creator.Router.Methods.Shared.Default', [$this, 'getSharedRouterMethodsDefault'], true);
+
+		$container->alias(J6RouterMethodsDefault::class, 'Compiler.Creator.Router.Methods.J6.Default')
+			->share('Compiler.Creator.Router.Methods.J6.Default', [$this, 'getJ6RouterMethodsDefault'], true);
+
 		$container->alias(RouterMethodsManual::class, 'Compiler.Creator.Router.Methods.Manual')
 			->share('Compiler.Creator.Router.Methods.Manual', [$this, 'getRouterMethodsManual'], true);
+
+		$container->share('Compiler.Creator.Router.Methods.Shared.Manual', [$this, 'getSharedRouterMethodsManual'], true);
+
+		$container->alias(J6RouterMethodsManual::class, 'Compiler.Creator.Router.Methods.J6.Manual')
+			->share('Compiler.Creator.Router.Methods.J6.Manual', [$this, 'getJ6RouterMethodsManual'], true);
 
 		$container->alias(FieldsetString::class, 'Compiler.Creator.Fieldset.String')
 			->share('Compiler.Creator.Fieldset.String', [$this, 'getFieldsetString'], true);
@@ -173,6 +210,11 @@ class Creator implements ServiceProviderInterface
 
 		$container->alias(Helper::class, 'Compiler.Creator.Helper')
 			->share('Compiler.Creator.Helper', [$this, 'getHelper'], true);
+
+		$container->share('Compiler.Creator.Shared.Helper', [$this, 'getSharedHelper'], true);
+
+		$container->alias(J6Helper::class, 'Compiler.Creator.J6.Helper')
+			->share('Compiler.Creator.J6.Helper', [$this, 'getJ6Helper'], true);
 
 		$container->alias(EmailHelper::class, 'Compiler.Creator.Email.Helper')
 			->share('Compiler.Creator.Email.Helper', [$this, 'getEmailHelper'], true);
@@ -398,7 +440,82 @@ class Creator implements ServiceProviderInterface
 	 */
 	public function getConfigFieldsetsEmailHelper(Container $container): ConfigFieldsetsEmailHelper
 	{
-		return new ConfigFieldsetsEmailHelper(
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		return $container->get('Compiler.Creator.Config.Fieldsets.J' . $this->targetVersion . '.Email.Helper');
+	}
+
+	/**
+	 * Build the email configuration renderer for Joomla 3 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J3ConfigFieldsetsEmailHelper
+	 * @since   6.2.0
+	 */
+	public function getJ3ConfigFieldsetsEmailHelper(Container $container): J3ConfigFieldsetsEmailHelper
+	{
+		return new J3ConfigFieldsetsEmailHelper(
+			$container->get('Config'),
+			$container->get('Language'),
+			$container->get('Component'),
+			$container->get('Compiler.Builder.Config.Fieldsets'),
+			$container->get('Compiler.Builder.Config.Fieldsets.Customfield')
+		);
+	}
+
+	/**
+	 * Build the email configuration renderer for Joomla 4 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J4ConfigFieldsetsEmailHelper
+	 * @since   6.2.0
+	 */
+	public function getJ4ConfigFieldsetsEmailHelper(Container $container): J4ConfigFieldsetsEmailHelper
+	{
+		return new J4ConfigFieldsetsEmailHelper(
+			$container->get('Config'),
+			$container->get('Language'),
+			$container->get('Component'),
+			$container->get('Compiler.Builder.Config.Fieldsets'),
+			$container->get('Compiler.Builder.Config.Fieldsets.Customfield')
+		);
+	}
+
+	/**
+	 * Build the email configuration renderer for Joomla 5 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J5ConfigFieldsetsEmailHelper
+	 * @since   6.2.0
+	 */
+	public function getJ5ConfigFieldsetsEmailHelper(Container $container): J5ConfigFieldsetsEmailHelper
+	{
+		return new J5ConfigFieldsetsEmailHelper(
+			$container->get('Config'),
+			$container->get('Language'),
+			$container->get('Component'),
+			$container->get('Compiler.Builder.Config.Fieldsets'),
+			$container->get('Compiler.Builder.Config.Fieldsets.Customfield')
+		);
+	}
+
+	/**
+	 * Build the email configuration renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6ConfigFieldsetsEmailHelper
+	 * @since   6.2.0
+	 */
+	public function getJ6ConfigFieldsetsEmailHelper(Container $container): J6ConfigFieldsetsEmailHelper
+	{
+		return new J6ConfigFieldsetsEmailHelper(
 			$container->get('Config'),
 			$container->get('Language'),
 			$container->get('Component'),
@@ -661,7 +778,45 @@ class Creator implements ServiceProviderInterface
 	 */
 	public function getRouterMethodsDefault(Container $container): RouterMethodsDefault
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Compiler.Creator.Router.Methods.J6.Default');
+		}
+
+		return $container->get('Compiler.Creator.Router.Methods.Shared.Default');
+	}
+
+	/**
+	 * Build the RouterMethodsDefault renderer for shared targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  RouterMethodsDefault
+	 * @since   6.2.0
+	 */
+	public function getSharedRouterMethodsDefault(Container $container): RouterMethodsDefault
+	{
 		return new RouterMethodsDefault(
+			$container->get('Compiler.Builder.Router')
+		);
+	}
+
+	/**
+	 * Build the RouterMethodsDefault renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6RouterMethodsDefault
+	 * @since   6.2.0
+	 */
+	public function getJ6RouterMethodsDefault(Container $container): J6RouterMethodsDefault
+	{
+		return new J6RouterMethodsDefault(
 			$container->get('Compiler.Builder.Router')
 		);
 	}
@@ -676,7 +831,45 @@ class Creator implements ServiceProviderInterface
 	 */
 	public function getRouterMethodsManual(Container $container): RouterMethodsManual
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Compiler.Creator.Router.Methods.J6.Manual');
+		}
+
+		return $container->get('Compiler.Creator.Router.Methods.Shared.Manual');
+	}
+
+	/**
+	 * Build the RouterMethodsManual renderer for shared targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  RouterMethodsManual
+	 * @since   6.2.0
+	 */
+	public function getSharedRouterMethodsManual(Container $container): RouterMethodsManual
+	{
 		return new RouterMethodsManual(
+			$container->get('Compiler.Builder.Router')
+		);
+	}
+
+	/**
+	 * Build the RouterMethodsManual renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6RouterMethodsManual
+	 * @since   6.2.0
+	 */
+	public function getJ6RouterMethodsManual(Container $container): J6RouterMethodsManual
+	{
+		return new J6RouterMethodsManual(
 			$container->get('Compiler.Builder.Router')
 		);
 	}
@@ -909,7 +1102,48 @@ class Creator implements ServiceProviderInterface
 	 */
 	public function getHelper(Container $container): Helper
 	{
+		if (empty($this->targetVersion))
+		{
+			$this->targetVersion = $container->get('Config')->joomla_version;
+		}
+
+		if ((int) $this->targetVersion === 6)
+		{
+			return $container->get('Compiler.Creator.J6.Helper');
+		}
+
+		return $container->get('Compiler.Creator.Shared.Helper');
+	}
+
+	/**
+	 * Build the Helper renderer for shared targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  Helper
+	 * @since   6.2.0
+	 */
+	public function getSharedHelper(Container $container): Helper
+	{
 		return new Helper(
+			$container->get('Config'),
+			$container->get('Utilities.Structure'),
+			$container->get('Compiler.Builder.Content.One'),
+			$container->get('Compiler.Builder.Content.Multi')
+		);
+	}
+
+	/**
+	 * Build the Helper renderer for Joomla 6 targets.
+	 *
+	 * @param   Container  $container  The DI container.
+	 *
+	 * @return  J6Helper
+	 * @since   6.2.0
+	 */
+	public function getJ6Helper(Container $container): J6Helper
+	{
+		return new J6Helper(
 			$container->get('Config'),
 			$container->get('Utilities.Structure'),
 			$container->get('Compiler.Builder.Content.One'),

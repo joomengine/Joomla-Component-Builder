@@ -31,6 +31,8 @@ use VDM\Joomla\Utilities\StringHelper;
 use VDM\Joomla\Utilities\JsonHelper;
 use VDM\Joomla\Utilities\FileHelper;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Placefix;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 
 
 /**
@@ -313,14 +315,14 @@ class Structure
 		if (!isset($this->htaccess[$power->path_jcb]))
 		{
 			// set the htaccess data
-			$data = '# Apache 2.4+' . PHP_EOL .
-				'<IfModule mod_authz_core.c>' . PHP_EOL .
-				'  Require all denied' . PHP_EOL .
-				'</IfModule>' . PHP_EOL . PHP_EOL .
-				'# Apache 2.0-2.2' . PHP_EOL .
-				'<IfModule !mod_authz_core.c>' . PHP_EOL .
-				'  Deny from all' . PHP_EOL .
-				'</IfModule>' . PHP_EOL;
+			$data = Indent::_(0) . '#' . Line::_(__LINE__, __CLASS__) . ' Apache 2.4+'
+				. PHP_EOL . Indent::_(0) . '<IfModule mod_authz_core.c>'
+				. PHP_EOL . Indent::_(1) . 'Require all denied'
+				. PHP_EOL . Indent::_(0) . '</IfModule>'
+				. PHP_EOL . PHP_EOL . Indent::_(0) . '#' . Line::_(__LINE__, __CLASS__) . ' Apache 2.0-2.2'
+				. PHP_EOL . Indent::_(0) . '<IfModule !mod_authz_core.c>'
+				. PHP_EOL . Indent::_(1) . 'Deny from all'
+				. PHP_EOL . Indent::_(0) . '</IfModule>' . PHP_EOL;
 
 			// now we must add the .htaccess file
 			$fileDetails = array('path' => $power->full_path_jcb . '/.htaccess',
@@ -352,14 +354,14 @@ class Structure
 			                     'zip'  => 'web.config');
 			$this->file->write(
 				$fileDetails['path'],
-				'<?xml version="1.0"?>' . PHP_EOL .
-				'<configuration>' . PHP_EOL .
-				'    <system.web>' . PHP_EOL .
-				'        <authorization>' . PHP_EOL .
-				'            <deny users="*" />' . PHP_EOL .
-				'        </authorization>' . PHP_EOL .
-				'    </system.web>' . PHP_EOL .
-				'</configuration>' . PHP_EOL
+				Indent::_(0) . '<?xml version="1.0"?>'
+				. PHP_EOL . Indent::_(0) . '<configuration>'
+				. PHP_EOL . Indent::_(1) . '<system.web>'
+				. PHP_EOL . Indent::_(2) . '<authorization>'
+				. PHP_EOL . Indent::_(3) . '<deny users="*" />'
+				. PHP_EOL . Indent::_(2) . '</authorization>'
+				. PHP_EOL . Indent::_(1) . '</system.web>'
+				. PHP_EOL . Indent::_(0) . '</configuration>' . PHP_EOL
 			);
 			$this->files->appendArray($power->key, $fileDetails);
 

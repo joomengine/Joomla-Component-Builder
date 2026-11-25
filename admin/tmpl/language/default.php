@@ -50,7 +50,10 @@ $tmpl    = $tmpl ? '&tmpl=' . $tmpl : '';
 		// remove overlay when page fully loaded
 		window.addEventListener('load', function() {
 			var componentLoader = document.getElementById('componentbuilder_loader');
-			if (componentLoader) componentLoader.style.display = 'block';
+			if (componentLoader)
+			{
+				componentLoader.style.display = 'block';
+			}
 			loadingDiv.style.display = 'none';
 		});
 	})();

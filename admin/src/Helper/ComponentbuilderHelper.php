@@ -1474,7 +1474,6 @@ abstract class ComponentbuilderHelper
 		return self::$tabSpacerBucket[$nr];
 	}
 
-
 	/**
 	 * Local in-memory cache of session values for faster access.
 	 *
@@ -2135,7 +2134,6 @@ abstract class ComponentbuilderHelper
 		}
 		return $url;
 	}
-
 
 	/**
 	 * get Dynamic Scripts
@@ -3028,7 +3026,6 @@ abstract class ComponentbuilderHelper
 		return $string;
 	}
 
-
 	/**
 	* Get the file path or url
 	* 
@@ -3072,7 +3069,6 @@ abstract class ComponentbuilderHelper
 		// sanitize the path
 		return '/' . trim( $folderPath, '/' ) . '/';
 	}
-
 
 	/**
 	* the Crypt objects
@@ -3607,7 +3603,6 @@ abstract class ComponentbuilderHelper
 
 		return  true;
 	}
-
 
 	/**
 	 * the locker
@@ -4815,7 +4810,6 @@ abstract class ComponentbuilderHelper
 		return false;
 	}
 
-
 	/**
 	 * Making class or function name safe
 	 *
@@ -5499,7 +5493,7 @@ abstract class ComponentbuilderHelper
 	public static function getHelpUrl(string $view)
 	{
 		$user	= Factory::getApplication()->getIdentity();
-		$groups = $user->get('groups');
+		$groups = $user->groups;
 		$db	= Factory::getContainer()->get(DatabaseInterface::class);
 		$query	= $db->getQuery(true);
 		$query->select(array('a.id','a.groups','a.target','a.type','a.article','a.url'));

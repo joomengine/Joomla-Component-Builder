@@ -86,7 +86,6 @@ final class Provider implements ProviderInterface
 		$provider[] = Indent::_(3) . "PluginInterface::class,";
 		$provider[] = Indent::_(3) . "function (Container \$container) {";
 		$provider[] = Indent::_(4) . "\$plugin = new {$plugin->class_name}(";
-		$provider[] = Indent::_(5) . "\$container->get(DispatcherInterface::class),";
 		$provider[] = Indent::_(5) . "(array) PluginHelper::getPlugin('{$group}', '{$plugin->context_name}')";
 		$provider[] = Indent::_(4) . ");";
 		$provider[] = Indent::_(4) . "\$plugin->setApplication(Factory::getApplication());";

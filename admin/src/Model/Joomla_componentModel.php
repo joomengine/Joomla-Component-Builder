@@ -1097,6 +1097,7 @@ class Joomla_componentModel extends AdminModel
 	 */
 	public function validate($form, $data, $group = null)
 	{
+		// Keep conditional requirements inside the native model validation lifecycle.
 		$rule = FormHelper::loadRuleType('conditionalrequired');
 		if (!$rule)
 		{
@@ -1150,6 +1151,7 @@ class Joomla_componentModel extends AdminModel
 	 */
 	protected function resolveConditionalData(array $data, $form, $group = null)
 	{
+		// Resolve stored selectors only after native validation plugins and filtering.
 		$application = Factory::getApplication();
 		$context = [
 			'stored' => [],

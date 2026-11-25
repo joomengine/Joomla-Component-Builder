@@ -30,8 +30,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\Controller\Exim
  * controller: the token check, the permission guard, the spreadsheet export,
  * and the session hand-off into the import view.
  * 
- * Only how the current user is put in scope differs between Joomla targets, so
- * that is the extension point the target variants override.
+ * Target variants supply the current-user and import-session lookups.
  * 
  * @since  6.1.7
  */
@@ -139,8 +138,7 @@ class EximportMethod implements EximportMethodInterface
 		$method[] = Indent::_(2) . "{";
 		$method[] = Indent::_(3) . "//" . Line::_(__Line__, __Class__)
 			. " Get the input";
-		$method[] = Indent::_(3)
-			. "\$input = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->input;";
+		$method[] = $this->getInputObject();
 		$method[] = Indent::_(3)
 			. "\$pks = \$input->post->get('cid', array(), 'array');";
 		$method[] = Indent::_(3) . "//" . Line::_(__Line__, __Class__)
@@ -212,7 +210,7 @@ class EximportMethod implements EximportMethodInterface
 		$method[] = Indent::_(3) . "{";
 		$method[] = Indent::_(4) . "//" . Line::_(__Line__, __Class__)
 			. " Load headers to session.";
-		$method[] = Indent::_(4) . "\$session = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getSession();";
+		$method[] = $this->getSessionObject();
 		$method[] = Indent::_(4) . "\$headers = json_encode(\$headers);";
 		$method[] = Indent::_(4) . "\$session->set('" . $nameSingleCode
 			. "_VDM_IMPORTHEADERS', \$headers);";
@@ -274,6 +272,29 @@ class EximportMethod implements EximportMethodInterface
 	protected function getUserObject(): string
 	{
 		return Indent::_(2) . "\$user = Joomla__"."_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->getIdentity();";
+	}
+
+	/**
+	 * Get the statement that puts the import session in scope.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function getSessionObject(): string
+	{
+		return Indent::_(4) . "\$session = Joomla__"
+			. "_39403062_84fb_46e0_bac4_0023f766e827___Power::getSession();";
+	}
+
+	/**
+	 * Put the controller request input in scope for the generated method.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function getInputObject(): string
+	{
+		return Indent::_(3) . '$input = Joomla__' . '_39403062_84fb_46e0_bac4_0023f766e827___Power::getApplication()->input;';
 	}
 }
 

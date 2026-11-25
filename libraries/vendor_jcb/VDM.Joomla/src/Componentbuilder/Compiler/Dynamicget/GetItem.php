@@ -45,7 +45,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Placefix;
  * 
  * @since 5.1.2
  */
-final class GetItem
+class GetItem
 {
 	/**
 	 * The Config Class.
@@ -206,6 +206,14 @@ final class GetItem
 	 * @since 5.1.2
 	 */
 	protected QueryGroup $querygroup;
+
+	/**
+	 * Fresh-query method emitted by this target renderer.
+	 *
+	 * @var   string
+	 * @since 6.2.0
+	 */
+	protected string $queryMethod = 'getQuery(true)';
 
 	/**
 	 * Constructor.
@@ -371,7 +379,7 @@ final class GetItem
 		}
 
 		$dbSetup .= PHP_EOL . PHP_EOL . $tab . Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " Create a new query object.";
-		$dbSetup .= PHP_EOL . Indent::_(1) . $tab . Indent::_(1) . "\$query = \$db->getQuery(true);";
+		$dbSetup .= PHP_EOL . Indent::_(1) . $tab . Indent::_(1) . "\$query = \$db->{$this->queryMethod};";
 
 		return $dbSetup;
 	}

@@ -182,14 +182,14 @@ final class CryptKey
 			$function = [];
 			// start building the getCryptKey function/class method
 			$function[] = PHP_EOL . PHP_EOL . Indent::_(1) . "/**";
-			$function[] = Indent::_(1) . " *	Get The Encryption Keys";
+			$function[] = Indent::_(1) . " *" . Indent::_(1) . "Get The Encryption Keys";
 			$function[] = Indent::_(1) . " *";
 			$function[] = Indent::_(1)
-				. " *	@param  string        \$type     The type of key";
+				. " *" . Indent::_(1) . "@param  string        \$type     The type of key";
 			$function[] = Indent::_(1)
-				. " *	@param  string/bool   \$default  The return value if no key was found";
+				. " *" . Indent::_(1) . "@param  string/bool   \$default  The return value if no key was found";
 			$function[] = Indent::_(1) . " *";
-			$function[] = Indent::_(1) . " *	@return  string   On success";
+			$function[] = Indent::_(1) . " *" . Indent::_(1) . "@return  string   On success";
 			$function[] = Indent::_(1) . " *";
 			$function[] = Indent::_(1) . " **/";
 			$function[] = Indent::_(1)
@@ -256,21 +256,21 @@ final class CryptKey
 			if ($this->modelmediumfield->isActive())
 			{
 				$function[] = PHP_EOL . PHP_EOL . Indent::_(1) . "/**";
-				$function[] = Indent::_(1) . " *	The Medium Encryption Key";
+				$function[] = Indent::_(1) . " *" . Indent::_(1) . "The Medium Encryption Key";
 				$function[] = Indent::_(1) . " *";
-				$function[] = Indent::_(1) . " *	@var  string/bool";
+				$function[] = Indent::_(1) . " *" . Indent::_(1) . "@var  string/bool";
 				$function[] = Indent::_(1) . " **/";
 				$function[] = Indent::_(1)
 					. "protected static \$mediumCryptKey = false;";
 				$function[] = PHP_EOL . Indent::_(1) . "/**";
 				$function[] = Indent::_(1)
-					. " *	Get The Medium Encryption Key";
+					. " *" . Indent::_(1) . "Get The Medium Encryption Key";
 				$function[] = Indent::_(1) . " *";
 				$function[] = Indent::_(1)
-					. " *	@param   string    \$path  The path to the medium crypt key folder";
+					. " *" . Indent::_(1) . "@param   string    \$path  The path to the medium crypt key folder";
 				$function[] = Indent::_(1) . " *";
 				$function[] = Indent::_(1)
-					. " *	@return  string    On success";
+					. " *" . Indent::_(1) . "@return  string    On success";
 				$function[] = Indent::_(1) . " *";
 				$function[] = Indent::_(1) . " **/";
 				$function[] = Indent::_(1)

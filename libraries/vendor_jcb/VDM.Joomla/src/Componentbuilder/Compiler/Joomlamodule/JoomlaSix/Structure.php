@@ -346,20 +346,21 @@ final class Structure implements StructureInterface
 	{
 		$form_field_class   = [];
 		$form_field_class[] = Placefix::_h('BOM') . PHP_EOL;
+		$form_field_class[] = "namespace {$this->NamespacePrefix}\\Module\\{$module->namespace}\\{$module->target_client_namespace}\\Field;";
 		$form_field_class[] = PHP_EOL . "use Joomla\CMS\Form\FormField;";
 		$form_field_class[] = "use Joomla\CMS\Factory;";
 		$form_field_class[] = PHP_EOL . "//" . Line::_(__Line__, __Class__)
 			. " No direct access to this file";
 		$form_field_class[] = "defined('_JEXEC') or die('Restricted access');";
 		$form_field_class[] = PHP_EOL
-			. "class {$module->class_name}engine extends FormField";
+			. "class {$module->class_name}engineField extends FormField";
 		$form_field_class[] = "{";
 		$form_field_class[] = Indent::_(1)
-			. "protected \$type = '{$module->code_name}engine';";
+			. "protected \$type = '{$module->class_name}engine';";
 		$form_field_class[] = PHP_EOL . Indent::_(1)
 			. "protected function getLabel()";
 		$form_field_class[] = Indent::_(1) . "{";
-		$form_field_class[] = Indent::_(2) . "return;";
+		$form_field_class[] = Indent::_(2) . "return '';";
 		$form_field_class[] = Indent::_(1) . "}";
 		$form_field_class[] = PHP_EOL . Indent::_(1)
 			. "protected function getInput()";
@@ -369,7 +370,7 @@ final class Structure implements StructureInterface
 		$form_field_class[] = Indent::_(2)
 			. "\$document = Factory::getApplication()->getDocument();";
 		$form_field_class[] = implode(PHP_EOL, $fieldScriptBucket);
-		$form_field_class[] = Indent::_(2) . "return; // noting for now :)";
+		$form_field_class[] = Indent::_(2) . "return '';";
 		$form_field_class[] = Indent::_(1) . "}";
 		$form_field_class[] = "}";
 
@@ -412,9 +413,9 @@ final class Structure implements StructureInterface
 
 		$this->file->write(
 			$file_details['path'],
-			'<?php' . PHP_EOL . '// Module services provider class template' .
+			'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' Module services provider class template' .
 			PHP_EOL . Placefix::_h('BOM') . Placefix::_h('PROVIDER_CLASS_HEADER') .
-			PHP_EOL . PHP_EOL . '// No direct access to this file' . PHP_EOL .
+			PHP_EOL . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL .
 			"defined('_JEXEC') or die('Restricted access');" .
 			PHP_EOL . PHP_EOL . 
 			Placefix::_h('PROVIDER_CLASS')
@@ -447,11 +448,11 @@ final class Structure implements StructureInterface
 
 		$this->file->write(
 			$file_details['path'],
-			'<?php' . PHP_EOL . '// Module Dispatcher class template' .
+			'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' Module Dispatcher class template' .
 			PHP_EOL . Placefix::_h('BOM') . PHP_EOL .
 			"namespace {$this->NamespacePrefix}\\Module\\{$module->namespace}\\{$module->target_client_namespace}\\Dispatcher;" .
 			Placefix::_h('DISPATCHER_CLASS_HEADER') .
-			PHP_EOL . PHP_EOL . '// No direct access to this file' . PHP_EOL .
+			PHP_EOL . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL .
 			"defined('_JEXEC') or die('Restricted access');" .
 			PHP_EOL . PHP_EOL .
 			Placefix::_h('DISPATCHER_CLASS')
@@ -486,11 +487,11 @@ final class Structure implements StructureInterface
 
 			$this->file->write(
 				$file_details['path'],
-				'<?php' . PHP_EOL . '// Module custom get (data) class template' .
+				'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' Module custom get (data) class template' .
 				PHP_EOL . Placefix::_h('BOM') . PHP_EOL .
 				"namespace {$this->NamespacePrefix}\\Module\\{$module->namespace}\\{$module->target_client_namespace}\\Helper;" .
 				Placefix::_h('DYNAMICGETS_HEADER') .
-				PHP_EOL . PHP_EOL . '// No direct access to this file' . PHP_EOL .
+				PHP_EOL . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL .
 				"defined('_JEXEC') or die('Restricted access');" .
 				PHP_EOL . PHP_EOL . '/**' . PHP_EOL . ' * Module ' . $module->official_name . ' Data Helper'
 				. PHP_EOL . ' */' . PHP_EOL . "final class " . $module->class_data_name . " implements DatabaseAwareInterface"
@@ -590,11 +591,11 @@ final class Structure implements StructureInterface
 
 			$this->file->write(
 				$file_details['path'],
-				'<?php' . PHP_EOL . '// Module helper class template' .
+				'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' Module helper class template' .
 				PHP_EOL . Placefix::_h('BOM') . PHP_EOL .
 				"namespace {$this->NamespacePrefix}\\Module\\{$module->namespace}\\{$module->target_client_namespace}\\Helper;" .
 				Placefix::_h('HELPER_CLASS_HEADER') .
-				PHP_EOL . PHP_EOL . '// No direct access to this file' . PHP_EOL .
+				PHP_EOL . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL .
 				"defined('_JEXEC') or die('Restricted access');" .
 				PHP_EOL . Placefix::_h('HELPER_CLASS')
 			);
@@ -651,9 +652,9 @@ final class Structure implements StructureInterface
 
 		$this->file->write(
 			$file_details['path'],
-			'<?php' . PHP_EOL . '// default tmpl' . PHP_EOL . Placefix::_h('BOM') .
+			'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' default tmpl' . PHP_EOL . Placefix::_h('BOM') .
 			Placefix::_h('MODDEFAULT_HEADER') .
-			PHP_EOL . PHP_EOL . '// No direct access to this file' . PHP_EOL .
+			PHP_EOL . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL .
 			"defined('_JEXEC') or die();" .  Placefix::_h('MODDEFAULT_HEADER_CODE') . PHP_EOL . '?>' .
 			Placefix::_h('MODDEFAULT')
 		);
@@ -687,9 +688,9 @@ final class Structure implements StructureInterface
 
 				$this->file->write(
 					$file_details['path'],
-					'<?php' . PHP_EOL . '// ' . $template . ' tmpl' . PHP_EOL . Placefix::_h('BOM') .
+					'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' ' . $template . ' tmpl' . PHP_EOL . Placefix::_h('BOM') .
 					Placefix::_h(StringHelper::safe("MODDEFAULT_HEADER_{$template}", 'U')) .
-					PHP_EOL . PHP_EOL . '// No direct access to this file' . PHP_EOL .
+					PHP_EOL . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL .
 					"defined('_JEXEC') or die();" .  Placefix::_h(StringHelper::safe("MODDEFAULT_HEADER_CODE_{$template}", 'U')) . PHP_EOL . '?>' .
 					Placefix::_h(StringHelper::safe("MODDEFAULT_{$template}", 'U'))
 				);
@@ -722,9 +723,9 @@ final class Structure implements StructureInterface
 
 			$this->file->write(
 				$file_details['path'],
-				'<?php' . PHP_EOL . '// Script template'
+				'<?php' . PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' Script template'
 				. PHP_EOL . Placefix::_h('BOM') . PHP_EOL
-				. PHP_EOL . '// No direct access to this file' . PHP_EOL
+				. PHP_EOL . Indent::_(0) . '//' . Line::_(__LINE__, __CLASS__) . ' No direct access to this file' . PHP_EOL
 				. "defined('_JEXEC') or die('Restricted access');" . PHP_EOL
 				. Placefix::_h('INSTALLCLASS')
 			);
@@ -774,6 +775,7 @@ final class Structure implements StructureInterface
 	{
 		// check if we have custom fields needed for scripts
 		$field_script_bucket = [];
+		$module->add_scripts_field = false;
 
 		// add any css from the fields
 		$this->setCssForm($module, $field_script_bucket);
@@ -784,10 +786,12 @@ final class Structure implements StructureInterface
 		// add the custom script field
 		if (!empty($field_script_bucket))
 		{
+			$module->add_scripts_field = true;
+			$this->folder->create($module->folder_path . '/src/Field');
 			$file_details = [
-				'path' => $module->folder_path . "/src/Field/{$module->class_name}engine.php",
-				'name' => "{$module->class_name}engine.php",
-				'zip'  => "src/Field/{$module->class_name}engine.php"
+				'path' => $module->folder_path . "/src/Field/{$module->class_name}engineField.php",
+				'name' => "{$module->class_name}engineField.php",
+				'zip'  => "src/Field/{$module->class_name}engineField.php"
 			];
 
 			$this->file->write(
@@ -823,13 +827,13 @@ final class Structure implements StructureInterface
 			if (strpos((string) $css, '<?php') === false)
 			{
 				// create the css folder
-				$this->folder->create($module->folder_path . '/assets/css');
+				$this->folder->create($module->folder_path . '/media/css');
 
 				// add the CSS file
 				$file_details = [
-					'path' => $module->folder_path . "/assets/css/{$module->class_name}engine.css",
+					'path' => $module->folder_path . "/media/css/{$module->class_name}engine.css",
 					'name' => "{$module->class_name}engine.css",
-					'zip'  => "assets/css/{$module->class_name}engine.css"
+					'zip'  => "media/css/{$module->class_name}engine.css"
 				];
 
 				$this->file->write(
@@ -847,9 +851,8 @@ final class Structure implements StructureInterface
 				$bucket[] = Indent::_(2) . "//"
 					. Line::_(__Line__, __Class__) . " Custom CSS";
 				$bucket[] = Indent::_(2)
-					. "Html::_('stylesheet', '"
-					. "modules/{$module->folder_name}"
-					. "/assets/css/{$module->class_name}engine.css', ['version' => 'auto', 'relative' => true]);";
+					. "\$document->getWebAssetManager()->registerAndUseStyle('{$module->folder_name}.form', "
+					. "'media/{$module->folder_name}/css/{$module->class_name}engine.css', ['version' => 'auto']);";
 			}
 		}
 	}
@@ -872,13 +875,13 @@ final class Structure implements StructureInterface
 			if (strpos((string) $javascript, '<?php') === false)
 			{
 				// add the JavaScript file
-				$this->folder->create($module->folder_path . '/assets/js');
+				$this->folder->create($module->folder_path . '/media/js');
 
 				// add the CSS file
 				$file_details = [
-					'path' => $module->folder_path . "/assets/js/{$module->class_name}engine.js",
+					'path' => $module->folder_path . "/media/js/{$module->class_name}engine.js",
 					'name' => "{$module->class_name}engine.js",
-					'zip'  => "assets/js/{$module->class_name}engine.js"
+					'zip'  => "media/js/{$module->class_name}engine.js"
 				];
 
 				$this->file->write(
@@ -896,9 +899,8 @@ final class Structure implements StructureInterface
 				$bucket[] = Indent::_(2) . "//"
 					. Line::_(__Line__, __Class__) . " Custom JS";
 				$bucket[] = Indent::_(2)
-					. "Html::_('script', '"
-					. "/modules/{$module->folder_name}"
-					. "/assets/js/{$module->class_name}engine.js', ['version' => 'auto', 'relative' => true]);";
+					. "\$document->getWebAssetManager()->registerAndUseScript('{$module->folder_name}.form', "
+					. "'media/{$module->folder_name}/js/{$module->class_name}engine.js', ['version' => 'auto'], [], ['core', 'jquery']);";
 			}
 		}	
 	}
@@ -1231,11 +1233,11 @@ final class Structure implements StructureInterface
 					// build sub path
 					if (strpos($fileName, '.js') !== false)
 					{
-						$path = '/assets/js';
+						$path = '/media/js';
 					}
 					elseif (strpos($fileName, '.css') !== false)
 					{
-						$path = '/assets/css';
+						$path = '/media/css';
 					}
 					else
 					{

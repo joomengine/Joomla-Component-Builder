@@ -15,6 +15,7 @@ namespace VDM\Joomla\Componentbuilder\Compiler\JoomlaSix;
 use VDM\Joomla\Componentbuilder\Compiler\Config;
 use VDM\Joomla\Componentbuilder\Compiler\Interfaces\EventInterface as Event;
 use VDM\Joomla\Componentbuilder\Compiler\Placeholder;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Placefix;
 use VDM\Joomla\Componentbuilder\Compiler\Language;
 use VDM\Joomla\Componentbuilder\Compiler\Builder\UikitComp;
 use VDM\Joomla\Componentbuilder\Compiler\Builder\AdminFilterType;
@@ -282,7 +283,10 @@ final class Header implements HeaderInterface
 				break;
 
 			case 'plugin.provider.header':
-				$headers[] = "use {$this->NamespacePrefix}\\Plugin\\[[[PluginGroupNamespace]]]\\[[[PluginNamespace]]]\\Extension\\{$codeName};";
+				// Defer plugin placeholders until rendering, including after self-compilation.
+				$headers[] = "use {$this->NamespacePrefix}\\Plugin\\"
+					. Placefix::_('PluginGroupNamespace') . '\\'
+					. Placefix::_('PluginNamespace') . "\\Extension\\{$codeName};";
 				break;
 
 			default:
@@ -604,7 +608,6 @@ final class Header implements HeaderInterface
 				$headers[] = 'use Joomla\CMS\Factory;';
 				$headers[] = 'use Joomla\CMS\Plugin\PluginHelper;';
 				$headers[] = 'use Joomla\CMS\Extension\PluginInterface;';
-				$headers[] = 'use Joomla\Event\DispatcherInterface;';
 				$headers[] = 'use Joomla\DI\ServiceProviderInterface;';
 				$headers[] = 'use Joomla\DI\Container;';
 				break;

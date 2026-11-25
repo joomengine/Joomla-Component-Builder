@@ -14,6 +14,7 @@ namespace VDM\Joomla\Componentbuilder\Compiler\Architecture\AdminView;
 
 use VDM\Joomla\Componentbuilder\Compiler\Config;
 use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
+use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
 
 
 /**
@@ -26,7 +27,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Indent;
  * 
  * @since  6.1.7
  */
-final class FadeInEffect
+class FadeInEffect
 {
 	/**
 	 * The Config Class.
@@ -65,9 +66,8 @@ final class FadeInEffect
 		if ($view['settings']->add_fadein == 1)
 		{
 			$fadein   = [];
-			$fadein[] = "<script type=\"text/javascript\">";
 			$fadein[] = Indent::_(1) . "(function() {";
-			$fadein[] = Indent::_(2) . "// create loading overlay";
+			$fadein[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " create loading overlay";
 			$fadein[] = Indent::_(2) . "var loadingDiv = document.createElement('div');";
 			$fadein[] = Indent::_(2) . "loadingDiv.id = 'loading';";
 
@@ -90,22 +90,36 @@ final class FadeInEffect
 
 			$fadein[] = Indent::_(2) . "document.body.appendChild(loadingDiv);";
 
-			$fadein[] = Indent::_(2) . "// remove overlay when page fully loaded";
+			$fadein[] = Indent::_(2) . "//" . Line::_(__LINE__, __CLASS__) . " remove overlay when page fully loaded";
 			$fadein[] = Indent::_(2) . "window.addEventListener('load', function() {";
 			$fadein[] = Indent::_(3) . "var componentLoader = document.getElementById('{$component}_loader');";
-			$fadein[] = Indent::_(3) . "if (componentLoader) componentLoader.style.display = 'block';";
+			$fadein[] = Indent::_(3) . "if (componentLoader)";
+			$fadein[] = Indent::_(3) . "{";
+			$fadein[] = Indent::_(4) . "componentLoader.style.display = 'block';";
+			$fadein[] = Indent::_(3) . "}";
 			$fadein[] = Indent::_(3) . "loadingDiv.style.display = 'none';";
 			$fadein[] = Indent::_(2) . "});";
 
 			$fadein[] = Indent::_(1) . "})();";
-			$fadein[] = "</script>";
-
-			$fadein[] = "<div id=\"{$component}_loader\" style=\"display: none;\">";
-
-			return implode(PHP_EOL, $fadein);
+			return $this->renderScript(implode(PHP_EOL, $fadein), $component)
+				. PHP_EOL . "<div id=\"{$component}_loader\" style=\"display: none;\">";
 		}
 
 		return "<div id=\"{$component}_loader\">";
+	}
+
+	/**
+	 * Wrap the generated overlay script for the selected output target.
+	 *
+	 * @param   string  $script     Generated overlay JavaScript.
+	 * @param   string  $component  Component code name.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function renderScript(string $script, string $component): string
+	{
+		return '<script type="text/javascript">' . PHP_EOL . $script . PHP_EOL . '</script>';
 	}
 }
 

@@ -40,6 +40,14 @@ use VDM\Joomla\Componentbuilder\Compiler\Interfaces\Architecture\CustomView\Disp
 class DisplayMethod implements DisplayMethodInterface
 {
 	/**
+	 * Whether generated views drain legacy model errors after retrieval.
+	 *
+	 * @var   bool
+	 * @since 6.2.0
+	 */
+	protected bool $checkErrors = true;
+
+	/**
 	 * The Config Class.
 	 *
 	 * @var   Config
@@ -176,16 +184,19 @@ class DisplayMethod implements DisplayMethodInterface
 				$method .= $this->getSetDocument();
 			}
 
-			$method .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
-					__LINE__,__CLASS__
-				) . " Check for errors.";
+			if ($this->checkErrors)
+			{
+				$method .= PHP_EOL . PHP_EOL . Indent::_(2) . "//" . Line::_(
+						__LINE__,__CLASS__
+					) . " Check for errors.";
 
-			$method .= $this->getErrorsCheck();
+				$method .= $this->getErrorsCheck();
 
-			$method .= PHP_EOL . Indent::_(2) . "{";
-			$method .= PHP_EOL . Indent::_(3)
-				. "throw new \Exception(implode(PHP_EOL, \$errors), 500);";
-			$method .= PHP_EOL . Indent::_(2) . "}";
+				$method .= PHP_EOL . Indent::_(2) . "{";
+				$method .= PHP_EOL . Indent::_(3)
+					. "throw new \Exception(implode(PHP_EOL, \$errors), 500);";
+				$method .= PHP_EOL . Indent::_(2) . "}";
+			}
 			// add events if needed
 			if ($view['settings']->main_get->gettype == 1
 				&& ArrayHelper::check(

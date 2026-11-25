@@ -26,7 +26,7 @@ use VDM\Joomla\Componentbuilder\Compiler\Utilities\Line;
  * 
  * @since 5.1.4
  */
-final class DynamicButtons
+class DynamicButtons
 {
 	/**
 	 * The Config Class.
@@ -114,14 +114,29 @@ final class DynamicButtons
 			$buttons[] = Indent::_(2) . '{';
 			$buttons[] = Indent::_(3) . "// " . Line::_(__LINE__, __CLASS__) . " add {$nameEscaped} button.";
 			$buttons[] = Indent::_(3)
-				. "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::custom('"
-				. "{$nameListCode}.redirectTo{$linkSafe}', "
-				. "'{$customButton['icon']}', '', '{$keyLang}', true);";
+				. $this->button(
+					$nameListCode . '.redirectTo' . $linkSafe, $customButton['icon'], $keyLang
+				);
 			$buttons[] = Indent::_(2) . '}';
 		}
 
 		// Return the generated button code block.
 		return ArrayHelper::check($buttons) ? implode(PHP_EOL, $buttons) : '';
+	}
+	/**
+	 * Render the selection-dependent redirect button.
+	 *
+	 * @param   string  $task   Controller task.
+	 * @param   string  $icon   Button icon.
+	 * @param   string  $label  Translation key.
+	 *
+	 * @return  string
+	 * @since   6.2.0
+	 */
+	protected function button(string $task, string $icon, string $label): string
+	{
+		return "Joomla__" . "_0c1a176a_304f_433a_8233_37d01ff87815___Power::custom('"
+			. $task . "', '" . $icon . "', '', '" . $label . "', true);";
 	}
 }
 
